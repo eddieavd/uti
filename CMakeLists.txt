@@ -11,3 +11,5 @@ add_compile_options( -Wall -Wextra -pedantic -Werror -O0 )
 add_link_options( -fsanitize=address -fsanitize=undefined )
 
 add_executable( uti main.cpp )
+
+target_include_directories( uti PUBLIC include )
