@@ -19,9 +19,10 @@ namespace uti
 {
 
 
+template< typename CharType >
 struct string_view
 {
-        using value_type =    char const ;
+        using value_type =      CharType ;
         using  size_type = unsigned long ;
         using ssize_type =     long long ;
 
@@ -49,11 +50,11 @@ struct string_view
         constexpr bool operator== ( string_view const & _other_ ) const noexcept { return data_ == _other_.data_ && size_ == _other_.size_; }
         constexpr bool operator!= ( string_view const & _other_ ) const noexcept { return !operator==( _other_ ); }
 
-        constexpr ssize_type operator++ (     ) noexcept { data_--; return ++size_; } // extends view on left  side
-        constexpr ssize_type operator++ ( int ) noexcept { return ++size_; }          // extends view on right side
+        constexpr ssize_type operator++ (     ) noexcept { data_--; return ++size_; } // extends view on  left side
+        constexpr ssize_type operator++ ( int ) noexcept {          return ++size_; } // extends view on right side
 
-        constexpr ssize_type operator-- (     ) noexcept { data_++; return --size_; } // shrinks view on left  side
-        constexpr ssize_type operator-- ( int ) noexcept { return --size_; }          // shrinks view on right side
+        constexpr ssize_type operator-- (     ) noexcept { data_++; return --size_; } // shrinks view on  left side
+        constexpr ssize_type operator-- ( int ) noexcept {          return --size_; } // shrinks view on right side
 
         constexpr bool equal_to ( string_view const & _other_ ) const noexcept ;
 
@@ -64,9 +65,9 @@ struct string_view
         constexpr void trim_left  () noexcept ;
         constexpr void trim_right () noexcept ;
 
-        constexpr string_view trimmed       () noexcept ;
-        constexpr string_view trimmed_left  () noexcept ;
-        constexpr string_view trimmed_right () noexcept ;
+        constexpr string_view trimmed       () const noexcept ;
+        constexpr string_view trimmed_left  () const noexcept ;
+        constexpr string_view trimmed_right () const noexcept ;
 
         constexpr string_view chop_left  ( ssize_type _count_ ) noexcept ;
         constexpr string_view chop_right ( ssize_type _count_ ) noexcept ;
@@ -77,8 +78,8 @@ struct string_view
         constexpr value_type chop_char_left  () noexcept ;
         constexpr value_type chop_char_right () noexcept ;
 
-        constexpr ssize_type index_of ( value_type const  & _val_, ssize_type const start = 0 ) const noexcept ;
-        constexpr ssize_type index_of ( string_view const & _val_, ssize_type const start = 0 ) const noexcept ;
+        constexpr ssize_type index_of ( value_type  const & _val_, ssize_type const start ) const noexcept ;
+        constexpr ssize_type index_of ( string_view const & _val_, ssize_type const start ) const noexcept ;
 
         constexpr string_view chop_to_delimiter ( value_type  const & _delimiter_, bool _discard_delimiter_ = true ) noexcept ;
         constexpr string_view chop_to_string    ( string_view const & _delimiter_, bool _discard_delimiter_ = true ) noexcept ;
@@ -125,43 +126,41 @@ private:
 };
 
 
-// template< typename CharType >
-// string_view ( CharType const * _c_str_ ) -> string_view< CharType const > ;
-
-
-#ifdef STRING_VIEW_IMPLEMENTATION
-
-
 template< typename CharType >
-constexpr long strlen ( CharType const * str )
+constexpr long long strlen ( CharType const * str ) noexcept
 {
-        long len = -1;
+        long long len { -1 };
         while( str[ ++len ] != '\0' ) {}
         return len;
 }
 
 
-constexpr string_view::string_view () noexcept
+template< typename CharType >
+constexpr string_view< CharType >::string_view () noexcept
         : data_( nullptr ),
           size_(       0 )
 {}
 
-constexpr string_view::string_view ( value_type * _c_str_ ) noexcept
+template< typename CharType >
+constexpr string_view< CharType >::string_view ( value_type * _c_str_ ) noexcept
         : data_(         _c_str_   ),
           size_( strlen( _c_str_ ) )
 {}
 
-constexpr string_view::string_view ( value_type * _data_, ssize_type _count_ ) noexcept
+template< typename CharType >
+constexpr string_view< CharType >::string_view ( value_type * _data_, ssize_type _count_ ) noexcept
         : data_(  _data_ ),
           size_( _count_ )
 {}
 
-constexpr string_view::string_view ( string_view const & _other_ ) noexcept
+template< typename CharType >
+constexpr string_view< CharType >::string_view ( string_view const & _other_ ) noexcept
         : data_( _other_.data_ ),
           size_( _other_.size_ )
 {}
 
-constexpr string_view::string_view ( string_view && _other_ ) noexcept
+template< typename CharType >
+constexpr string_view< CharType >::string_view ( string_view && _other_ ) noexcept
         : data_( UTI_MOVE( _other_.data_ ) ),
           size_( UTI_MOVE( _other_.size_ ) )
 {
@@ -169,8 +168,9 @@ constexpr string_view::string_view ( string_view && _other_ ) noexcept
         _other_.size_ =       0 ;
 }
 
-constexpr string_view &
-string_view::operator= ( string_view const & _other_ ) noexcept
+template< typename CharType >
+constexpr string_view< CharType > &
+string_view< CharType >::operator= ( string_view const & _other_ ) noexcept
 {
         data_ = _other_.data_ ;
         size_ = _other_.size_ ;
@@ -178,8 +178,9 @@ string_view::operator= ( string_view const & _other_ ) noexcept
         return *this;
 }
 
-constexpr string_view &
-string_view::operator= ( string_view && _other_ ) noexcept
+template< typename CharType >
+constexpr string_view< CharType > &
+string_view< CharType >::operator= ( string_view && _other_ ) noexcept
 {
         data_ = UTI_MOVE( _other_.data_ ) ;
         size_ = UTI_MOVE( _other_.size_ ) ;
@@ -190,12 +191,17 @@ string_view::operator= ( string_view && _other_ ) noexcept
         return *this;
 }
 
+template< typename CharType >
 constexpr bool
-string_view::equal_to ( string_view const & _other_ ) const noexcept
+string_view< CharType >::equal_to ( string_view const & _other_ ) const noexcept
 {
         if( size() != _other_.size() )
         {
                 return false;
+        }
+        if( data() == _other_.data() )
+        {
+                return true;
         }
         for( ssize_type i = 0; i < size(); ++i )
         {
@@ -207,11 +213,16 @@ string_view::equal_to ( string_view const & _other_ ) const noexcept
         return true;
 }
 
+template< typename CharType >
 constexpr bool
-string_view::starts_with ( string_view const & _prefix_ ) const noexcept
+string_view< CharType >::starts_with ( string_view const & _prefix_ ) const noexcept
 {
 //      UTI_CONSTEXPR_ASSERT( size() >= _prefix_.size(), "string_view::starts_with: prefix longer than string" );
 
+        if( data() == _prefix_.data() )
+        {
+                return true;
+        }
         for( ssize_type i = 0; i < _prefix_.size(); ++i )
         {
                 if( at( i ) != _prefix_.at( i ) )
@@ -222,13 +233,18 @@ string_view::starts_with ( string_view const & _prefix_ ) const noexcept
         return true;
 }
 
+template< typename CharType >
 constexpr bool
-string_view::ends_with ( string_view const & _suffix_ ) const noexcept
+string_view< CharType >::ends_with ( string_view const & _suffix_ ) const noexcept
 {
 //      UTI_CONSTEXPR_ASSERT( size() >= _suffix_.size(), "string_view::ends_with: suffix longer than string" );
 
         ssize_type pos = size() - _suffix_.size();
 
+        if( data() + pos == _suffix_.data() )
+        {
+                return true;
+        }
         for( ssize_type i = 0; i < _suffix_.size(); ++i )
         {
                 if( at( pos + i ) != _suffix_.at( i ) )
@@ -239,40 +255,45 @@ string_view::ends_with ( string_view const & _suffix_ ) const noexcept
         return true;
 }
 
+template< typename CharType >
 constexpr void
-string_view::trim () noexcept
+string_view< CharType >::trim () noexcept
 {
         trim_left();
         trim_right();
 }
 
+template< typename CharType >
 constexpr void
-string_view::trim_left () noexcept
+string_view< CharType >::trim_left () noexcept
 {
-        while( ( front() ==  ' ' || front() == '\t' ) && !empty() )
+        while( !empty() && ( front() ==  ' ' || front() == '\t' ) )
         {
                 data_++;
                 size_--;
         }
 }
 
+template< typename CharType >
 constexpr void
-string_view::trim_right () noexcept
+string_view< CharType >::trim_right () noexcept
 {
-        while( ( back() ==  ' ' || back() == '\t' ) && !empty() )
+        while( !empty() && ( back() ==  ' ' || back() == '\t' ) )
         {
                 size_--;
         }
 }
 
-constexpr string_view
-string_view::trimmed () noexcept
+template< typename CharType >
+constexpr string_view< CharType >
+string_view< CharType >::trimmed () const noexcept
 {
         return trimmed_right().trimmed_left();
 }
 
-constexpr string_view
-string_view::trimmed_left () noexcept
+template< typename CharType >
+constexpr string_view< CharType >
+string_view< CharType >::trimmed_left () const noexcept
 {
         string_view new_view( *this );
 
@@ -281,8 +302,9 @@ string_view::trimmed_left () noexcept
         return new_view;
 }
 
-constexpr string_view
-string_view::trimmed_right () noexcept
+template< typename CharType >
+constexpr string_view< CharType >
+string_view< CharType >::trimmed_right () const noexcept
 {
         string_view new_view( *this );
 
@@ -291,8 +313,9 @@ string_view::trimmed_right () noexcept
         return new_view;
 }
 
-constexpr string_view
-string_view::chop_left ( ssize_type _count_ ) noexcept
+template< typename CharType >
+constexpr string_view< CharType >
+string_view< CharType >::chop_left ( ssize_type _count_ ) noexcept
 {
         if( _count_ > size() ) _count_ = size();
 
@@ -304,8 +327,9 @@ string_view::chop_left ( ssize_type _count_ ) noexcept
         return chop;
 }
 
-constexpr string_view
-string_view::chop_right ( ssize_type _count_ ) noexcept
+template< typename CharType >
+constexpr string_view< CharType >
+string_view< CharType >::chop_right ( ssize_type _count_ ) noexcept
 {
         if( _count_ > size() ) _count_ = size();
 
@@ -316,21 +340,24 @@ string_view::chop_right ( ssize_type _count_ ) noexcept
         return chop;
 }
 
+template< typename CharType >
 constexpr void
-string_view::unchop_left ( ssize_type _count_ ) noexcept
+string_view< CharType >::unchop_left ( ssize_type _count_ ) noexcept
 {
         data_ -= _count_ ;
         size_ += _count_ ;
 }
 
+template< typename CharType >
 constexpr void
-string_view::unchop_right ( ssize_type _count_ ) noexcept
+string_view< CharType >::unchop_right ( ssize_type _count_ ) noexcept
 {
         size_ += _count_ ;
 }
 
-constexpr string_view::value_type
-string_view::chop_char_left () noexcept
+template< typename CharType >
+constexpr typename string_view< CharType >::value_type
+string_view< CharType >::chop_char_left () noexcept
 {
         // assert !empty()
 
@@ -339,16 +366,18 @@ string_view::chop_char_left () noexcept
         return ( data_++ )[ 0 ];
 }
 
-constexpr string_view::value_type
-string_view::chop_char_right () noexcept
+template< typename CharType >
+constexpr typename string_view< CharType >::value_type
+string_view< CharType >::chop_char_right () noexcept
 {
         // assert !empty()
 
         return data_[ --size_ ];
 }
 
-constexpr typename string_view::ssize_type
-string_view::index_of ( value_type const & _val_, ssize_type const start ) const noexcept
+template< typename CharType >
+constexpr typename string_view< CharType >::ssize_type
+string_view< CharType >::index_of ( value_type const & _val_, ssize_type const start ) const noexcept
 {
         for( auto i = start; i < size(); ++i )
         {
@@ -360,8 +389,9 @@ string_view::index_of ( value_type const & _val_, ssize_type const start ) const
         return -1;
 }
 
-constexpr typename string_view::ssize_type
-string_view::index_of ( string_view const & _val_, ssize_type const start ) const noexcept
+template< typename CharType >
+constexpr typename string_view< CharType >::ssize_type
+string_view< CharType >::index_of ( string_view const & _val_, ssize_type const start ) const noexcept
 {
         string_view window( data_ + start, _val_.size() );
 
@@ -385,12 +415,13 @@ string_view::index_of ( string_view const & _val_, ssize_type const start ) cons
         return -1;
 }
 
-constexpr string_view
-string_view::chop_to_delimiter ( value_type const & _delimiter_, bool _discard_delimiter_ ) noexcept
+template< typename CharType >
+constexpr string_view< CharType >
+string_view< CharType >::chop_to_delimiter ( value_type const & _delimiter_, bool _discard_delimiter_ ) noexcept
 {
         string_view chop( data_, 0 );
 
-        while( data_[ 0 ] != _delimiter_ && !empty() )
+        while( !empty() && data_[ 0 ] != _delimiter_ )
         {
                 data_++;
                 size_--;
@@ -404,8 +435,9 @@ string_view::chop_to_delimiter ( value_type const & _delimiter_, bool _discard_d
         return chop;
 }
 
-constexpr string_view
-string_view::chop_to_string ( string_view const & _delimiter_, bool _discard_delimiter_ ) noexcept
+template< typename CharType >
+constexpr string_view< CharType >
+string_view< CharType >::chop_to_string ( string_view const & _delimiter_, bool _discard_delimiter_ ) noexcept
 {
         string_view window( data_, _delimiter_.size() );
 
@@ -434,60 +466,60 @@ string_view::chop_to_string ( string_view const & _delimiter_, bool _discard_del
                 }
                 return chop;
         }
-        string_view ret = UTI_MOVE( *this );
+        string_view chop( *this );
         this->data_ = nullptr ;
         this->size_ =       0 ;
-        return ret;
+        return chop;
 }
 
+template< typename CharType >
 template< typename Predicate >
-constexpr string_view
-string_view::chop_left_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) )
+constexpr string_view< CharType >
+string_view< CharType >::chop_left_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) )
 {
         string_view chop( data_, 0 );
 
-        while( _predicate_( front() ) && !empty() )
+        while( !empty() && _predicate_( front() ) )
         {
                 data_++;
                 size_--;
-                chop.size_++;
+                chop++ ;
         }
         return chop;
 }
 
+template< typename CharType >
 template< typename Predicate >
-constexpr string_view
-string_view::chop_right_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) )
+constexpr string_view< CharType >
+string_view< CharType >::chop_right_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) )
 {
         string_view chop( end(), 0 );
 
-        while( _predicate_( back() ) && !empty() )
+        while( !empty() && _predicate_( back() ) )
         {
                 size_--;
-                chop.data_--;
-                chop.size_++;
+                ++chop ;
         }
         return chop;
 }
 
-constexpr typename string_view::reference
-string_view::at ( ssize_type const _index_ ) noexcept
+template< typename CharType >
+constexpr typename string_view< CharType >::reference
+string_view< CharType >::at ( ssize_type const _index_ ) noexcept
 {
 //      UTI_CONSTEXPR_ASSERT( !empty() && _index_ >= 0 && _index_ < size(), "string_view::at: index out of bounds" );
 
         return data_[ _index_ ];
 }
 
-constexpr typename string_view::const_reference
-string_view::at ( ssize_type const _index_ ) const noexcept
+template< typename CharType >
+constexpr typename string_view< CharType >::const_reference
+string_view< CharType >::at ( ssize_type const _index_ ) const noexcept
 {
 //      UTI_CONSTEXPR_ASSERT( !empty() && _index_ >= 0 && _index_ < size(), "string_view::at: index out of bounds" );
 
         return data_[ _index_ ];
 }
-
-
-#endif
 
 
 } // namespace uti
