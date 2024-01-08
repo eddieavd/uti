@@ -139,7 +139,7 @@ public:
                 return CASE_LOWER( s0, value ).CASE_LOWER( s1, value );
         }
         constexpr string_switch & CASES_LOWER ( string_view_t const & s0, string_view_t const & s1,
-                                string_view_t const & s2, T value ) noexcept
+                                                string_view_t const & s2, T value ) noexcept
         {
                 return CASE_LOWER( s0, value ).CASES_LOWER( s1, s2, value );
         }
