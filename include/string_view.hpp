@@ -8,11 +8,6 @@
 
 #include <type_traits.hpp>
 
-#ifndef UTI_MOVE
-#define UTI_MOVE(...) \
-        static_cast< decltype(__VA_ARGS__)&&>(__VA_ARGS__)
-#endif
-
 #define SV_FMT "%.*s"
 #define SV_ARG(sv) (int) (sv).size(), (sv).data()
 
