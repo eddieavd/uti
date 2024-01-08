@@ -61,19 +61,23 @@ struct string_view
         [[ nodiscard ]] constexpr bool starts_with ( string_view const & _prefix_ ) const noexcept ;
         [[ nodiscard ]] constexpr bool   ends_with ( string_view const & _suffix_ ) const noexcept ;
 
-        constexpr void trim       () noexcept ;
-        constexpr void trim_left  () noexcept ;
-        constexpr void trim_right () noexcept ;
+        constexpr size_type trim       () noexcept ;
+        constexpr size_type trim_left  () noexcept ;
+        constexpr size_type trim_right () noexcept ;
 
         [[ nodiscard ]] constexpr string_view trimmed       () const noexcept ;
         [[ nodiscard ]] constexpr string_view trimmed_left  () const noexcept ;
         [[ nodiscard ]] constexpr string_view trimmed_right () const noexcept ;
+
+        [[ nodiscard ]] constexpr string_view substr ( ssize_type const _start_, ssize_type const _len_ = 0 ) const noexcept ;
 
         [[ nodiscard ]] constexpr string_view chop_left  ( ssize_type _count_ ) noexcept ;
         [[ nodiscard ]] constexpr string_view chop_right ( ssize_type _count_ ) noexcept ;
 
         constexpr void unchop_left  ( ssize_type _count_ ) noexcept ;
         constexpr void unchop_right ( ssize_type _count_ ) noexcept ;
+
+        [[ nodiscard ]] constexpr string_view chop_to_first_of ( string_view const & _delims_, bool const _discard_delimiter_ ) noexcept ;
 
         [[ nodiscard ]] constexpr value_type chop_char_left  () noexcept ;
         [[ nodiscard ]] constexpr value_type chop_char_right () noexcept ;
@@ -93,6 +97,12 @@ struct string_view
 
         template< typename Predicate >
         [[ nodiscard ]] constexpr string_view chop_right_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) ) ;
+
+        template< typename Integer >
+        [[ nodiscard ]] constexpr Integer parse_int () const noexcept ;
+
+        template< typename Float >
+        [[ nodiscard ]] constexpr Float parse_float () const noexcept ;
 
         [[ nodiscard ]] constexpr       reference at ( ssize_type const _index_ )       noexcept ;
         [[ nodiscard ]] constexpr const_reference at ( ssize_type const _index_ ) const noexcept ;
@@ -244,32 +254,40 @@ string_view< CharType >::ends_with ( string_view const & _suffix_ ) const noexce
 }
 
 template< typename CharType >
-constexpr void
+constexpr typename string_view< CharType >::size_type
 string_view< CharType >::trim () noexcept
 {
-        trim_left();
-        trim_right();
+        size_type count { 0 } ;
+        count += trim_left();
+        count += trim_right();
+        return count;
 }
 
 template< typename CharType >
-constexpr void
+constexpr typename string_view< CharType >::size_type
 string_view< CharType >::trim_left () noexcept
 {
+        size_type count { 0 } ;
         while( !empty() && ( front() ==  ' ' || front() == '\t' ) )
         {
                 data_++;
                 size_--;
+                count++;
         }
+        return count;
 }
 
 template< typename CharType >
-constexpr void
+constexpr typename string_view< CharType >::size_type
 string_view< CharType >::trim_right () noexcept
 {
+        size_type count { 0 } ;
         while( !empty() && ( back() ==  ' ' || back() == '\t' ) )
         {
                 size_--;
+                count++;
         }
+        return count;
 }
 
 template< typename CharType >
@@ -299,6 +317,21 @@ string_view< CharType >::trimmed_right () const noexcept
         new_view.trim_right();
 
         return new_view;
+}
+
+template< typename CharType >
+[[ nodiscard ]] constexpr string_view< CharType >
+string_view< CharType >::substr ( ssize_type const _start_, ssize_type const _len_ ) const noexcept
+{
+        string_view sub( *this );
+
+        ( void ) sub.chop_left( _start_ );
+
+        if( _len_ )
+        {
+                sub.size_ = _len_;
+        }
+        return sub;
 }
 
 template< typename CharType >
@@ -341,6 +374,26 @@ constexpr void
 string_view< CharType >::unchop_right ( ssize_type _count_ ) noexcept
 {
         size_ += _count_ ;
+}
+
+template< typename CharType >
+[[ nodiscard ]] constexpr string_view< CharType >
+string_view< CharType >::chop_to_first_of ( string_view const & _delims_, bool const _discard_delimiter_ ) noexcept
+{
+        string_view chop( data_, 0 );
+
+        while( !empty() && !_delims_.contains( front() ) )
+        {
+                data_++;
+                size_--;
+                chop.size_++;
+        }
+        if( !empty() && _discard_delimiter_ )
+        {
+                data_++;
+                size_--;
+        }
+        return chop;
 }
 
 template< typename CharType >
@@ -407,11 +460,11 @@ template< typename CharType >
 [[ nodiscard ]] constexpr bool
 string_view< CharType >::contains ( value_type const & _val_ ) const noexcept
 {
-        return index_of( _val_ ) >= 0;
+        return index_of( _val_, 0 ) >= 0;
 }
 
 template< typename CharType >
-[[ nodiscard ]] constexpr string_view< CharType >::ssize_type
+[[ nodiscard ]] constexpr typename string_view< CharType >::ssize_type
 string_view< CharType >::count ( value_type const & _val_ ) const noexcept
 {
         ssize_type count{ 0 } ;
@@ -512,6 +565,32 @@ string_view< CharType >::chop_right_while ( Predicate _predicate_ ) noexcept( no
                 ++chop ;
         }
         return chop;
+}
+
+template< typename CharType >
+template< typename Integer >
+[[ nodiscard ]] constexpr Integer
+string_view< CharType >::parse_int () const noexcept
+{
+        Integer num { 0 } ;
+        for( auto const & digit : *this )
+        {
+                if( '0' <= digit && digit <= '9' )
+                {
+                        num *= 10;
+                        num += digit - 48;
+                }
+                else break;
+        }
+        return num;
+}
+
+template< typename CharType >
+template< typename Float >
+[[ nodiscard ]] constexpr Float
+string_view< CharType >::parse_float () const noexcept
+{
+        return Float{ 0 };
 }
 
 template< typename CharType >
