@@ -20,6 +20,12 @@ namespace uti
 
 
 template< typename CharType >
+struct string_view ;
+
+using string_view_t = string_view< char const > ;
+
+
+template< typename CharType >
 struct string_view
 {
         using value_type =      CharType ;
@@ -56,10 +62,13 @@ struct string_view
         constexpr ssize_type operator-- (     ) noexcept { ++data_; return --size_; } // shrinks view on  left side
         constexpr ssize_type operator-- ( int ) noexcept {          return --size_; } // shrinks view on right side
 
-        [[ nodiscard ]] constexpr bool equal_to ( string_view const & _other_ ) const noexcept ;
+        [[ nodiscard ]] constexpr bool equal_to             ( string_view const & _other_ ) const noexcept ;
+        [[ nodiscard ]] constexpr bool equal_to_insensitive ( string_view const & _other_ ) const noexcept ;
 
-        [[ nodiscard ]] constexpr bool starts_with ( string_view const & _prefix_ ) const noexcept ;
-        [[ nodiscard ]] constexpr bool   ends_with ( string_view const & _suffix_ ) const noexcept ;
+        [[ nodiscard ]] constexpr bool starts_with             ( string_view const & _prefix_ ) const noexcept ;
+        [[ nodiscard ]] constexpr bool starts_with_insensitive ( string_view const & _prefix_ ) const noexcept ;
+        [[ nodiscard ]] constexpr bool   ends_with             ( string_view const & _suffix_ ) const noexcept ;
+        [[ nodiscard ]] constexpr bool   ends_with_insensitive ( string_view const & _suffix_ ) const noexcept ;
 
         constexpr size_type trim       () noexcept ;
         constexpr size_type trim_left  () noexcept ;
@@ -150,6 +159,14 @@ template< typename CharType >
 
 
 template< typename CharType >
+[[ nodiscard ]] constexpr CharType to_lower ( CharType chr ) noexcept
+{
+        if( 'A' <= chr && chr <= 'Z' ) return chr + 0x20;
+        return chr;
+}
+
+
+template< typename CharType >
 constexpr string_view< CharType >::string_view () noexcept
         : data_( nullptr ),
           size_(       0 )
@@ -213,6 +230,28 @@ string_view< CharType >::equal_to ( string_view const & _other_ ) const noexcept
 
 template< typename CharType >
 [[ nodiscard ]] constexpr bool
+string_view< CharType >::equal_to_insensitive ( string_view const & _other_ ) const noexcept
+{
+        if( size() != _other_.size() )
+        {
+                return false;
+        }
+        if( data() == _other_.data() )
+        {
+                return true;
+        }
+        for( ssize_type i = 0; i < size(); ++i )
+        {
+                if( to_lower( at( i ) ) != to_lower( _other_.at( i ) ) )
+                {
+                        return false;
+                }
+        }
+        return true;
+}
+
+template< typename CharType >
+[[ nodiscard ]] constexpr bool
 string_view< CharType >::starts_with ( string_view const & _prefix_ ) const noexcept
 {
 //      UTI_CONSTEXPR_ASSERT( size() >= _prefix_.size(), "string_view::starts_with: prefix longer than string" );
@@ -224,6 +263,26 @@ string_view< CharType >::starts_with ( string_view const & _prefix_ ) const noex
         for( ssize_type i = 0; i < _prefix_.size(); ++i )
         {
                 if( at( i ) != _prefix_.at( i ) )
+                {
+                        return false;
+                }
+        }
+        return true;
+}
+
+template< typename CharType >
+[[ nodiscard ]] constexpr bool
+string_view< CharType >::starts_with_insensitive ( string_view const & _prefix_ ) const noexcept
+{
+//      UTI_CONSTEXPR_ASSERT( size() >= _prefix_.size(), "string_view::starts_with: prefix longer than string" );
+
+        if( data() == _prefix_.data() )
+        {
+                return true;
+        }
+        for( ssize_type i = 0; i < _prefix_.size(); ++i )
+        {
+                if( to_lower( at( i ) ) != to_lower( _prefix_.at( i ) ) )
                 {
                         return false;
                 }
@@ -246,6 +305,28 @@ string_view< CharType >::ends_with ( string_view const & _suffix_ ) const noexce
         for( ssize_type i = 0; i < _suffix_.size(); ++i )
         {
                 if( at( pos + i ) != _suffix_.at( i ) )
+                {
+                        return false;
+                }
+        }
+        return true;
+}
+
+template< typename CharType >
+[[ nodiscard ]] constexpr bool
+string_view< CharType >::ends_with_insensitive ( string_view const & _suffix_ ) const noexcept
+{
+//      UTI_CONSTEXPR_ASSERT( size() >= _suffix_.size(), "string_view::ends_with: suffix longer than string" );
+
+        ssize_type pos = size() - _suffix_.size();
+
+        if( data() + pos == _suffix_.data() )
+        {
+                return true;
+        }
+        for( ssize_type i = 0; i < _suffix_.size(); ++i )
+        {
+                if( to_lower( at( pos + i ) ) != to_lower( _suffix_.at( i ) ) )
                 {
                         return false;
                 }
