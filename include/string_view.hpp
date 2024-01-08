@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <type_traits>
+
 #ifndef UTI_MOVE
 #define UTI_MOVE(...) \
         static_cast< decltype(__VA_ARGS__)&&>(__VA_ARGS__)
@@ -214,7 +216,7 @@ string_view< CharType >::equal_to ( string_view const & _other_ ) const noexcept
         {
                 return false;
         }
-        if( data() == _other_.data() )
+        if( !std::is_constant_evaluated() && data() == _other_.data() )
         {
                 return true;
         }
@@ -236,7 +238,7 @@ string_view< CharType >::equal_to_insensitive ( string_view const & _other_ ) co
         {
                 return false;
         }
-        if( data() == _other_.data() )
+        if( !std::is_constant_evaluated() && data() == _other_.data() )
         {
                 return true;
         }
@@ -256,7 +258,7 @@ string_view< CharType >::starts_with ( string_view const & _prefix_ ) const noex
 {
 //      UTI_CONSTEXPR_ASSERT( size() >= _prefix_.size(), "string_view::starts_with: prefix longer than string" );
 
-        if( data() == _prefix_.data() )
+        if( !std::is_constant_evaluated() && data() == _prefix_.data() )
         {
                 return true;
         }
@@ -276,7 +278,7 @@ string_view< CharType >::starts_with_insensitive ( string_view const & _prefix_ 
 {
 //      UTI_CONSTEXPR_ASSERT( size() >= _prefix_.size(), "string_view::starts_with: prefix longer than string" );
 
-        if( data() == _prefix_.data() )
+        if( !std::is_constant_evaluated() && data() == _prefix_.data() )
         {
                 return true;
         }
@@ -298,7 +300,7 @@ string_view< CharType >::ends_with ( string_view const & _suffix_ ) const noexce
 
         ssize_type pos = size() - _suffix_.size();
 
-        if( data() + pos == _suffix_.data() )
+        if( !std::is_constant_evaluated() && data() + pos == _suffix_.data() )
         {
                 return true;
         }
@@ -320,7 +322,7 @@ string_view< CharType >::ends_with_insensitive ( string_view const & _suffix_ ) 
 
         ssize_type pos = size() - _suffix_.size();
 
-        if( data() + pos == _suffix_.data() )
+        if( !std::is_constant_evaluated() && data() + pos == _suffix_.data() )
         {
                 return true;
         }
