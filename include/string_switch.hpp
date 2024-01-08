@@ -32,181 +32,181 @@ public:
 
         constexpr ~string_switch () noexcept = default ;
 
-        constexpr string_switch & CASE ( string_view_t const & s, T value ) noexcept
+        constexpr string_switch & CASE ( string_view_t const & _s_, T _value_ ) noexcept
         {
-                if( !is_set && str.equal_to( s ) )
+                if( !is_set && str.equal_to( _s_ ) )
                 {
-                        result = UTI_MOVE( value );
+                        result = UTI_MOVE( _value_ );
                         is_set = true;
                 }
                 return *this;
         }
-        constexpr string_switch & ENDS_WITH ( string_view_t const & s, T value ) noexcept
+        constexpr string_switch & ENDS_WITH ( string_view_t const & _s_, T _value_ ) noexcept
         {
-                if( !is_set && str.ends_with( s ) )
+                if( !is_set && str.ends_with( _s_ ) )
                 {
-                        result = UTI_MOVE( value );
+                        result = UTI_MOVE( _value_ );
                         is_set = true;
                 }
                 return *this;
         }
-        constexpr string_switch & STARTS_WITH ( string_view_t const & s, T value ) noexcept
+        constexpr string_switch & STARTS_WITH ( string_view_t const & _s_, T _value_ ) noexcept
         {
-                if( !is_set && str.starts_with( s ) )
+                if( !is_set && str.starts_with( _s_ ) )
                 {
-                        result = UTI_MOVE( value );
+                        result = UTI_MOVE( _value_ );
                         is_set = true;
                 }
                 return *this;
         }
-        constexpr string_switch & CASES ( string_view_t const & s0, string_view_t const & s1, T value ) noexcept
+        constexpr string_switch & CASES ( string_view_t const & _s0_, string_view_t const & _s1_, T _value_ ) noexcept
         {
-                return CASE( s0, value ).CASE( s1, value );
+                return CASE( _s0_, _value_ ).CASE( _s1_, _value_ );
         }
-        constexpr string_switch & CASES ( string_view_t const & s0, string_view_t const & s1,
-                                          string_view_t const & s2, T value ) noexcept
+        constexpr string_switch & CASES ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                          string_view_t const & _s2_, T _value_ ) noexcept
         {
-                return CASE( s0, value ).CASES( s1, s2, value );
+                return CASE( _s0_, _value_ ).CASES( _s1_, _s2_, _value_ );
         }
-        constexpr string_switch & CASES ( string_view_t const & s0, string_view_t const & s1,
-                                          string_view_t const & s2, string_view_t const & s3, T value ) noexcept
+        constexpr string_switch & CASES ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                          string_view_t const & _s2_, string_view_t const & _s3_, T _value_ ) noexcept
         {
-                return CASE( s0, value ).CASES( s1, s2, s3, value );
+                return CASE( _s0_, _value_ ).CASES( _s1_, _s2_, _s3_, _value_ );
         }
-        constexpr string_switch & CASES ( string_view_t const & s0, string_view_t const & s1,
-                                          string_view_t const & s2, string_view_t const & s3,
-                                          string_view_t const & s4, T value ) noexcept
+        constexpr string_switch & CASES ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                          string_view_t const & _s2_, string_view_t const & _s3_,
+                                          string_view_t const & _s4_, T _value_ ) noexcept
         {
-                return CASE( s0, value ).CASES( s1, s2, s3, s4, value );
+                return CASE( _s0_, _value_ ).CASES( _s1_, _s2_, _s3_, _s4_, _value_ );
         }
-        constexpr string_switch & CASES ( string_view_t const & s0, string_view_t const & s1,
-                                          string_view_t const & s2, string_view_t const & s3,
-                                          string_view_t const & s4, string_view_t const & s5, T value ) noexcept
+        constexpr string_switch & CASES ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                          string_view_t const & _s2_, string_view_t const & _s3_,
+                                          string_view_t const & _s4_, string_view_t const & _s5_, T _value_ ) noexcept
         {
-                return CASE( s0, value ).CASES( s1, s2, s3, s4, s5, value );
+                return CASE( _s0_, _value_ ).CASES( _s1_, _s2_, _s3_, _s4_, _s5_, _value_ );
         }
-        constexpr string_switch & CASES ( string_view_t const & s0, string_view_t const & s1,
-                                          string_view_t const & s2, string_view_t const & s3,
-                                          string_view_t const & s4, string_view_t const & s5,
-                                          string_view_t const & s6, T value ) noexcept
+        constexpr string_switch & CASES ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                          string_view_t const & _s2_, string_view_t const & _s3_,
+                                          string_view_t const & _s4_, string_view_t const & _s5_,
+                                          string_view_t const & _s6_, T _value_ ) noexcept
         {
-                return CASE( s0, value ).CASES( s1, s2, s3, s4, s5, s6, value );
+                return CASE( _s0_, _value_ ).CASES( _s1_, _s2_, _s3_, _s4_, _s5_, _s6_, _value_ );
         }
-        constexpr string_switch & CASES ( string_view_t const & s0, string_view_t const & s1,
-                                          string_view_t const & s2, string_view_t const & s3,
-                                          string_view_t const & s4, string_view_t const & s5,
-                                          string_view_t const & s6, string_view_t const & s7, T value ) noexcept
+        constexpr string_switch & CASES ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                          string_view_t const & _s2_, string_view_t const & _s3_,
+                                          string_view_t const & _s4_, string_view_t const & _s5_,
+                                          string_view_t const & _s6_, string_view_t const & _s7_, T _value_ ) noexcept
         {
-                return CASE( s0, value ).CASES( s1, s2, s3, s4, s5, s6, s7, value );
+                return CASE( _s0_, _value_ ).CASES( _s1_, _s2_, _s3_, _s4_, _s5_, _s6_, _s7_, _value_ );
         }
-        constexpr string_switch & CASES ( string_view_t const & s0, string_view_t const & s1,
-                                          string_view_t const & s2, string_view_t const & s3,
-                                          string_view_t const & s4, string_view_t const & s5,
-                                          string_view_t const & s6, string_view_t const & s7,
-                                          string_view_t const & s8, T value ) noexcept
+        constexpr string_switch & CASES ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                          string_view_t const & _s2_, string_view_t const & _s3_,
+                                          string_view_t const & _s4_, string_view_t const & _s5_,
+                                          string_view_t const & _s6_, string_view_t const & _s7_,
+                                          string_view_t const & _s8_, T _value_ ) noexcept
         {
-                return CASE( s0, value ).CASES( s1, s2, s3, s4, s5, s6, s7, s8, value );
+                return CASE( _s0_, _value_ ).CASES( _s1_, _s2_, _s3_, _s4_, _s5_, _s6_, _s7_, _s8_, _value_ );
         }
-        constexpr string_switch & CASES ( string_view_t const & s0, string_view_t const & s1,
-                                          string_view_t const & s2, string_view_t const & s3,
-                                          string_view_t const & s4, string_view_t const & s5,
-                                          string_view_t const & s6, string_view_t const & s7,
-                                          string_view_t const & s8, string_view_t const & s9, T value ) noexcept
+        constexpr string_switch & CASES ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                          string_view_t const & _s2_, string_view_t const & _s3_,
+                                          string_view_t const & _s4_, string_view_t const & _s5_,
+                                          string_view_t const & _s6_, string_view_t const & _s7_,
+                                          string_view_t const & _s8_, string_view_t const & _s9_, T _value_ ) noexcept
         {
-                return CASE( s0, value ).CASES( s1, s2, s3, s4, s5, s6, s7, s8, s9, value );
+                return CASE( _s0_, _value_ ).CASES( _s1_, _s2_, _s3_, _s4_, _s5_, _s6_, _s7_, _s8_, _s9_, _value_ );
         }
 
-        constexpr string_switch & CASE_LOWER ( string_view_t const & s, T value ) noexcept
+        constexpr string_switch & CASE_LOWER ( string_view_t const & s, T _value_ ) noexcept
         {
                 if( !is_set && str.equal_to_insensitive( s ) )
                 {
-                        result = UTI_MOVE( value );
+                        result = UTI_MOVE( _value_ );
                         is_set = true;
                 }
                 return *this;
         }
-        constexpr string_switch & ENDS_WITH_LOWER ( string_view_t const & s, T value ) noexcept
+        constexpr string_switch & ENDS_WITH_LOWER ( string_view_t const & s, T _value_ ) noexcept
         {
                 if( !is_set && str.ends_with_insensitive( s ) )
                 {
-                        result = UTI_MOVE( value );
+                        result = UTI_MOVE( _value_ );
                         is_set = true;
                 }
                 return *this;
         }
-        constexpr string_switch & STARTS_WITH_LOWER ( string_view_t const & s, T value ) noexcept
+        constexpr string_switch & STARTS_WITH_LOWER ( string_view_t const & s, T _value_ ) noexcept
         {
                 if( !is_set && str.starts_with_insensitive( s ) )
                 {
-                        result = UTI_MOVE( value );
+                        result = UTI_MOVE( _value_ );
                         is_set = true;
                 }
                 return *this;
         }
-        constexpr string_switch & CASES_LOWER ( string_view_t const & s0, string_view_t const & s1, T value ) noexcept
+        constexpr string_switch & CASES_LOWER ( string_view_t const & _s0_, string_view_t const & _s1_, T _value_ ) noexcept
         {
-                return CASE_LOWER( s0, value ).CASE_LOWER( s1, value );
+                return CASE_LOWER( _s0_, _value_ ).CASE_LOWER( _s1_, _value_ );
         }
-        constexpr string_switch & CASES_LOWER ( string_view_t const & s0, string_view_t const & s1,
-                                                string_view_t const & s2, T value ) noexcept
+        constexpr string_switch & CASES_LOWER ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                                string_view_t const & _s2_, T _value_ ) noexcept
         {
-                return CASE_LOWER( s0, value ).CASES_LOWER( s1, s2, value );
+                return CASE_LOWER( _s0_, _value_ ).CASES_LOWER( _s1_, _s2_, _value_ );
         }
-        constexpr string_switch & CASES_LOWER ( string_view_t const & s0, string_view_t const & s1,
-                                                string_view_t const & s2, string_view_t const & s3, T value ) noexcept
+        constexpr string_switch & CASES_LOWER ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                                string_view_t const & _s2_, string_view_t const & _s3_, T _value_ ) noexcept
         {
-                return CASE_LOWER( s0, value ).CASES_LOWER( s1, s2, s3, value );
+                return CASE_LOWER( _s0_, _value_ ).CASES_LOWER( _s1_, _s2_, _s3_, _value_ );
         }
-        constexpr string_switch & CASES_LOWER ( string_view_t const & s0, string_view_t const & s1,
-                                                string_view_t const & s2, string_view_t const & s3,
-                                                string_view_t const & s4, T value ) noexcept
+        constexpr string_switch & CASES_LOWER ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                                string_view_t const & _s2_, string_view_t const & _s3_,
+                                                string_view_t const & _s4_, T _value_ ) noexcept
         {
-                return CASE_LOWER( s0, value ).CASES_LOWER( s1, s2, s3, s4, value );
+                return CASE_LOWER( _s0_, _value_ ).CASES_LOWER( _s1_, _s2_, _s3_, _s4_, _value_ );
         }
-        constexpr string_switch & CASES_LOWER ( string_view_t const & s0, string_view_t const & s1,
-                                                string_view_t const & s2, string_view_t const & s3,
-                                                string_view_t const & s4, string_view_t const & s5, T value ) noexcept
+        constexpr string_switch & CASES_LOWER ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                                string_view_t const & _s2_, string_view_t const & _s3_,
+                                                string_view_t const & _s4_, string_view_t const & _s5_, T _value_ ) noexcept
         {
-                return CASE_LOWER( s0, value ).CASES_LOWER( s1, s2, s3, s4, s5, value );
+                return CASE_LOWER( _s0_, _value_ ).CASES_LOWER( _s1_, _s2_, _s3_, _s4_, _s5_, _value_ );
         }
-        constexpr string_switch & CASES_LOWER ( string_view_t const & s0, string_view_t const & s1,
-                                                string_view_t const & s2, string_view_t const & s3,
-                                                string_view_t const & s4, string_view_t const & s5,
-                                                string_view_t const & s6, T value ) noexcept
+        constexpr string_switch & CASES_LOWER ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                                string_view_t const & _s2_, string_view_t const & _s3_,
+                                                string_view_t const & _s4_, string_view_t const & _s5_,
+                                                string_view_t const & _s6_, T _value_ ) noexcept
         {
-                return CASE_LOWER( s0, value ).CASES_LOWER( s1, s2, s3, s4, s5, s6, value );
+                return CASE_LOWER( _s0_, _value_ ).CASES_LOWER( _s1_, _s2_, _s3_, _s4_, _s5_, _s6_, _value_ );
         }
-        constexpr string_switch & CASES_LOWER ( string_view_t const & s0, string_view_t const & s1,
-                                                string_view_t const & s2, string_view_t const & s3,
-                                                string_view_t const & s4, string_view_t const & s5,
-                                                string_view_t const & s6, string_view_t const & s7, T value ) noexcept
+        constexpr string_switch & CASES_LOWER ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                                string_view_t const & _s2_, string_view_t const & _s3_,
+                                                string_view_t const & _s4_, string_view_t const & _s5_,
+                                                string_view_t const & _s6_, string_view_t const & _s7_, T _value_ ) noexcept
         {
-                return CASE_LOWER( s0, value ).CASES_LOWER( s1, s2, s3, s4, s5, s6, s7, value );
+                return CASE_LOWER( _s0_, _value_ ).CASES_LOWER( _s1_, _s2_, _s3_, _s4_, _s5_, _s6_, _s7_, _value_ );
         }
-        constexpr string_switch & CASES_LOWER ( string_view_t const & s0, string_view_t const & s1,
-                                                string_view_t const & s2, string_view_t const & s3,
-                                                string_view_t const & s4, string_view_t const & s5,
-                                                string_view_t const & s6, string_view_t const & s7,
-                                                string_view_t const & s8, T value ) noexcept
+        constexpr string_switch & CASES_LOWER ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                                string_view_t const & _s2_, string_view_t const & _s3_,
+                                                string_view_t const & _s4_, string_view_t const & _s5_,
+                                                string_view_t const & _s6_, string_view_t const & _s7_,
+                                                string_view_t const & _s8_, T _value_ ) noexcept
         {
-                return CASE_LOWER( s0, value ).CASES_LOWER( s1, s2, s3, s4, s5, s6, s7, s8, value );
+                return CASE_LOWER( _s0_, _value_ ).CASES_LOWER( _s1_, _s2_, _s3_, _s4_, _s5_, _s6_, _s7_, _s8_, _value_ );
         }
-        constexpr string_switch & CASES_LOWER ( string_view_t const & s0, string_view_t const & s1,
-                                                string_view_t const & s2, string_view_t const & s3,
-                                                string_view_t const & s4, string_view_t const & s5,
-                                                string_view_t const & s6, string_view_t const & s7,
-                                                string_view_t const & s8, string_view_t const & s9, T value ) noexcept
+        constexpr string_switch & CASES_LOWER ( string_view_t const & _s0_, string_view_t const & _s1_,
+                                                string_view_t const & _s2_, string_view_t const & _s3_,
+                                                string_view_t const & _s4_, string_view_t const & _s5_,
+                                                string_view_t const & _s6_, string_view_t const & _s7_,
+                                                string_view_t const & _s8_, string_view_t const & _s9_, T _value_ ) noexcept
         {
-                return CASE_LOWER( s0, value ).CASES_LOWER( s1, s2, s3, s4, s5, s6, s7, s8, s9, value );
+                return CASE_LOWER( _s0_, _value_ ).CASES_LOWER( _s1_, _s2_, _s3_, _s4_, _s5_, _s6_, _s7_, _s8_, _s9_, _value_ );
         }
 
-        [[ nodiscard ]] constexpr R DEFAULT ( T value ) noexcept
+        [[ nodiscard ]] constexpr R DEFAULT ( T _value_ ) noexcept
         {
                 if( is_set )
                 {
                         return UTI_MOVE( result );
                 }
-                return value;
+                return _value_;
         }
         [[ nodiscard ]] constexpr operator R () noexcept
         {

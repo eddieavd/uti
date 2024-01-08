@@ -9,11 +9,12 @@
 
 int main ()
 {
-        constexpr int result = uti::string_switch< int >( "test", 0 )
+        constexpr int result = uti::string_switch< int >( "test" )
                 .CASE       ( "est", 1 )
                 .CASE       ( "tet", 2 )
                 .STARTS_WITH( "tes", 3 )
-                .ENDS_WITH  ( "est", 4 );
+                .ENDS_WITH  ( "est", 4 )
+                .DEFAULT    (        0 );
 
         static_assert( result == 3 );
 
