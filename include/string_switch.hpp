@@ -17,11 +17,11 @@ template< typename T, typename R = T >
 class string_switch
 {
 public:
-        explicit constexpr string_switch ( string_view_t _str_ ) noexcept
-                : str( UTI_MOVE( _str_ ) ), result(), is_set( false ) {}
+        explicit constexpr string_switch ( string_view_t const & _str_ ) noexcept
+                : str( _str_ ), result(), is_set( false ) {}
 
-        constexpr string_switch ( string_view_t _str_, T _default_ ) noexcept
-                : str( UTI_MOVE( _str_ ) ), result( UTI_MOVE( _default_ ) ), is_set( false ) {}
+        constexpr string_switch ( string_view_t const & _str_, T _default_ ) noexcept
+                : str( _str_ ), result( UTI_MOVE( _default_ ) ), is_set( false ) {}
 
         constexpr string_switch             ( string_switch const &  ) = delete ;
         constexpr string_switch & operator= ( string_switch const &  ) = delete ;
@@ -213,8 +213,8 @@ public:
                 return UTI_MOVE( result );
         }
 private:
-        string_view_t const str ;
-        T result ;
+        string_view_t str ;
+        T    result ;
         bool is_set ;
 };
 
