@@ -34,9 +34,8 @@
     !__has_builtin(__is_empty)                   || \
     !__has_builtin(__is_enum)                    || \
     !__has_builtin(__is_union)                   || \
-    !__has_builtin(__underlying_type)            || \
     !__has_builtin(__is_trivially_constructible) || \
-    !__has_builtin(__is_trivially_copyable)      || \
+    !__has_builtin(__is_trivially_assignable)    || \
     ( !__has_builtin(__is_trivially_destructible)  || !__has_builtin(__has_trivial_destructor) )
 #       ifdef UTI_HAS_STL
 //              use c++ standard library implementations
@@ -888,6 +887,28 @@ template< typename T, typename U > inline constexpr bool      is_nothrow_assigna
 template< typename T             > inline constexpr bool is_nothrow_copy_assignable_v = is_nothrow_copy_assignable< T    >::value ;
 template< typename T             > inline constexpr bool is_nothrow_move_assignable_v = is_nothrow_move_assignable< T    >::value ;
 
+#if __has_builtin( __is_trivially_assignable )
+
+template< typename T, typename U >
+struct _is_trivially_assignable_impl : integral_constant< __is_trivially_assignable( T, U ) > {} ;
+
+#elif defined( UTI_HAS_STL )
+
+template< typename T, typename U >
+struct _is_trivially_assignable_impl : std::is_trivially_assignable< T, U > {} ;
+
+#else
+#error "no implementation for 'is_trivially_assignable' available"
+#endif
+
+template< typename T, typename U > using      is_trivially_assignable = _is_trivially_assignable_impl< T, U > ;
+template< typename T             > using is_trivially_copy_assignable =  is_trivially_assignable< T, add_lvalue_reference_t< add_const_t< T > > > ;
+template< typename T             > using is_trivially_move_assignable =  is_trivially_assignable< T, add_rvalue_reference_t<              T   > > ;
+
+template< typename T, typename U > inline constexpr bool      is_trivially_assignable_v =      is_trivially_assignable< T, U >::value ;
+template< typename T             > inline constexpr bool is_trivially_copy_assignable_v = is_trivially_copy_assignable< T    >::value ;
+template< typename T             > inline constexpr bool is_trivially_move_assignable_v = is_trivially_move_assignable< T    >::value ;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///     constructibility
 ////////////////////////////////////////////////////////////////////////////////
@@ -932,6 +953,12 @@ template< typename T > using is_destructible = integral_constant< is_detected_v<
 
 template< typename T > inline constexpr bool is_destructible_v = is_destructible< T >::value ;
 
+template< typename T > using nothrow_destruct = integral_constant< noexcept( uti::declval< T >().~T() ) > ;
+
+template< typename T > using is_nothrow_destructible = integral_constant< is_destructible_v< T > && is_v< nothrow_destruct< T > > > ;
+
+template< typename T > inline constexpr bool is_nothrow_destructible_v = is_nothrow_destructible< T >::value ;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #if __has_builtin( __is_trivially_constructible )
@@ -958,25 +985,6 @@ template< typename T, typename... Args > inline constexpr bool         is_trivia
 template< typename T                   > inline constexpr bool is_trivially_default_constructible_v = is_trivially_default_constructible< T          >::value ;
 template< typename T                   > inline constexpr bool    is_trivially_copy_constructible_v =    is_trivially_copy_constructible< T          >::value ;
 template< typename T                   > inline constexpr bool    is_trivially_move_constructible_v =    is_trivially_move_constructible< T          >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-#if __has_builtin( __is_trivially_copyable )
-
-template< typename T >
-using is_trivially_copyable = integral_constant< __is_trivially_copyable( T ) > ;
-
-#elif defined( UTI_HAS_STL )
-
-template< typename T >
-using is_trivially_copyable = std::is_trivially_copyable< T > ;
-
-#else
-#error "uti: no implementation for 'is_trivially_copyable' available"
-#endif
-
-template< typename T >
-inline constexpr bool is_trivially_copyable_v = is_trivially_copyable< T >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1020,6 +1028,62 @@ using is_trivially_destructible = _is_trivially_destructible_impl< T > ;
 
 template< typename T >
 inline constexpr bool is_trivially_destructible_v = is_trivially_destructible< T >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+
+#if __has_builtin( __is_trivially_copyable )
+
+template< typename T >
+using _is_trivially_copyable_impl = integral_constant< __is_trivially_copyable( T ) > ;
+
+#elif defined( UTI_HAS_STL )
+
+template< typename T >
+using _is_trivially_copyable_impl = std::is_trivially_copyable< T > ;
+
+#else
+
+// https://en.cppreference.com/w/cpp/language/classes#Trivially_copyable_class
+template< typename T >
+using _is_trivially_copyable_impl = conjunction
+                                <
+                                        disjunction
+                                        <
+                                                is_trivially_copy_constructible< T >,
+                                                is_not< is_copy_constructible< T > >
+                                        >,
+                                        disjunction
+                                        <
+                                                is_trivially_move_constructible< T >,
+                                                is_not< is_move_constructible< T > >
+                                        >,
+                                        disjunction
+                                        <
+                                                is_trivially_copy_assignable< T >,
+                                                is_not< is_copy_assignable< T > >
+                                        >,
+                                        disjunction
+                                        <
+                                                is_trivially_move_assignable< T >,
+                                                is_not< is_move_assignable< T > >
+                                        >,
+                                        is_trivially_destructible< T >
+                                > ;
+
+#endif
+
+template< typename T >
+using is_trivially_copyable = _is_trivially_copyable_impl< T > ;
+
+template< typename T >
+inline constexpr bool is_trivially_copyable_v = is_trivially_copyable< T >::value ;
+
+// https://en.cppreference.com/w/cpp/language/classes#Trivial_class
+template< typename T >
+using is_trivial = conjunction< is_trivially_copyable< T >, is_trivially_default_constructible< T > > ;
+
+template< typename T >
+inline constexpr bool is_trivial_v = is_trivial< T >::value ;
 
 
 } // namespace uti
