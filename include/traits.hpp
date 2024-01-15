@@ -1,7 +1,7 @@
 //
 //
 //      uti
-//      type_traits.hpp
+//      traits.hpp
 //
 
 #pragma once
@@ -105,10 +105,7 @@ constexpr bool is_constant_evaluated () noexcept
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename... >
-struct void_t
-{
-        using type = void ;
-};
+using void_t = void ;
 
 template< auto Val >
 struct value_identity
@@ -271,7 +268,7 @@ using remove_cv_t = typename remove_cv< T >::type ;
 
 
 template< typename T >
-struct remove_cvref : remove_reference< remove_cv_t< T > > {} ;
+struct remove_cvref : remove_cv< remove_reference_t< T > > {} ;
 
 template< typename T >
 using remove_cvref_t = typename remove_cvref< T >::type ;
@@ -288,29 +285,6 @@ struct enable_if< true, T > { using type = T ; } ;
 
 template< bool C, typename T = void >
 using enable_if_t = typename enable_if< C, T >::type ;
-
-////////////////////////////////////////////////////////////////////////////////
-///     unary
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct is : false_type {} ;
-
-template<>
-struct is< true_type > : true_type {} ;
-
-template< typename T >
-inline constexpr bool is_v = is< T >::value ;
-
-
-template< typename T >
-struct is_not : true_type {} ;
-
-template<>
-struct is_not< true_type > : false_type {} ;
-
-template< typename T >
-inline constexpr bool is_not_v = is_not< T >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///     binary
@@ -760,429 +734,10 @@ inline constexpr bool is_scalar_v = is_scalar< T >::value ;
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename T >
-struct alignment_of : integral_constant< alignof( T ) > {} ;
+using alignment_of = integral_constant< alignof( T ) > ;
 
 template< typename T >
 inline constexpr auto alignment_of_v = alignment_of< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-///     assignability
-////////////////////////////////////////////////////////////////////////////////
-
-#if __has_builtin( __is_assignable )
-
-template< typename T, typename U >
-struct is_assignable : integral_constant< __is_assignable( T, U ) > {} ;
-
-#elif defined( UTI_HAS_STL )
-
-template< typename T, typename U >
-struct is_assignable : std::is_assignable< T, U > {} ;
-
-#else
-
-template< typename, typename T >
-struct _select_2nd { using type = T ; } ;
-
-template< typename T, typename U >
-typename _select_2nd< decltype( ( uti::declval< T >() = uti::declval< U >() ) ), true_type >::type _is_assignable_test ( int ) ;
-
-template< typename, typename > false_type _is_assignable_test ( ... ) ;
-
-template< typename T, typename U, bool = is_void_v< T > || is_void_v< U > >
-struct _is_assignable_impl
-        : public decltype( ( _is_assignable_test< T, U >( 0 ) ) ) {} ;
-
-template< typename T, typename U >
-struct _is_assignable_impl< T, U, true >
-        : public false_type {} ;
-
-template< typename T, typename U >
-struct is_assignable : public _is_assignable_impl< T, U > {} ;
-
-#endif
-
-template< typename T, typename U >
-inline constexpr bool is_assignable_v = is_assignable< T, U >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct is_copy_assignable : is_assignable< add_lvalue_reference_t< T >, add_lvalue_reference_t< add_const_t< T > > > {} ;
-
-template< typename T >
-inline constexpr bool is_copy_assignable_v = is_copy_assignable< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct is_move_assignable : is_assignable< add_lvalue_reference_t< T >, add_rvalue_reference_t< T > > {} ;
-
-template< typename T >
-inline constexpr bool is_move_assignable_v = is_move_assignable< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-#if __has_builtin( __is_nothrow_assignable )
-
-template< typename T, typename Arg >
-struct is_nothrow_assignable : integral_constant< __is_nothrow_assignable( T, Arg ) > {} ;
-
-#elif defined( UTI_HAS_STL )
-
-template< typename T, typename Arg >
-struct is_nothrow_assignable : std::is_nothrow_assignable< T, Arg > {} ;
-
-#else
-
-template< bool, typename T, typename Arg > struct _is_nothrow_assignable_impl ;
-
-template< typename T, typename Arg >
-struct _is_nothrow_assignable_impl< false, T, Arg > : public false_type {} ;
-
-template< typename T, typename Arg >
-struct _is_nothrow_assignable_impl< true, T, Arg >
-        : public integral_constant< noexcept( uti::declval< T >() = uti::declval< Arg >() ) > {} ;
-
-template< typename T, typename Arg >
-struct is_nothrow_assignable
-        : public _is_nothrow_assignable_impl< is_assignable_v< T, Arg >, T, Arg > {} ;
-
-#endif
-
-template< typename T, typename Arg >
-inline constexpr bool is_nothrow_assignable_v = is_nothrow_assignable< T, Arg >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct is_nothrow_move_assignable : is_nothrow_assignable< T, add_rvalue_reference_t< T > > {} ;
-
-template< typename T >
-inline constexpr bool is_nothrow_move_assignable_v = is_nothrow_move_assignable< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct is_nothrow_copy_assignable : is_nothrow_assignable< T, add_lvalue_reference_t< add_const_t< T > > > {} ;
-
-template< typename T >
-inline constexpr bool is_nothrow_copy_assignable_v = is_nothrow_copy_assignable< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct _remove_pointer_impl : type_identity< T > {} ;
-
-template< typename T >
-struct _remove_pointer_impl< T * > : type_identity< T > {} ;
-
-template< typename T >
-struct remove_pointer : _remove_pointer_impl< remove_cv_t< T > > {} ;
-
-template< typename T >
-using remove_pointer_t = typename remove_pointer< T >::type ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct _is_pointer_to_const_impl : false_type {} ;
-
-template< typename T >
-struct _is_pointer_to_const_impl< T * > : is_const< T > {} ;
-
-template< typename T >
-struct is_pointer_to_const : _is_pointer_to_const_impl< remove_cv_t< T > > {} ;
-
-template< typename T >
-inline constexpr bool is_pointer_to_const_v = is_pointer_to_const< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-///     constructibility
-////////////////////////////////////////////////////////////////////////////////
-
-#if !__has_builtin( __is_constructible )
-
-template< typename T, typename... Args >
-struct _is_constructible_impl : integral_constant< __is_constructible( T, Args... ) > {} ;
-
-#elif defined( UTI_HAS_STL )
-
-template< typename T, typename... Args >
-struct _is_constructible_impl : std::is_constructible< T, Args... > {} ;
-
-#else
-
-template< typename, typename T, typename... Args >
-struct _is_constructible_impl : false_type {} ;
-
-template< typename T, typename... Args >
-struct _is_constructible_impl< void_t< decltype( ::new T( uti::declval< Args >()... ) ) >, T, Args... > : true_type {} ;
-
-#endif
-
-template< typename T, typename... Args >
-using is_constructible = _is_constructible_impl< /* void_T<>, */ T, Args... > ;
-
-template< typename T, typename... Args >
-inline constexpr bool is_constructible_v = is_constructible< T, Args... >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-#if __has_builtin( __is_nothrow_constructible )
-
-template< typename T, typename... Args >
-struct is_nothrow_constructible : integral_constant< __is_nothrow_constructible( T, Args... ) > {} ;
-
-#elif defined( UTI_HAS_STL )
-
-template< typename T, typename... Args >
-struct is_nothrow_constructible : std::is_nothrow_constructible< T > {} ;
-
-#else
-
-template< bool, bool, typename T, typename... Args > struct _is_nothrow_constructible_impl ;
-
-template< typename T, typename... Args >
-struct _is_nothrow_constructible_impl< /* is_constructible */ true, /* is_reference */ false, T, Args... >
-        : integral_constant< noexcept( T( uti::declval< Args >()... ) ) > {} ;
-
-template< typename T >
-void _implicit_conversion_to ( T ) noexcept {}
-
-template< typename T, typename Arg >
-struct _is_nothrow_constructible_impl< true, true, T, Arg >
-        : integral_constant< noexcept( _implicit_conversion_to< T >( uti::declval< Arg >() ) ) > {} ;
-
-template< typename T, bool IsReference, typename... Args >
-struct _is_nothrow_constructible_impl< false, IsReference, T, Args... >
-        : public false_type {} ;
-
-template< typename T, typename... Args >
-struct is_nothrow_constructible : _is_nothrow_constructible_impl< is_constructible_v< T, Args... >, is_reference_v< T >, T, Args... > {} ;
-
-template< typename T, size_t N >
-struct is_nothrow_constructible< T[ N ] >
-        : _is_nothrow_constructible_impl< is_constructible_v< T >, is_reference_v< T >, T > {} ;
-
-#endif
-
-template< typename T, typename... Args >
-inline constexpr bool is_nothrow_constructible_v = is_nothrow_constructible< T, Args... >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-#if __has_builtin( __is_trivially_constructible )
-
-template< typename T, typename... Args >
-struct _is_trivially_constructible_impl : integral_constant< __is_trivially_constructible( T, Args... ) > {} ;
-
-#elif defined( UTI_HAS_STL )
-
-template< typename T, typename... Args >
-struct _is_trivially_constructible_impl : std::is_trivially_constructible< T, Args... > {} ;
-
-#else
-#error "uti: no implementation for 'is_trivially_constructible' available"
-#endif
-
-template< typename T, typename... Args >
-struct is_trivially_constructible : _is_trivially_constructible_impl< T, Args... > {} ;
-
-template< typename T, typename... Args >
-inline constexpr bool is_trivially_constructible_v = is_trivially_constructible< T, Args... >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename >
-struct _is_destructible_apply
-{
-        using type = int ;
-};
-
-template< typename T >
-struct _is_destructor_wellformed
-{
-        template< typename T1 >
-        static true_type _test ( typename _is_destructible_apply< decltype( uti::declval< T1 & >().~T1() ) >::type ) ;
-
-        template< typename T1 >
-        static false_type _test ( ... ) ;
-
-        static const bool value = decltype( _test< T >( 8372 ) )::value ;
-};
-
-template< typename, bool >
-struct _destructible_impl ;
-
-template< typename T >
-struct _destructible_impl< T, false >
-        : public integral_constant< _is_destructor_wellformed< typename remove_all_extents< T >::type >::value > {} ;
-
-template< typename T >
-struct _destructible_impl< T, true >
-        : public true_type {} ;
-
-template< typename T, bool >
-struct _destructible_false ;
-
-template< typename T >
-struct _destructible_false< T, false > : public _destructible_impl< T, is_reference_v< T > > {} ;
-
-template< typename T >
-struct _destructible_false< T, true > : public false_type {} ;
-
-template< typename T >
-struct is_destructible : public _destructible_false< T, is_function_v< T > > {} ;
-
-template< typename T >
-struct is_destructible< T[] > : public false_type {} ;
-
-template<>
-struct is_destructible< void > : public false_type {} ;
-
-template< typename T >
-inline constexpr bool is_destructible_v = is_destructible< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< bool, typename T >
-struct _is_nothrow_destructible_impl ;
-
-template< typename T >
-struct _is_nothrow_destructible_impl< false, T > : public false_type {} ;
-
-template< typename T >
-struct _is_nothrow_destructible_impl< true, T > : public integral_constant< noexcept( uti::declval< T >().~T() ) > {} ;
-
-template< typename T >
-struct is_nothrow_destructible : public _is_nothrow_destructible_impl< is_destructible_v< T >, T > {} ;
-
-template< typename T >
-inline constexpr bool is_nothrow_destructible_v = is_nothrow_destructible< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-#if __has_builtin( __is_trivially_destructible )
-
-template< typename T >
-struct is_trivially_destructible : integral_constant< __is_trivially_destructible( T ) > {} ;
-
-#elif __has_builtin( __has_trivial_destructor )
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-builtins"
-
-template< typename T >
-struct is_trivially_destructible : integral_constant< __has_trivial_destructor( T ) > {} ;
-
-#pragma GCC diagnostic pop
-
-#elif defined( UTI_HAS_STL )
-
-template< typename T >
-struct is_trivially_destructible : std::is_trivially_destructible< T > {} ;
-
-#elif UTI_STD_VER <= 11
-
-template< typename T >
-struct _trivial_destructor_impl : public integral_constant< is_scalar_v< T > || is_reference_v< T > > {} ;
-
-template< typename T >
-struct is_trivially_destructible : _trivial_destructor_impl< typename remove_all_extents< T >::type > {} ;
-
-template< typename T >
-struct is_trivially_destructible< T[] > : public false_type {} ;
-
-#else
-#error "uti: no implementation for 'is_trivially_destructible' available"
-#endif
-
-template< typename T >
-inline constexpr bool is_trivially_destructible_v = is_trivially_destructible< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct is_copy_constructible : is_constructible
-                                <
-                                        T,
-                                        add_lvalue_reference_t< add_const_t< T > >
-                                > {} ;
-
-template< typename T >
-inline constexpr bool is_copy_constructible_v = is_copy_constructible< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct is_move_constructible : is_constructible
-                                <
-                                        T,
-                                        add_rvalue_reference_t< T >
-                                > {} ;
-
-template< typename T >
-inline constexpr bool is_move_constructible_v = is_move_constructible< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct is_trivially_copy_constructible : is_trivially_constructible< T, add_lvalue_reference_t< add_const_t< T > > > {} ;
-
-template< typename T >
-inline constexpr bool is_trivially_copy_constructible_v = is_trivially_copy_constructible< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-#if __has_builtin( __is_trivially_copyable )
-
-template< typename T >
-struct is_trivially_copyable : integral_constant< __is_trivially_copyable( T ) > {} ;
-
-#elif defined( UTI_HAS_STL )
-
-template< typename T >
-struct is_trivially_copyable : std::is_trivially_copyable< T > {} ;
-
-#else
-#error "uti: no implementation for 'is_trivially_copyable' available"
-#endif
-
-template< typename T >
-inline constexpr bool is_trivially_copyable_v = is_trivially_copyable< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct is_trivially_move_constructible : is_trivially_constructible< T, add_rvalue_reference_t< T > > {} ;
-
-template< typename T >
-inline constexpr bool is_trivially_move_constructible_v = is_trivially_move_constructible< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct is_nothrow_default_constructible : is_nothrow_constructible< T > {} ;
-
-template< typename T >
-inline constexpr bool is_nothrow_default_constructible_v = is_nothrow_default_constructible< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct is_nothrow_copy_constructible : is_nothrow_constructible< T, add_lvalue_reference_t< add_const_t< T > > > {} ;
-
-template< typename T >
-inline constexpr bool is_nothrow_copy_constructible_v = is_nothrow_copy_constructible< T >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-struct is_nothrow_move_constructible : is_nothrow_constructible< T, add_rvalue_reference_t< T > > {} ;
-
-template< typename T >
-inline constexpr bool is_nothrow_move_constructible_v = is_nothrow_move_constructible< T >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///     convertibility
@@ -1202,13 +757,13 @@ auto _test_implicitly_convertible ( ... ) -> false_type ;
 
 
 template< typename From, typename To >
-struct is_convertible
-        : integral_constant
+using is_convertible
+        = integral_constant
           <
                 ( decltype( _test_returnable< To >( 0 ) )::value &&
                   decltype( _test_implicitly_convertible< From, To >( 0 ) )::value ) ||
                 ( is_void_v< From > && is_void_v< To > )
-          > {} ;
+          > ;
 
 template< typename From, typename To >
 inline constexpr bool is_convertible_v = is_convertible< From, To >::value ;
@@ -1234,6 +789,248 @@ struct is_nothrow_convertible : conditional_t
 
 template< typename From, typename To >
 inline constexpr bool is_nothrow_convertible_v = is_nothrow_convertible< From, To >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+///     unary
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T >
+using is = integral_constant< is_convertible_v< T, true_type > > ;
+
+template< typename T >
+inline constexpr bool is_v = is< T >::value ;
+
+
+template< typename T >
+using is_not = integral_constant< is_convertible_v< T, false_type > > ;
+
+template< typename T >
+inline constexpr bool is_not_v = is_not< T >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+///     detector
+////////////////////////////////////////////////////////////////////////////////
+
+struct notype ;
+
+template< typename Default, typename Void,
+          template< typename... > typename Fn,
+          typename... Args >
+struct _detector
+{
+        using type    = Default    ;
+        using value_t = false_type ;
+};
+
+template< typename Default,
+          template< typename... > typename Fn,
+          typename... Args >
+struct _detector< Default, void_t< Fn< Args... > >, Fn, Args... >
+{
+        using type    = Fn< Args... > ;
+        using value_t = true_type     ;
+};
+
+template< template< typename... > typename Fn, typename... Args >
+using is_detected = typename _detector< notype, void, Fn, Args... >::value_t ;
+
+template< template< typename... > typename Fn, typename... Args >
+inline constexpr bool is_detected_v = is_detected< Fn, Args... >::value ;
+
+template< template< typename... > typename Fn, typename... Args >
+using detected_t = typename _detector< notype, void, Fn, Args... >::type ;
+
+template< typename Default, template< typename... > typename Fn, typename... Args >
+using detected_or = _detector< Default, void, Fn, Args... > ;
+
+template< typename Default, template< typename... > typename Fn, typename... Args >
+using detected_or_t = detected_or< Default, Fn, Args... >::type ;
+
+template< typename Expected, template< typename... > typename Fn, typename... Args >
+using is_detected_exact = is_same< Expected, detected_t< Fn, Args... > > ;
+
+template< typename Expected, template< typename... > typename Fn, typename... Args >
+inline constexpr bool is_detected_exact_v = is_detected_exact< Expected, Fn, Args... >::value ;
+
+template< typename To, template< typename... > typename Fn, typename... Args >
+using is_detected_convertible = is_convertible< detected_t< Fn, Args... >, To > ;
+
+template< typename To, template< typename... > typename Fn, typename... Args >
+inline constexpr bool is_detected_convertible_v = is_detected_convertible< To, Fn, Args... >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+///     assignability
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T, typename U > using assign_t = decltype( uti::declval< T >() = uti::declval< U >() ) ;
+
+template< typename T > using copy_assign_t = assign_t< T, add_lvalue_reference_t< add_const_t< T > > > ;
+template< typename T > using move_assign_t = assign_t< T, add_rvalue_reference_t<              T   > > ;
+
+template< typename T, typename U > using is_assignable      = integral_constant< is_detected_v<      assign_t, T, U > > ;
+template< typename T             > using is_copy_assignable = integral_constant< is_detected_v< copy_assign_t, T    > > ;
+template< typename T             > using is_move_assignable = integral_constant< is_detected_v< move_assign_t, T    > > ;
+
+template< typename T, typename U > inline constexpr bool is_assignable_v      = is_assignable     < T, U >::value ;
+template< typename T             > inline constexpr bool is_copy_assignable_v = is_copy_assignable< T    >::value ;
+template< typename T             > inline constexpr bool is_move_assignable_v = is_move_assignable< T    >::value ;
+
+template< typename T, typename U > using nothrow_assign = integral_constant< noexcept( uti::declval< T >() = uti::declval< U >() ) > ;
+
+template< typename T > using nothrow_copy_assign = nothrow_assign< T, add_lvalue_reference_t< add_const_t< T > > > ;
+template< typename T > using nothrow_move_assign = nothrow_assign< T, add_rvalue_reference_t<              T   > > ;
+
+template< typename T, typename U > using is_nothrow_assignable = integral_constant< is_assignable_v< T, U > && is_v< nothrow_assign< T, U > > > ;
+
+template< typename T > using is_nothrow_copy_assignable = is_nothrow_assignable< T, add_lvalue_reference_t< add_const_t< T > > > ;
+template< typename T > using is_nothrow_move_assignable = is_nothrow_assignable< T, add_rvalue_reference_t<              T   > > ;
+
+template< typename T, typename U > inline constexpr bool is_nothrow_assignable_v      = is_nothrow_assignable     < T, U >::value ;
+template< typename T             > inline constexpr bool is_nothrow_copy_assignable_v = is_nothrow_copy_assignable< T    >::value ;
+template< typename T             > inline constexpr bool is_nothrow_move_assignable_v = is_nothrow_move_assignable< T    >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+///     constructibility
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T, typename... Args > using construct_t = decltype( T( uti::declval< Args >()... ) ) ;
+
+template< typename T > using default_construct_t = construct_t< T                                             > ;
+template< typename T > using    copy_construct_t = construct_t< T, add_lvalue_reference_t< add_const_t< T > > > ;
+template< typename T > using    move_construct_t = construct_t< T, add_rvalue_reference_t<              T   > > ;
+
+template< typename T, typename... Args > using is_constructible         = integral_constant< is_detected_v<         construct_t, T, Args... > > ;
+template< typename T                   > using is_default_constructible = integral_constant< is_detected_v< default_construct_t, T          > > ;
+template< typename T                   > using is_copy_constructible    = integral_constant< is_detected_v<    copy_construct_t, T          > > ;
+template< typename T                   > using is_move_constructible    = integral_constant< is_detected_v<    move_construct_t, T          > > ;
+
+template< typename T, typename... Args > inline constexpr bool is_constructible_v         = is_constructible        < T, Args... >::value ;
+template< typename T                   > inline constexpr bool is_default_constructible_v = is_default_constructible< T          >::value ;
+template< typename T                   > inline constexpr bool is_copy_constructible_v    = is_copy_constructible   < T          >::value ;
+template< typename T                   > inline constexpr bool is_move_constructible_v    = is_move_constructible   < T          >::value ;
+
+template< typename T, typename... Args > using nothrow_construct = integral_constant< noexcept( T( uti::declval< Args >()... ) ) > ;
+
+template< typename T > using nothrow_default_construct = nothrow_construct< T                                             > ;
+template< typename T > using nothrow_copy_construct    = nothrow_construct< T, add_lvalue_reference_t< add_const_t< T > > > ;
+template< typename T > using nothrow_move_construct    = nothrow_construct< T, add_rvalue_reference_t<              T   > > ;
+
+template< typename T, typename... Args > using is_nothrow_constructible = integral_constant< is_constructible_v< T, Args... > && is_v< nothrow_construct< T, Args... > > > ;
+
+template< typename T > using is_nothrow_default_constructible = is_nothrow_constructible< T                                             > ;
+template< typename T > using is_nothrow_copy_constructible    = is_nothrow_constructible< T, add_lvalue_reference_t< add_const_t< T > > > ;
+template< typename T > using is_nothrow_move_constructible    = is_nothrow_constructible< T, add_rvalue_reference_t<              T   > > ;
+
+template< typename T, typename... Args > inline constexpr bool is_nothrow_constructible_v         = is_nothrow_constructible        < T, Args... >::value ;
+template< typename T                   > inline constexpr bool is_nothrow_default_constructible_v = is_nothrow_default_constructible< T          >::value ;
+template< typename T                   > inline constexpr bool is_nothrow_copy_constructible_v    = is_nothrow_copy_constructible   < T          >::value ;
+template< typename T                   > inline constexpr bool is_nothrow_move_constructible_v    = is_nothrow_move_constructible   < T          >::value ;
+
+
+template< typename T >
+using destruct_t = decltype( uti::declval< T >().~T() ) ;
+
+template< typename T >
+using is_destructible = integral_constant< is_detected_v< destruct_t, T > > ;
+
+template< typename T >
+inline constexpr bool is_destructible_v = is_destructible< T >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+
+#if __has_builtin( __is_trivially_constructible )
+
+template< typename T, typename... Args >
+using _is_trivially_constructible_impl = integral_constant< __is_trivially_constructible( T, Args... ) > ;
+
+#elif defined( UTI_HAS_STL )
+
+template< typename T, typename... Args >
+using _is_trivially_constructible_impl = std::is_trivially_constructible< T, Args... > ;
+
+#else
+#error "uti: no implementation for 'is_trivially_constructible' available"
+#endif
+
+template< typename T, typename... Args >
+using is_trivially_constructible = _is_trivially_constructible_impl< T, Args... > ;
+
+template< typename T, typename... Args >
+inline constexpr bool is_trivially_constructible_v = is_trivially_constructible< T, Args... >::value ;
+
+template< typename T >
+using is_trivially_copy_constructible = is_trivially_constructible< T, add_lvalue_reference_t< add_const_t< T > > > ;
+
+template< typename T >
+inline constexpr bool is_trivially_copy_constructible_v = is_trivially_copy_constructible< T >::value ;
+
+template< typename T >
+using is_trivially_move_constructible = is_trivially_constructible< T, add_rvalue_reference_t< T > > ;
+
+template< typename T >
+inline constexpr bool is_trivially_move_constructible_v = is_trivially_move_constructible< T >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+
+#if __has_builtin( __is_trivially_copyable )
+
+template< typename T >
+using is_trivially_copyable = integral_constant< __is_trivially_copyable( T ) > ;
+
+#elif defined( UTI_HAS_STL )
+
+template< typename T >
+using is_trivially_copyable = std::is_trivially_copyable< T > ;
+
+#else
+#error "uti: no implementation for 'is_trivially_copyable' available"
+#endif
+
+template< typename T >
+inline constexpr bool is_trivially_copyable_v = is_trivially_copyable< T >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+
+#if __has_builtin( __is_trivially_destructible )
+
+template< typename T >
+using _is_trivially_destructible_impl = integral_constant< __is_trivially_destructible( T ) > ;
+
+#elif __has_builtin( __has_trivial_destructor )
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-builtins"
+
+template< typename T >
+using _is_trivially_destructible_impl = integral_constant< __has_trivial_destructor( T ) > ;
+
+#pragma GCC diagnostic pop
+
+#elif defined( UTI_HAS_STL )
+
+template< typename T >
+using _is_trivially_destructible_impl = std::is_trivially_destructible< T > ;
+
+#elif UTI_STD_VER <= 11
+
+template< typename T >
+using _trivial_destructor_impl = integral_constant< is_scalar_v< T > || is_reference_v< T > > ;
+
+template< typename T >
+using _is_trivially_destructible_impl = _trivial_destructor_impl< typename remove_all_extents< T >::type > ;
+
+template< typename T >
+using _is_trivially_destructible_impl< T[] > = false_type ;
+
+#else
+#error "uti: no implementation for 'is_trivially_destructible' available"
+#endif
+
+template< typename T >
+using is_trivially_destructible = _is_trivially_destructible_impl< T > ;
+
+template< typename T >
+inline constexpr bool is_trivially_destructible_v = is_trivially_destructible< T >::value ;
 
 
 } // namespace uti
