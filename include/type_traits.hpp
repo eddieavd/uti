@@ -377,6 +377,30 @@ struct conditional< false, Then, Else >
 template< bool Cond, typename Then, typename Else >
 using conditional_t = typename conditional< Cond, Then, Else >::type ;
 
+
+template< typename... Args > struct conjunction : true_type {} ;
+
+template< typename... Args >
+struct conjunction< true_type, Args... > : conjunction< Args... > {} ;
+
+template< typename... Args >
+struct conjunction< false_type, Args... > : false_type {} ;
+
+template< typename... Args >
+inline constexpr bool conjunction_v = conjunction< Args... >::value ;
+
+
+template< typename... Args > struct disjunction : false_type {} ;
+
+template< typename... Args >
+struct disjunction< true_type, Args... > : true_type {} ;
+
+template< typename T, typename... Args >
+struct disjunction< T, Args... > : disjunction< Args... > {} ;
+
+template< typename... Args >
+inline constexpr bool disjunction_v = disjunction< Args... >::value ;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///     reference stuff contd.
 ////////////////////////////////////////////////////////////////////////////////
@@ -434,6 +458,10 @@ add_rvalue_reference_t< T > declval () noexcept
 
 using nullptr_t = decltype( nullptr ) ;
 using ptrdiff_t = decltype( uti::declval< int * >() - uti::declval< int * >() ) ;
+
+#ifdef UTI_HAS_STL
+static_assert( std::is_same_v< ptrdiff_t, std::ptrdiff_t > ) ;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 ///     primary
