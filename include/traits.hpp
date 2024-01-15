@@ -30,7 +30,6 @@
         static_cast< decltype(__VA_ARGS__)&&>(__VA_ARGS__)
 #endif
 
-
 #if !__has_builtin(__is_final)                   || \
     !__has_builtin(__is_empty)                   || \
     !__has_builtin(__is_enum)                    || \
@@ -867,11 +866,11 @@ template< typename T, typename U > using assign_t = decltype( uti::declval< T >(
 template< typename T > using copy_assign_t = assign_t< T, add_lvalue_reference_t< add_const_t< T > > > ;
 template< typename T > using move_assign_t = assign_t< T, add_rvalue_reference_t<              T   > > ;
 
-template< typename T, typename U > using is_assignable      = integral_constant< is_detected_v<      assign_t, T, U > > ;
+template< typename T, typename U > using      is_assignable = integral_constant< is_detected_v<      assign_t, T, U > > ;
 template< typename T             > using is_copy_assignable = integral_constant< is_detected_v< copy_assign_t, T    > > ;
 template< typename T             > using is_move_assignable = integral_constant< is_detected_v< move_assign_t, T    > > ;
 
-template< typename T, typename U > inline constexpr bool is_assignable_v      = is_assignable     < T, U >::value ;
+template< typename T, typename U > inline constexpr bool      is_assignable_v =      is_assignable< T, U >::value ;
 template< typename T             > inline constexpr bool is_copy_assignable_v = is_copy_assignable< T    >::value ;
 template< typename T             > inline constexpr bool is_move_assignable_v = is_move_assignable< T    >::value ;
 
@@ -885,7 +884,7 @@ template< typename T, typename U > using is_nothrow_assignable = integral_consta
 template< typename T > using is_nothrow_copy_assignable = is_nothrow_assignable< T, add_lvalue_reference_t< add_const_t< T > > > ;
 template< typename T > using is_nothrow_move_assignable = is_nothrow_assignable< T, add_rvalue_reference_t<              T   > > ;
 
-template< typename T, typename U > inline constexpr bool is_nothrow_assignable_v      = is_nothrow_assignable     < T, U >::value ;
+template< typename T, typename U > inline constexpr bool      is_nothrow_assignable_v =      is_nothrow_assignable< T, U >::value ;
 template< typename T             > inline constexpr bool is_nothrow_copy_assignable_v = is_nothrow_copy_assignable< T    >::value ;
 template< typename T             > inline constexpr bool is_nothrow_move_assignable_v = is_nothrow_move_assignable< T    >::value ;
 
@@ -899,42 +898,39 @@ template< typename T > using default_construct_t = construct_t< T               
 template< typename T > using    copy_construct_t = construct_t< T, add_lvalue_reference_t< add_const_t< T > > > ;
 template< typename T > using    move_construct_t = construct_t< T, add_rvalue_reference_t<              T   > > ;
 
-template< typename T, typename... Args > using is_constructible         = integral_constant< is_detected_v<         construct_t, T, Args... > > ;
+template< typename T, typename... Args > using         is_constructible = integral_constant< is_detected_v<         construct_t, T, Args... > > ;
 template< typename T                   > using is_default_constructible = integral_constant< is_detected_v< default_construct_t, T          > > ;
-template< typename T                   > using is_copy_constructible    = integral_constant< is_detected_v<    copy_construct_t, T          > > ;
-template< typename T                   > using is_move_constructible    = integral_constant< is_detected_v<    move_construct_t, T          > > ;
+template< typename T                   > using    is_copy_constructible = integral_constant< is_detected_v<    copy_construct_t, T          > > ;
+template< typename T                   > using    is_move_constructible = integral_constant< is_detected_v<    move_construct_t, T          > > ;
 
-template< typename T, typename... Args > inline constexpr bool is_constructible_v         = is_constructible        < T, Args... >::value ;
+template< typename T, typename... Args > inline constexpr bool         is_constructible_v =         is_constructible< T, Args... >::value ;
 template< typename T                   > inline constexpr bool is_default_constructible_v = is_default_constructible< T          >::value ;
-template< typename T                   > inline constexpr bool is_copy_constructible_v    = is_copy_constructible   < T          >::value ;
-template< typename T                   > inline constexpr bool is_move_constructible_v    = is_move_constructible   < T          >::value ;
+template< typename T                   > inline constexpr bool    is_copy_constructible_v =    is_copy_constructible< T          >::value ;
+template< typename T                   > inline constexpr bool    is_move_constructible_v =    is_move_constructible< T          >::value ;
 
 template< typename T, typename... Args > using nothrow_construct = integral_constant< noexcept( T( uti::declval< Args >()... ) ) > ;
 
 template< typename T > using nothrow_default_construct = nothrow_construct< T                                             > ;
-template< typename T > using nothrow_copy_construct    = nothrow_construct< T, add_lvalue_reference_t< add_const_t< T > > > ;
-template< typename T > using nothrow_move_construct    = nothrow_construct< T, add_rvalue_reference_t<              T   > > ;
+template< typename T > using    nothrow_copy_construct = nothrow_construct< T, add_lvalue_reference_t< add_const_t< T > > > ;
+template< typename T > using    nothrow_move_construct = nothrow_construct< T, add_rvalue_reference_t<              T   > > ;
 
 template< typename T, typename... Args > using is_nothrow_constructible = integral_constant< is_constructible_v< T, Args... > && is_v< nothrow_construct< T, Args... > > > ;
 
 template< typename T > using is_nothrow_default_constructible = is_nothrow_constructible< T                                             > ;
-template< typename T > using is_nothrow_copy_constructible    = is_nothrow_constructible< T, add_lvalue_reference_t< add_const_t< T > > > ;
-template< typename T > using is_nothrow_move_constructible    = is_nothrow_constructible< T, add_rvalue_reference_t<              T   > > ;
+template< typename T > using    is_nothrow_copy_constructible = is_nothrow_constructible< T, add_lvalue_reference_t< add_const_t< T > > > ;
+template< typename T > using    is_nothrow_move_constructible = is_nothrow_constructible< T, add_rvalue_reference_t<              T   > > ;
 
-template< typename T, typename... Args > inline constexpr bool is_nothrow_constructible_v         = is_nothrow_constructible        < T, Args... >::value ;
+template< typename T, typename... Args > inline constexpr bool         is_nothrow_constructible_v =         is_nothrow_constructible< T, Args... >::value ;
 template< typename T                   > inline constexpr bool is_nothrow_default_constructible_v = is_nothrow_default_constructible< T          >::value ;
-template< typename T                   > inline constexpr bool is_nothrow_copy_constructible_v    = is_nothrow_copy_constructible   < T          >::value ;
-template< typename T                   > inline constexpr bool is_nothrow_move_constructible_v    = is_nothrow_move_constructible   < T          >::value ;
+template< typename T                   > inline constexpr bool    is_nothrow_copy_constructible_v =    is_nothrow_copy_constructible< T          >::value ;
+template< typename T                   > inline constexpr bool    is_nothrow_move_constructible_v =    is_nothrow_move_constructible< T          >::value ;
 
 
-template< typename T >
-using destruct_t = decltype( uti::declval< T >().~T() ) ;
+template< typename T > using destruct_t = decltype( uti::declval< T >().~T() ) ;
 
-template< typename T >
-using is_destructible = integral_constant< is_detected_v< destruct_t, T > > ;
+template< typename T > using is_destructible = integral_constant< is_detected_v< destruct_t, T > > ;
 
-template< typename T >
-inline constexpr bool is_destructible_v = is_destructible< T >::value ;
+template< typename T > inline constexpr bool is_destructible_v = is_destructible< T >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -952,23 +948,16 @@ using _is_trivially_constructible_impl = std::is_trivially_constructible< T, Arg
 #error "uti: no implementation for 'is_trivially_constructible' available"
 #endif
 
-template< typename T, typename... Args >
-using is_trivially_constructible = _is_trivially_constructible_impl< T, Args... > ;
+template< typename T, typename... Args > using is_trivially_constructible = _is_trivially_constructible_impl< T, Args... > ;
 
-template< typename T, typename... Args >
-inline constexpr bool is_trivially_constructible_v = is_trivially_constructible< T, Args... >::value ;
+template< typename T > using is_trivially_default_constructible = is_trivially_constructible< T                                             > ;
+template< typename T > using    is_trivially_copy_constructible = is_trivially_constructible< T, add_lvalue_reference_t< add_const_t< T > > > ;
+template< typename T > using    is_trivially_move_constructible = is_trivially_constructible< T, add_rvalue_reference_t<              T   > > ;
 
-template< typename T >
-using is_trivially_copy_constructible = is_trivially_constructible< T, add_lvalue_reference_t< add_const_t< T > > > ;
-
-template< typename T >
-inline constexpr bool is_trivially_copy_constructible_v = is_trivially_copy_constructible< T >::value ;
-
-template< typename T >
-using is_trivially_move_constructible = is_trivially_constructible< T, add_rvalue_reference_t< T > > ;
-
-template< typename T >
-inline constexpr bool is_trivially_move_constructible_v = is_trivially_move_constructible< T >::value ;
+template< typename T, typename... Args > inline constexpr bool         is_trivially_constructible_v =         is_trivially_constructible< T, Args... >::value ;
+template< typename T                   > inline constexpr bool is_trivially_default_constructible_v = is_trivially_default_constructible< T          >::value ;
+template< typename T                   > inline constexpr bool    is_trivially_copy_constructible_v =    is_trivially_copy_constructible< T          >::value ;
+template< typename T                   > inline constexpr bool    is_trivially_move_constructible_v =    is_trivially_move_constructible< T          >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
