@@ -8,6 +8,7 @@
 
 #include <traits/traits.hpp>
 #include <traits/ref_wrap.hpp>
+#include <traits/int_sequence.hpp>
 #include <meta/meta.hpp>
 
 
@@ -42,6 +43,16 @@ constexpr auto make_tuple ( Ts&&... ts )
         return tuple< unwrap_ref_decay_t< Ts >... > { UTI_FWD( ts )... } ;
 }
 
+
+template< typename Tuple > struct tuple_size ;
+
+template< typename... Ts >
+struct tuple_size< tuple< Ts... > > : integral_constant< sizeof...( Ts ) > {} ;
+
+template< typename Tuple >
+inline constexpr ssize_t tuple_size_v = tuple_size< remove_cv_t< Tuple > >::value ;
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace _detail
@@ -55,7 +66,7 @@ template< typename Tuple >
 struct get_impl< 0, Tuple >
 {
         template< typename T >
-        constexpr static decltype( auto ) get ( T && t )
+        static constexpr decltype( auto ) get ( T && t )
         {
                 constexpr bool is_const = is_const_v< remove_reference_t< T > > ;
                 constexpr bool is_lvref = is_lvalue_reference_v< T > ;
@@ -81,6 +92,25 @@ struct get_impl< 0, Tuple >
         }
 };
 
+template< typename Tup1, typename Tup2, ssize_t... Idxs1, ssize_t... Idxs2 >
+static constexpr auto cat_from_indices ( Tup1&& t1, Tup2&& t2, index_sequence< Idxs1... >, index_sequence< Idxs2... > )
+{
+        return tuple{ get< Idxs1 >( UTI_FWD( t1 ) )..., get< Idxs2 >( UTI_FWD( t2 ) )... };
+}
+
+struct tuple_cat_impl
+{
+        template< typename Tup1, typename Tup2 >
+        static constexpr auto fn ( Tup1&& t1, Tup2&& t2 )
+        {
+                return cat_from_indices( UTI_FWD( t1 ),
+                                         UTI_FWD( t2 ),
+                                         make_index_sequence< tuple_size_v< remove_cvref_t< Tup1 > > > {},
+                                         make_index_sequence< tuple_size_v< remove_cvref_t< Tup2 > > > {}
+                );
+        }
+};
+
 
 } // namespace _detail
 
@@ -90,6 +120,12 @@ template< ssize_t Idx, typename Tuple >
 constexpr decltype( auto ) get ( Tuple && tup )
 {
         return _detail::get_impl< Idx, remove_cvref_t< Tuple > >::get( UTI_FWD( tup ) );
+}
+
+template< typename... Tups >
+constexpr auto tuple_cat ( Tups&&... tups )
+{
+        return _detail::tuple_cat_impl::fn( UTI_FWD( tups )... );
 }
 
 
