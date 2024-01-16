@@ -911,7 +911,7 @@ template< typename T, typename U > using nothrow_assign = integral_constant< noe
 template< typename T > using nothrow_copy_assign = nothrow_assign< T, add_lvalue_reference_t< add_const_t< T > > > ;
 template< typename T > using nothrow_move_assign = nothrow_assign< T, add_rvalue_reference_t<              T   > > ;
 
-template< bool, typename T, typename U > struct _is_nothrow_assignable_impl : false_type {} ;
+template< bool, typename T, typename U > struct _is_nothrow_assignable_impl               : false_type             {} ;
 template<       typename T, typename U > struct _is_nothrow_assignable_impl< true, T, U > : nothrow_assign< T, U > {} ;
 
 template< typename T, typename U > using is_nothrow_assignable = _is_nothrow_assignable_impl< is_assignable_v< T, U >, T, U > ;
@@ -967,7 +967,7 @@ template< typename T                   > inline constexpr bool    is_move_constr
 
 template< typename T, typename... Args > using nothrow_construct = integral_constant< noexcept( T( uti::declval< Args >()... ) ) > ;
 
-template< bool, typename T, typename... Args > struct _is_nothrow_constructible_impl : false_type {} ;
+template< bool, typename T, typename... Args > struct _is_nothrow_constructible_impl                     : false_type                      {} ;
 template<       typename T, typename... Args > struct _is_nothrow_constructible_impl< true, T, Args... > : nothrow_construct< T, Args... > {} ;
 
 template< typename T, typename... Args > using is_nothrow_constructible = _is_nothrow_constructible_impl< is_constructible_v< T, Args... >, T, Args... > ;
@@ -990,9 +990,11 @@ template< typename T > inline constexpr bool is_destructible_v = is_destructible
 
 template< typename T > using nothrow_destruct = integral_constant< noexcept( uti::declval< T >().~T() ) > ;
 
-template< typename T > using is_nothrow_destructible = integral_constant< is_destructible_v< T > && is_v< nothrow_destruct< T > > > ;
+template< bool, typename T > struct _is_nothrow_destructible_impl            : false_type            {} ;
+template<       typename T > struct _is_nothrow_destructible_impl< true, T > : nothrow_destruct< T > {} ;
 
-template< typename T > inline constexpr bool is_nothrow_destructible_v = is_nothrow_destructible< T >::value ;
+template< typename T > using                 is_nothrow_destructible   = _is_nothrow_destructible_impl< is_destructible_v< T >, T > ;
+template< typename T > inline constexpr bool is_nothrow_destructible_v =  is_nothrow_destructible< T >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
