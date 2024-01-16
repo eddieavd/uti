@@ -391,10 +391,10 @@ inline constexpr bool is_referenceable_v = is_referenceable< T >::value ;
 
 
 template< typename T, bool = is_referenceable_v< T > >
-struct _add_lvalue_reference_impl { using type = T ; } ;
+struct _add_lvalue_reference_impl : type_identity< T > {} ;
 
 template< typename T >
-struct _add_lvalue_reference_impl< T, true > { using type = T & ; } ;
+struct _add_lvalue_reference_impl< T, true > : type_identity< T & > {} ;
 
 template< typename T >
 struct add_lvalue_reference : _add_lvalue_reference_impl< T > {} ;
@@ -404,10 +404,10 @@ using add_lvalue_reference_t = typename add_lvalue_reference< T >::type ;
 
 
 template< typename T, bool = is_referenceable_v< T > >
-struct _add_rvalue_reference_impl { using type = T ; } ;
+struct _add_rvalue_reference_impl : type_identity< T > {} ;
 
 template< typename T >
-struct _add_rvalue_reference_impl< T, true > { using type = T && ; } ;
+struct _add_rvalue_reference_impl< T, true > : type_identity< T && > {} ;
 
 template< typename T >
 struct add_rvalue_reference : _add_rvalue_reference_impl< T > {} ;
@@ -440,13 +440,29 @@ static_assert( std::is_same_v< ptrdiff_t, std::ptrdiff_t > ) ;
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename T >
-struct remove_all_extents { using type = T ; } ;
+struct remove_extent : type_identity< T > {} ;
 
 template< typename T >
-struct remove_all_extents< T[] > { using type = typename remove_all_extents< T >::type ; } ;
+struct remove_extent< T[] > : type_identity< T > {} ;
 
 template< typename T, size_t N >
-struct remove_all_extents< T[ N ] > { using type = typename remove_all_extents< T >::type ; } ;
+struct remove_extent< T[ N ] > : type_identity< T > {} ;
+
+template< typename T >
+using remove_extent_t = typename remove_extent< T >::type ;
+
+
+template< typename T >
+struct remove_all_extents : type_identity< T > {} ;
+
+template< typename T >
+struct remove_all_extents< T[] > : remove_all_extents< T > {} ;
+
+template< typename T, size_t N >
+struct remove_all_extents< T[ N ] > : remove_all_extents< T > {} ;
+
+template< typename T >
+using remove_all_extents_t = typename remove_all_extents< T >::type ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -579,6 +595,23 @@ struct is_pointer : _is_pointer_impl< remove_cv_t< T > > {} ;
 
 template< typename T >
 inline constexpr bool is_pointer_v = is_pointer< T >::value ;
+
+
+template< typename T >
+struct remove_pointer : type_identity< T > {} ;
+
+template< typename T >
+struct remove_pointer< T * > : type_identity< T > {} ;
+
+template< typename T >
+using remove_pointer_t = typename remove_pointer< T >::type ;
+
+
+template< typename T >
+struct add_pointer : type_identity< T * > {} ;
+
+template< typename T >
+using add_pointer_t = typename add_pointer< T >::type ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -842,7 +875,7 @@ template< typename Default, template< typename... > typename Fn, typename... Arg
 using detected_or = _detector< Default, void, Fn, Args... > ;
 
 template< typename Default, template< typename... > typename Fn, typename... Args >
-using detected_or_t = detected_or< Default, Fn, Args... >::type ;
+using detected_or_t = typename detected_or< Default, Fn, Args... >::type ;
 
 template< typename Expected, template< typename... > typename Fn, typename... Args >
 using is_detected_exact = is_same< Expected, detected_t< Fn, Args... > > ;
@@ -878,7 +911,10 @@ template< typename T, typename U > using nothrow_assign = integral_constant< noe
 template< typename T > using nothrow_copy_assign = nothrow_assign< T, add_lvalue_reference_t< add_const_t< T > > > ;
 template< typename T > using nothrow_move_assign = nothrow_assign< T, add_rvalue_reference_t<              T   > > ;
 
-template< typename T, typename U > using is_nothrow_assignable = integral_constant< is_assignable_v< T, U > && is_v< nothrow_assign< T, U > > > ;
+template< bool, typename T, typename U > struct _is_nothrow_assignable_impl : false_type {} ;
+template<       typename T, typename U > struct _is_nothrow_assignable_impl< true, T, U > : nothrow_assign< T, U > {} ;
+
+template< typename T, typename U > using is_nothrow_assignable = _is_nothrow_assignable_impl< is_assignable_v< T, U >, T, U > ;
 
 template< typename T > using is_nothrow_copy_assignable = is_nothrow_assignable< T, add_lvalue_reference_t< add_const_t< T > > > ;
 template< typename T > using is_nothrow_move_assignable = is_nothrow_assignable< T, add_rvalue_reference_t<              T   > > ;
@@ -931,11 +967,10 @@ template< typename T                   > inline constexpr bool    is_move_constr
 
 template< typename T, typename... Args > using nothrow_construct = integral_constant< noexcept( T( uti::declval< Args >()... ) ) > ;
 
-template< typename T > using nothrow_default_construct = nothrow_construct< T                                             > ;
-template< typename T > using    nothrow_copy_construct = nothrow_construct< T, add_lvalue_reference_t< add_const_t< T > > > ;
-template< typename T > using    nothrow_move_construct = nothrow_construct< T, add_rvalue_reference_t<              T   > > ;
+template< bool, typename T, typename... Args > struct _is_nothrow_constructible_impl : false_type {} ;
+template<       typename T, typename... Args > struct _is_nothrow_constructible_impl< true, T, Args... > : nothrow_construct< T, Args... > {} ;
 
-template< typename T, typename... Args > using is_nothrow_constructible = integral_constant< is_constructible_v< T, Args... > && is_v< nothrow_construct< T, Args... > > > ;
+template< typename T, typename... Args > using is_nothrow_constructible = _is_nothrow_constructible_impl< is_constructible_v< T, Args... >, T, Args... > ;
 
 template< typename T > using is_nothrow_default_constructible = is_nothrow_constructible< T                                             > ;
 template< typename T > using    is_nothrow_copy_constructible = is_nothrow_constructible< T, add_lvalue_reference_t< add_const_t< T > > > ;
@@ -1014,7 +1049,7 @@ template< typename T >
 using _trivial_destructor_impl = integral_constant< is_scalar_v< T > || is_reference_v< T > > ;
 
 template< typename T >
-using _is_trivially_destructible_impl = _trivial_destructor_impl< typename remove_all_extents< T >::type > ;
+using _is_trivially_destructible_impl = _trivial_destructor_impl< remove_all_extents_t< T > > ;
 
 template< typename T >
 using _is_trivially_destructible_impl< T[] > = false_type ;
@@ -1045,7 +1080,7 @@ using _is_trivially_copyable_impl = std::is_trivially_copyable< T > ;
 
 // https://en.cppreference.com/w/cpp/language/classes#Trivially_copyable_class
 template< typename T >
-using _is_trivially_copyable_impl = conjunction
+using _is_trivially_copyable_impl = conjunction< conjunction
                                 <
                                         disjunction
                                         <
@@ -1066,7 +1101,7 @@ using _is_trivially_copyable_impl = conjunction
                                         <
                                                 is_trivially_move_assignable< T >,
                                                 is_not< is_move_assignable< T > >
-                                        >,
+                                        > >,
                                         is_trivially_destructible< T >
                                 > ;
 
@@ -1084,6 +1119,39 @@ using is_trivial = conjunction< is_trivially_copyable< T >, is_trivially_default
 
 template< typename T >
 inline constexpr bool is_trivial_v = is_trivial< T >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T, bool >
+struct _decay : remove_cv_t< T > {} ;
+
+template< typename T >
+struct _decay< T, true > : conditional
+                        <
+                                is_array_v< T >,
+                                remove_extent_t< T >*,
+                                conditional_t
+                                <
+                                        is_function_v< T >,
+                                        add_pointer_t< T >,
+                                        remove_cv_t< T >
+                                >
+                        > {} ;
+
+template< typename T, bool B >
+using _decay_t = typename _decay< T, B >::type ;
+
+template< typename T >
+struct decay
+{
+private:
+        using U = remove_reference_t< T > ;
+public:
+        using type = _decay_t< U, is_referenceable_v< U > > ;
+};
+
+template< typename T >
+using decay_t = typename decay< T >::type ;
 
 
 } // namespace uti
