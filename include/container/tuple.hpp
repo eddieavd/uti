@@ -52,7 +52,6 @@ struct tuple_size< tuple< Ts... > > : integral_constant< sizeof...( Ts ) > {} ;
 template< typename Tuple >
 inline constexpr ssize_t tuple_size_v = tuple_size< remove_cv_t< Tuple > >::value ;
 
-
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace _detail

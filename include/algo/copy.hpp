@@ -34,7 +34,7 @@ void copy ( InVal * begin, InVal * end, OutVal * dest )
 {
         if constexpr( is_trivially_copy_assignable_v< InVal > )
         {
-                size_t const n = static_cast< size_t >( end - begin );
+                ssize_t const n = static_cast< ssize_t >( end - begin );
                 if( n > 0 )
                 {
 #if __has_builtin( __builtin_memmove )

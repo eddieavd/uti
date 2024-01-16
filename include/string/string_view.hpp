@@ -26,9 +26,9 @@ using string_view_t = string_view< char const > ;
 template< typename CharType >
 struct string_view
 {
-        using value_type =      CharType ;
-        using  size_type = unsigned long ;
-        using ssize_type =     long long ;
+        using value_type = CharType ;
+        using  size_type =   size_t ;
+        using ssize_type =  ssize_t ;
 
         using         pointer = value_type       * ;
         using   const_pointer = value_type const * ;
@@ -68,9 +68,9 @@ struct string_view
         [[ nodiscard ]] constexpr bool   ends_with             ( string_view const & _suffix_ ) const noexcept ;
         [[ nodiscard ]] constexpr bool   ends_with_insensitive ( string_view const & _suffix_ ) const noexcept ;
 
-        constexpr size_type trim       () noexcept ;
-        constexpr size_type trim_left  () noexcept ;
-        constexpr size_type trim_right () noexcept ;
+        constexpr ssize_type trim       () noexcept ;
+        constexpr ssize_type trim_left  () noexcept ;
+        constexpr ssize_type trim_right () noexcept ;
 
         [[ nodiscard ]] constexpr string_view trimmed       () const noexcept ;
         [[ nodiscard ]] constexpr string_view trimmed_left  () const noexcept ;
@@ -333,20 +333,20 @@ string_view< CharType >::ends_with_insensitive ( string_view const & _suffix_ ) 
 }
 
 template< typename CharType >
-constexpr typename string_view< CharType >::size_type
+constexpr typename string_view< CharType >::ssize_type
 string_view< CharType >::trim () noexcept
 {
-        size_type count { 0 } ;
+        ssize_type count { 0 } ;
         count += trim_left();
         count += trim_right();
         return count;
 }
 
 template< typename CharType >
-constexpr typename string_view< CharType >::size_type
+constexpr typename string_view< CharType >::ssize_type
 string_view< CharType >::trim_left () noexcept
 {
-        size_type count { 0 } ;
+        ssize_type count { 0 } ;
         while( !empty() && ( front() ==  ' ' || front() == '\t' ) )
         {
                 data_++;
@@ -357,10 +357,10 @@ string_view< CharType >::trim_left () noexcept
 }
 
 template< typename CharType >
-constexpr typename string_view< CharType >::size_type
+constexpr typename string_view< CharType >::ssize_type
 string_view< CharType >::trim_right () noexcept
 {
-        size_type count { 0 } ;
+        ssize_type count { 0 } ;
         while( !empty() && ( back() ==  ' ' || back() == '\t' ) )
         {
                 size_--;
