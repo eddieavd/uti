@@ -17,9 +17,6 @@ template< typename T, typename R = T >
 class string_switch
 {
 public:
-        explicit constexpr string_switch ( string_view_t const & _str_ ) noexcept
-                : str( _str_ ), result(), is_set( false ) {}
-
         constexpr string_switch ( string_view_t const & _str_, T _default_ ) noexcept
                 : str( _str_ ), result( UTI_MOVE( _default_ ) ), is_set( false ) {}
 
