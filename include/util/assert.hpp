@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <util/config.hpp>
+
 
 #ifndef UTI_ASSERT
 #       ifdef UTI_RELEASE
@@ -27,17 +29,20 @@
 #endif
 
 #ifndef UTI_CEXPR_ASSERT
-#define UTI_CEXPR_ASSERT( cond, ... )           \
-        do                                       \
-        {                                         \
-                if( uti::is_constant_evaluated() ) \
-                {                                   \
-                        int test { 1 } ;             \
-                        test /= ( cond ) ;            \
-                }                                      \
-                else                                    \
-                {                                        \
-                        UTI_ASSERT( cond, __VA_ARGS__ );  \
-                }                                          \
-        } while( 0 )
+#define UTI_CEXPR_ASSERT( cond, ... )                   \
+        UTI_DIAGS_PUSH()                                 \
+        UTI_DIAGS_DISABLE( -Wunused-but-set-variable )    \
+        do                                                 \
+        {                                                   \
+                if constexpr( uti::is_constant_evaluated() ) \
+                {                                             \
+                        int test { 1 } ;                       \
+                        test /= ( cond ) ;                      \
+                }                                                \
+                else                                              \
+                {                                                  \
+                        UTI_ASSERT( cond, __VA_ARGS__ );            \
+                }                                                    \
+        } while( 0 );                                                 \
+        UTI_DIAGS_POP()
 #endif
