@@ -8,7 +8,7 @@
 
 #include <traits/traits.hpp>
 #include <traits/ref_wrap.hpp>
-#include <traits/int_sequence.hpp>
+#include <traits/sequence.hpp>
 #include <meta/meta.hpp>
 
 
@@ -52,7 +52,6 @@ struct tuple_size< tuple< Ts... > > : integral_constant< sizeof...( Ts ) > {} ;
 template< typename Tuple >
 inline constexpr ssize_t tuple_size_v = tuple_size< remove_cv_t< Tuple > >::value ;
 
-////////////////////////////////////////////////////////////////////////////////
 
 namespace _detail
 {
@@ -113,7 +112,6 @@ struct tuple_cat_impl
 
 } // namespace _detail
 
-////////////////////////////////////////////////////////////////////////////////
 
 template< ssize_t Idx, typename Tuple >
 constexpr decltype( auto ) get ( Tuple && tup )
