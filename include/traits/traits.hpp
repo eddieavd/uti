@@ -99,6 +99,23 @@ constexpr bool is_constant_evaluated () noexcept
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+///     declval
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T, typename U = T&& > U _declval (  int ) ;
+template< typename T                   > T _declval ( long ) ;
+
+template< typename T > auto declval () noexcept -> decltype( _declval< T >( 0 ) ) ;
+
+using nullptr_t = decltype( nullptr ) ;
+using ptrdiff_t = decltype( uti::declval< int * >() - uti::declval< int * >() ) ;
+
+#ifdef UTI_HAS_STL
+static_assert( std::is_same_v< nullptr_t, std::nullptr_t > ) ;
+static_assert( std::is_same_v< ptrdiff_t, std::ptrdiff_t > ) ;
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
 ///     identity
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -223,7 +240,7 @@ inline constexpr bool is_volatile_v = is_volatile< T >::value ;
 
 
 template< typename T >
-struct add_volatile { using type = T volatile ; } ;
+struct add_volatile : type_identity< T volatile > {} ;
 
 template< typename T >
 using add_volatile_t = typename add_volatile< T >::type ;
@@ -254,6 +271,42 @@ struct remove_reference< T && > : type_identity< T > {} ;
 template< typename T >
 using remove_reference_t = typename remove_reference< T >::type ;
 
+
+template< typename T, typename = void >
+struct is_referenceable : false_type {} ;
+
+template< typename T >
+struct is_referenceable< T, void_t< decltype( uti::declval< T & >() ) > > : true_type {} ;
+
+template< typename T >
+inline constexpr bool is_referenceable_v = is_referenceable< T >::value ;
+
+
+template< typename T, bool = is_referenceable_v< T > >
+struct _add_lvalue_reference_impl : type_identity< T > {} ;
+
+template< typename T >
+struct _add_lvalue_reference_impl< T, true > : type_identity< T & > {} ;
+
+template< typename T >
+struct add_lvalue_reference : _add_lvalue_reference_impl< T > {} ;
+
+template< typename T >
+using add_lvalue_reference_t = typename add_lvalue_reference< T >::type ;
+
+
+template< typename T, bool = is_referenceable_v< T > >
+struct _add_rvalue_reference_impl : type_identity< T > {} ;
+
+template< typename T >
+struct _add_rvalue_reference_impl< T, true > : type_identity< T && > {} ;
+
+template< typename T >
+struct add_rvalue_reference : _add_rvalue_reference_impl< T > {} ;
+
+template< typename T >
+using add_rvalue_reference_t = typename add_rvalue_reference< T >::type ;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///     cvref stuff
 ////////////////////////////////////////////////////////////////////////////////
@@ -279,7 +332,7 @@ template< bool, typename T = void >
 struct enable_if {} ;
 
 template< typename T >
-struct enable_if< true, T > { using type = T ; } ;
+struct enable_if< true, T > : type_identity< T > {} ;
 
 template< bool C, typename T = void >
 using enable_if_t = typename enable_if< C, T >::type ;
@@ -335,16 +388,10 @@ inline constexpr bool is_one_of_v = is_one_of< T, Args... >::value ;
 ////////////////////////////////////////////////////////////////////////////////
 
 template< bool Cond, typename Then, typename Else >
-struct conditional
-{
-        using type = Then ;
-};
+struct conditional : type_identity< Then > {} ;
 
 template< typename Then, typename Else >
-struct conditional< false, Then, Else >
-{
-        using type = Else ;
-};
+struct conditional< false, Then, Else > : type_identity< Else > {} ;
 
 template< bool Cond, typename Then, typename Else >
 using conditional_t = typename conditional< Cond, Then, Else >::type ;
@@ -372,69 +419,6 @@ struct disjunction< false_type, Args... > : disjunction< Args... > {} ;
 
 template< typename... Args >
 inline constexpr bool disjunction_v = disjunction< Args... >::value ;
-
-////////////////////////////////////////////////////////////////////////////////
-///     reference stuff contd.
-////////////////////////////////////////////////////////////////////////////////
-
-struct _is_referenceable_impl
-{
-        template< typename T > static T &        _test( int ) ;
-        template< typename T > static false_type _test( ... ) ;
-};
-
-template< typename T >
-struct is_referenceable : integral_constant< is_not_same_v< decltype( _is_referenceable_impl::_test< T >( 0 ) ), false_type > > {} ;
-
-template< typename T >
-inline constexpr bool is_referenceable_v = is_referenceable< T >::value ;
-
-
-template< typename T, bool = is_referenceable_v< T > >
-struct _add_lvalue_reference_impl : type_identity< T > {} ;
-
-template< typename T >
-struct _add_lvalue_reference_impl< T, true > : type_identity< T & > {} ;
-
-template< typename T >
-struct add_lvalue_reference : _add_lvalue_reference_impl< T > {} ;
-
-template< typename T >
-using add_lvalue_reference_t = typename add_lvalue_reference< T >::type ;
-
-
-template< typename T, bool = is_referenceable_v< T > >
-struct _add_rvalue_reference_impl : type_identity< T > {} ;
-
-template< typename T >
-struct _add_rvalue_reference_impl< T, true > : type_identity< T && > {} ;
-
-template< typename T >
-struct add_rvalue_reference : _add_rvalue_reference_impl< T > {} ;
-
-template< typename T >
-using add_rvalue_reference_t = typename add_rvalue_reference< T >::type ;
-
-////////////////////////////////////////////////////////////////////////////////
-///     declval
-////////////////////////////////////////////////////////////////////////////////
-
-template< typename T >
-constexpr bool always_false = false ;
-
-template< typename T >
-add_rvalue_reference_t< T > declval () noexcept
-{
-        static_assert( always_false< T >, "uti: declval not allowed in evaluated context" );
-}
-
-using nullptr_t = decltype( nullptr ) ;
-using ptrdiff_t = decltype( uti::declval< int * >() - uti::declval< int * >() ) ;
-
-#ifdef UTI_HAS_STL
-static_assert( std::is_same_v< nullptr_t, std::nullptr_t > ) ;
-static_assert( std::is_same_v< ptrdiff_t, std::ptrdiff_t > ) ;
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 ///     primary
