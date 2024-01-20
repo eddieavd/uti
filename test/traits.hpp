@@ -5,6 +5,7 @@
 //
 
 #include <type_traits>
+#include <string>
 
 #include <traits/traits.hpp>
 
@@ -152,10 +153,17 @@ constexpr int test_traits () noexcept
 
         ////////////////////////////////////////////////////////////////////////////////
 
-//      static_assert( uti::is_copy_assignable_v< int > ) ;
-//      static_assert( uti::is_move_assignable_v< int > ) ;
-//      static_assert( uti::is_nothrow_copy_assignable_v< int > ) ;
-//      static_assert( uti::is_nothrow_move_assignable_v< int > ) ;
+        static_assert( !uti::is_assignable_v<       int  ,    int > ) ;
+        static_assert(  uti::is_assignable_v<       int &,    int > ) ;
+        static_assert( !uti::is_assignable_v<       int  , double > ) ;
+        static_assert(  uti::is_assignable_v< std::string, double > ) ;
+
+        static_assert( uti::is_nothrow_assignable_v< int &, double > ) ;
+
+        static_assert( uti::is_copy_assignable_v< int > ) ;
+        static_assert( uti::is_move_assignable_v< int > ) ;
+        static_assert( uti::is_nothrow_copy_assignable_v< int > ) ;
+        static_assert( uti::is_nothrow_move_assignable_v< int > ) ;
 
         static_assert(  uti::is_copy_assignable_v< throwcopythrowassign > ) ;
         static_assert(  uti::is_copy_assignable_v<   noexcopynoexassign > ) ;

@@ -896,8 +896,8 @@ inline constexpr bool is_detected_convertible_v = is_detected_convertible< To, F
 
 template< typename T, typename U > using assign_t = decltype( uti::declval< T >() = uti::declval< U >() ) ;
 
-template< typename T > using copy_assign_t = assign_t< T, add_lvalue_reference_t< add_const_t< T > > > ;
-template< typename T > using move_assign_t = assign_t< T, add_rvalue_reference_t<              T   > > ;
+template< typename T > using copy_assign_t = assign_t< add_lvalue_reference_t< T >, add_lvalue_reference_t< add_const_t< T > > > ;
+template< typename T > using move_assign_t = assign_t< add_lvalue_reference_t< T >, add_rvalue_reference_t<              T   > > ;
 
 template< typename T, typename U > using      is_assignable = integral_constant< is_detected_v<      assign_t, T, U > > ;
 template< typename T             > using is_copy_assignable = integral_constant< is_detected_v< copy_assign_t, T    > > ;
@@ -909,16 +909,13 @@ template< typename T             > inline constexpr bool is_move_assignable_v = 
 
 template< typename T, typename U > using nothrow_assign = integral_constant< noexcept( uti::declval< T >() = uti::declval< U >() ) > ;
 
-template< typename T > using nothrow_copy_assign = nothrow_assign< T, add_lvalue_reference_t< add_const_t< T > > > ;
-template< typename T > using nothrow_move_assign = nothrow_assign< T, add_rvalue_reference_t<              T   > > ;
-
 template< bool, typename T, typename U > struct _is_nothrow_assignable_impl               : false_type             {} ;
 template<       typename T, typename U > struct _is_nothrow_assignable_impl< true, T, U > : nothrow_assign< T, U > {} ;
 
 template< typename T, typename U > using is_nothrow_assignable = _is_nothrow_assignable_impl< is_assignable_v< T, U >, T, U > ;
 
-template< typename T > using is_nothrow_copy_assignable = is_nothrow_assignable< T, add_lvalue_reference_t< add_const_t< T > > > ;
-template< typename T > using is_nothrow_move_assignable = is_nothrow_assignable< T, add_rvalue_reference_t<              T   > > ;
+template< typename T > using is_nothrow_copy_assignable = is_nothrow_assignable< add_lvalue_reference_t< T >, add_lvalue_reference_t< add_const_t< T > > > ;
+template< typename T > using is_nothrow_move_assignable = is_nothrow_assignable< add_lvalue_reference_t< T >, add_rvalue_reference_t<              T   > > ;
 
 template< typename T, typename U > inline constexpr bool      is_nothrow_assignable_v =      is_nothrow_assignable< T, U >::value ;
 template< typename T             > inline constexpr bool is_nothrow_copy_assignable_v = is_nothrow_copy_assignable< T    >::value ;
