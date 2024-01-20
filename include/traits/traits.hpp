@@ -193,7 +193,7 @@ inline constexpr bool is_const_v = is_const< T >::value ;
 
 
 template< typename T >
-struct add_const { using type = T const ; } ;
+struct add_const : type_identity< T const > {} ;
 
 template< typename T >
 using add_const_t = typename add_const< T >::type ;
@@ -367,8 +367,8 @@ template< typename... Args > struct disjunction : false_type {} ;
 template< typename... Args >
 struct disjunction< true_type, Args... > : true_type {} ;
 
-template< typename T, typename... Args >
-struct disjunction< T, Args... > : disjunction< Args... > {} ;
+template< typename... Args >
+struct disjunction< false_type, Args... > : disjunction< Args... > {} ;
 
 template< typename... Args >
 inline constexpr bool disjunction_v = disjunction< Args... >::value ;
@@ -432,6 +432,7 @@ using nullptr_t = decltype( nullptr ) ;
 using ptrdiff_t = decltype( uti::declval< int * >() - uti::declval< int * >() ) ;
 
 #ifdef UTI_HAS_STL
+static_assert( std::is_same_v< nullptr_t, std::nullptr_t > ) ;
 static_assert( std::is_same_v< ptrdiff_t, std::ptrdiff_t > ) ;
 #endif
 
