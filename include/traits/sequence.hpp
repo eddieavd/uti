@@ -1,7 +1,7 @@
 //
 //
 //      uti
-//      int_sequence.hpp
+//      sequence.hpp
 //
 
 #pragma once
