@@ -7,7 +7,7 @@
 #pragma once
 
 #include <util/assert.hpp>
-#include <traits/traits.hpp>
+#include <meta/traits.hpp>
 
 #define SV_FMT "%.*s"
 #define SV_ARG(sv) (int) (sv).size(), (sv).data()

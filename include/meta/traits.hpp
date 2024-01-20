@@ -6,19 +6,8 @@
 
 #pragma once
 
-#ifndef UTI_STD_VER
-#       if __cplusplus <= 201103L
-#              define UTI_STD_VER 11
-#       elif __cplusplus <= 201402L
-#               define UTI_STD_VER 14
-#       elif __cplusplus <= 201703L
-#               define UTI_STD_VER 17
-#       elif __cplusplus <= 202002L
-#               define UTI_STD_VER 20
-#       else
-#               define UTI_STD_VER 23
-#       endif
-#endif
+#include <util/config.hpp>
+
 
 #ifndef UTI_MOVE
 #define UTI_MOVE(...) \
@@ -30,32 +19,6 @@
         static_cast< decltype(__VA_ARGS__)&&>(__VA_ARGS__)
 #endif
 
-#if !__has_builtin(__is_final)                   || \
-    !__has_builtin(__is_empty)                   || \
-    !__has_builtin(__is_enum)                    || \
-    !__has_builtin(__is_union)                   || \
-    !__has_builtin(__is_trivially_constructible) || \
-    !__has_builtin(__is_trivially_assignable)    || \
-    ( !__has_builtin(__is_trivially_destructible)  || !__has_builtin(__has_trivial_destructor) )
-#       ifdef UTI_HAS_STL
-//              use c++ standard library implementations
-#               include <type_traits>
-#       else
-//              oh boi
-#       endif
-#else
-//      use compiler intrinsics
-#endif
-
-#ifndef UTI_DEFAULT_FOR_MISSING
-#       ifdef UTI_FALSE_IF_MISSING
-#               define UTI_DEFAULT_FOR_MISSING : false_type {}
-#       elif defined( UTI_TRUE_IF_MISSING )
-#               define UTI_DEFAULT_FOR_MISSING : true_type {}
-#       else
-#               define UTI_DEFAULT_FOR_MISSING
-#       endif
-#endif
 
 
 namespace uti
@@ -106,6 +69,11 @@ constexpr bool is_constant_evaluated () noexcept
 #else
 #       error "uti: no implementation for 'is_constant_evaluated' available"
 #endif
+}
+
+UTI_NORETURN inline void unreachable ()
+{
+        UTI_UNREACHABLE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1105,6 +1073,14 @@ using is_trivially_copyable = _is_trivially_copyable_impl< T > ;
 
 template< typename T >
 inline constexpr bool is_trivially_copyable_v = is_trivially_copyable< T >::value ;
+
+
+template< typename T >
+using is_trivially_relocatable = integral_constant< UTI_IS_TRIVIALLY_RELOCATABLE( T ) > ;
+
+template< typename T >
+inline constexpr bool is_trivially_relocatable_v = is_trivially_relocatable< T >::value ;
+
 
 // https://en.cppreference.com/w/cpp/language/classes#Trivial_class
 template< typename T >

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <traits/traits.hpp>
+#include <meta/traits.hpp>
 
 
 namespace uti
