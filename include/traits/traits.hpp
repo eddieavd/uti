@@ -462,7 +462,7 @@ template< typename T >
 struct is_empty : std::is_empty< T > {} ;
 
 #else
-#error "uti: no implementation for 'is_empty' available"
+template< typename T > struct is_empty ;
 #endif
 
 template< typename T >
@@ -481,7 +481,7 @@ template< typename T >
 struct is_final : std::is_final< T > {} ;
 
 #else
-#error "uti: no implementation for 'is_final' available"
+template< typename T > struct is_final ;
 #endif
 
 template< typename T >
@@ -647,7 +647,7 @@ template< typename T >
 struct is_enum : std::is_enum< T > {} ;
 
 #else
-#error "uti: no implementation for 'is_enum' available"
+template< typename T > struct is_enum ;
 #endif
 
 template< typename T >
@@ -666,7 +666,7 @@ template< typename T >
 struct is_union : std::is_union< T > {} ;
 
 #else
-#error "uti: no implementation for 'is_union' available"
+template< typename T > struct is_union ;
 #endif
 
 template< typename T >
@@ -916,7 +916,7 @@ template< typename T, typename U >
 struct _is_trivially_assignable_impl : std::is_trivially_assignable< T, U > {} ;
 
 #else
-#error "no implementation for 'is_trivially_assignable' available"
+template< typename T, typename U > struct _is_trivially_assignable_impl ;
 #endif
 
 template< typename T, typename U > using      is_trivially_assignable = _is_trivially_assignable_impl< T, U > ;
@@ -983,15 +983,15 @@ template< typename T > inline constexpr bool is_nothrow_destructible_v =  is_not
 #if __has_builtin( __is_trivially_constructible )
 
 template< typename T, typename... Args >
-using _is_trivially_constructible_impl = integral_constant< __is_trivially_constructible( T, Args... ) > ;
+struct _is_trivially_constructible_impl : integral_constant< __is_trivially_constructible( T, Args... ) > {} ;
 
 #elif defined( UTI_HAS_STL )
 
 template< typename T, typename... Args >
-using _is_trivially_constructible_impl = std::is_trivially_constructible< T, Args... > ;
+struct _is_trivially_constructible_impl : std::is_trivially_constructible< T, Args... > {} ;
 
 #else
-#error "uti: no implementation for 'is_trivially_constructible' available"
+template< typename T, typename... Args > struct _is_trivially_constructible_impl ;
 #endif
 
 template< typename T, typename... Args > using is_trivially_constructible = _is_trivially_constructible_impl< T, Args... > ;
@@ -1039,7 +1039,7 @@ template< typename T >
 using _is_trivially_destructible_impl< T[] > = false_type ;
 
 #else
-#error "uti: no implementation for 'is_trivially_destructible' available"
+template< typename T > struct _is_trivially_destructible_impl ;
 #endif
 
 template< typename T >
