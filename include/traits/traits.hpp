@@ -47,6 +47,16 @@
 //      use compiler intrinsics
 #endif
 
+#ifndef UTI_DEFAULT_FOR_MISSING
+#       ifdef UTI_FALSE_IF_MISSING
+#               define UTI_DEFAULT_FOR_MISSING : false_type {}
+#       elif defined( UTI_TRUE_IF_MISSING )
+#               define UTI_DEFAULT_FOR_MISSING : true_type {}
+#       else
+#               define UTI_DEFAULT_FOR_MISSING
+#       endif
+#endif
+
 
 namespace uti
 {
@@ -462,7 +472,7 @@ template< typename T >
 struct is_empty : std::is_empty< T > {} ;
 
 #else
-template< typename T > struct is_empty ;
+template< typename T > struct is_empty UTI_DEFAULT_FOR_MISSING ;
 #endif
 
 template< typename T >
@@ -481,7 +491,7 @@ template< typename T >
 struct is_final : std::is_final< T > {} ;
 
 #else
-template< typename T > struct is_final ;
+template< typename T > struct is_final UTI_DEFAULT_FOR_MISSING ;
 #endif
 
 template< typename T >
@@ -647,7 +657,7 @@ template< typename T >
 struct is_enum : std::is_enum< T > {} ;
 
 #else
-template< typename T > struct is_enum ;
+template< typename T > struct is_enum UTI_DEFAULT_FOR_MISSING ;
 #endif
 
 template< typename T >
@@ -666,7 +676,7 @@ template< typename T >
 struct is_union : std::is_union< T > {} ;
 
 #else
-template< typename T > struct is_union ;
+template< typename T > struct is_union UTI_DEFAULT_FOR_MISSING ;
 #endif
 
 template< typename T >
@@ -916,7 +926,7 @@ template< typename T, typename U >
 struct _is_trivially_assignable_impl : std::is_trivially_assignable< T, U > {} ;
 
 #else
-template< typename T, typename U > struct _is_trivially_assignable_impl ;
+template< typename T, typename U > struct _is_trivially_assignable_impl UTI_DEFAULT_FOR_MISSING ;
 #endif
 
 template< typename T, typename U > using      is_trivially_assignable = _is_trivially_assignable_impl< T, U > ;
@@ -991,7 +1001,7 @@ template< typename T, typename... Args >
 struct _is_trivially_constructible_impl : std::is_trivially_constructible< T, Args... > {} ;
 
 #else
-template< typename T, typename... Args > struct _is_trivially_constructible_impl ;
+template< typename T, typename... Args > struct _is_trivially_constructible_impl UTI_DEFAULT_FOR_MISSING ;
 #endif
 
 template< typename T, typename... Args > using is_trivially_constructible = _is_trivially_constructible_impl< T, Args... > ;
@@ -1039,7 +1049,7 @@ template< typename T >
 using _is_trivially_destructible_impl< T[] > = false_type ;
 
 #else
-template< typename T > struct _is_trivially_destructible_impl ;
+template< typename T > struct _is_trivially_destructible_impl UTI_DEFAULT_FOR_MISSING ;
 #endif
 
 template< typename T >
@@ -1088,7 +1098,6 @@ using _is_trivially_copyable_impl = conjunction< conjunction
                                         > >,
                                         is_trivially_destructible< T >
                                 > ;
-
 #endif
 
 template< typename T >
