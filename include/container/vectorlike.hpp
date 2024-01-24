@@ -151,6 +151,8 @@ _vectorlike_view< T >::operator= ( _vectorlike_view && _other_ ) noexcept
         end_   = _other_.end_   ;
 
         _other_.begin_ = _other_.end_ = nullptr ;
+
+        return *this;
 }
 
 
@@ -250,6 +252,8 @@ _vectorlike_buffer< T >::operator= ( _vectorlike_buffer && _other_ ) noexcept
 
         _other_.buffer_   = nullptr ;
         _other_.capacity_ =       0 ;
+
+        return *this;
 }
 
 template< typename T >

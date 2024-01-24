@@ -90,7 +90,7 @@ private:
         template< typename... Args >
         void _emplace ( Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > ) ;
 
-        void _copy_buffer ( _buff_base & _buff_ ) noexcept( is_nothrow_copy_assignable_v< value_type > && is_nothrow_destructible_v< value_type > ) ;
+        void _copy_buffer ( _buff_base & _buff_ ) noexcept ( is_nothrow_copy_assignable_v< value_type > && is_nothrow_destructible_v< value_type > ) ;
         void _swap_buffer ( _buff_base & _buff_ ) noexcept ;
 };
 
