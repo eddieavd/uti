@@ -7,6 +7,7 @@
 #pragma once
 
 #include <meta/traits.hpp>
+#include <meta/invoke.hpp>
 
 
 namespace uti
@@ -39,14 +40,14 @@ public:
         constexpr operator type& () const noexcept { return *f_; }
 
         /// invoke
-        /*
+#ifdef UTI_HAS_STL
         template< typename... Args >
-        constexpr typename std::invoke_of< type&, Args... >::type
+        constexpr typename std::__invoke_of< type&, Args... >::type
         operator() ( Args&&... _args_ ) const
         {
                 return std::invoke( std::get(), UTI_FWD( _args_ )... );
         }
-        */
+#endif
 };
 
 

@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifdef UTI_HAS_STL
+
 #include <functional>
 
 
@@ -21,3 +23,5 @@ std::invoke_result_t< Fn, Args... > invoke ( Fn && fn, Args&&... args ) noexcept
 
 
 } // namespace uti
+
+#endif

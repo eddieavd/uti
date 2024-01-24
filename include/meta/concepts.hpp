@@ -314,6 +314,8 @@ concept regular = semiregular< T > && equality_comparable< T > ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef UTI_HAS_STL
+
 template< typename Fn, typename... Args >
 concept invocable =
         requires( Fn && fn, Args&&... args )
@@ -358,6 +360,8 @@ concept equivalence_relation = relation< R, T, U > ;
  */
 template< typename R, typename T, typename U >
 concept string_weak_order = relation< R, T, U > ;
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 

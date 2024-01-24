@@ -82,7 +82,7 @@ private:
         void _emplace ( Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > ) ;
 
         void _copy_buffer ( _buff_base & _buff_ ) noexcept( is_nothrow_copy_assignable_v< value_type > && is_nothrow_destructible_v< value_type > ) ;
-        void _swap_buffer ( _buff_base & _buff_ ) noexcept( is_nothrow_swappable_v< value_type > ) ;
+        void _swap_buffer ( _buff_base & _buff_ ) noexcept ;
 };
 
 template< typename T >
@@ -109,7 +109,7 @@ vector< T >::_copy_buffer ( _buff_base & _buff_ ) noexcept( is_nothrow_copy_assi
 
 template< typename T >
 void
-vector< T >::_swap_buffer ( _buff_base & _buff_ ) noexcept( is_nothrow_swappable_v< value_type > )
+vector< T >::_swap_buffer ( _buff_base & _buff_ ) noexcept
 {
         ::uti::swap( _buff_base::begin()   , _buff_.begin()    );
         ::uti::swap( _buff_base::capacity(), _buff_.capacity() );
@@ -202,10 +202,7 @@ template< typename T >
 void
 vector< T >::push_back ( value_type const & _val_ )
 {
-        if( _view_base::end() >= _buff_base::end() )
-        {
-                reserve();
-        }
+        reserve();
         _emplace( _val_ );
 }
 
@@ -213,10 +210,7 @@ template< typename T >
 void
 vector< T >::push_back ( value_type && _val_ )
 {
-        if( _view_base::end() >= _buff_base::end() )
-        {
-                reserve();
-        }
+        reserve();
         _emplace( UTI_MOVE( _val_ ) );
 }
 
@@ -225,10 +219,7 @@ template< typename... Args >
 void
 vector< T >::emplace_back ( Args&&... _args_ )
 {
-        if( _view_base::end() >= _buff_base::end() )
-        {
-                reserve();
-        }
+        reserve();
         _emplace( UTI_FWD( _args_ )... );
 }
 
@@ -257,7 +248,7 @@ vector< T >::pop_front () noexcept
 {
         if constexpr( !is_trivially_destructible_v< value_type > )
         {
-                allocator_type::destroy( _view_base::end() );
+                allocator_type::destroy( _view_base::begin() );
         }
         _view_base::pop_front();
 }
