@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <string>
 
-#include <traits/traits.hpp>
+#include <meta/traits.hpp>
 
 
 constexpr int test_traits () noexcept ;

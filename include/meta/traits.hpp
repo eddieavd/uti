@@ -295,12 +295,24 @@ struct remove_cv : remove_const< remove_volatile_t< T > > {} ;
 template< typename T >
 using remove_cv_t = typename remove_cv< T >::type ;
 
+template< typename From, typename To > struct copy_cv                            : type_identity< To                > {} ;
+template< typename From, typename To > struct copy_cv< From const         , To > : type_identity< To const          > {} ;
+template< typename From, typename To > struct copy_cv< From       volatile, To > : type_identity< To       volatile > {} ;
+template< typename From, typename To > struct copy_cv< From const volatile, To > : type_identity< To const volatile > {} ;
+
+template< typename From, typename To > using copy_cv_t = typename copy_cv< From, To >::type ;
 
 template< typename T >
 struct remove_cvref : remove_cv< remove_reference_t< T > > {} ;
 
 template< typename T >
 using remove_cvref_t = typename remove_cvref< T >::type ;
+
+template< typename From, typename To > struct copy_cvref                :                       copy_cv  < From, To >   {} ;
+template< typename From, typename To > struct copy_cvref< From & , To > : add_lvalue_reference< copy_cv_t< From, To > > {} ;
+template< typename From, typename To > struct copy_cvref< From &&, To > : add_rvalue_reference< copy_cv_t< From, To > > {} ;
+
+template< typename From, typename To > using copy_cvref_t = typename copy_cvref< From, To >::type ;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///     enable if
@@ -715,6 +727,20 @@ inline constexpr bool is_arithmetic_v = is_arithmetic< T >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template< typename T, bool = is_arithmetic_v< T > >
+struct _is_signed_impl : false_type {} ;
+
+template< typename T >
+struct _is_signed_impl< T, true > : integral_constant< T( -1 ) < T( 0 ) > {} ;
+
+template< typename T >
+using is_signed = _is_signed_impl< T > ;
+
+template< typename T >
+inline constexpr bool is_signed_v = is_signed< T >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+
 template< typename T >
 struct is_scalar : integral_constant< is_arithmetic_v    < T >
                                    || is_enum_v          < T >
@@ -724,6 +750,42 @@ struct is_scalar : integral_constant< is_arithmetic_v    < T >
 
 template< typename T >
 inline constexpr bool is_scalar_v = is_scalar< T >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace _detail
+{
+
+
+template< typename B >  true_type _test_ptr_conv (    B const volatile * ) ;
+template< typename   > false_type _test_ptr_conv ( void const volatile * ) ;
+
+template< typename B, typename D > auto _test_is_base_of ( int ) -> decltype( _test_ptr_conv< B >( static_cast< D * >( nullptr ) ) ) ;
+template< typename  , typename   > auto _test_is_base_of ( ... ) -> true_type ; // private or ambiguous base
+
+
+} // namespace _detail
+
+
+template< typename Base, typename Derived >
+struct is_base_of : integral_constant< is_class_v< Base    > &&
+                                       is_class_v< Derived > &&
+                                       decltype( _detail::_test_is_base_of< Base, Derived >( 0 ) )::value
+                                     > {} ;
+
+template< typename Base, typename Derived >
+inline constexpr bool is_base_of_v = is_base_of< Base, Derived >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T >
+struct is_object : integral_constant< is_scalar_v< T >
+                                   || is_array_v< T >
+                                   || is_union_v< T >
+                                   || is_class_v< T > > {} ;
+
+template< typename T >
+inline constexpr bool is_object_v = is_object< T >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
