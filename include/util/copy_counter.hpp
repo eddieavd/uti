@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <traits/traits.hpp>
+#include <meta/traits.hpp>
 
 #include <ostream>
 
@@ -20,6 +20,7 @@ struct copy_stats
         i32_t n_default_constructs { 0 } ;
         i32_t n_copies             { 0 } ;
         i32_t n_moves              { 0 } ;
+        i32_t n_destructs          { 0 } ;
 
         constexpr bool operator== ( copy_stats const & _other_ ) const noexcept = default ;
 };
@@ -36,15 +37,19 @@ struct copy_counter
 {
         inline static copy_stats stats ;
 
-        copy_counter () noexcept { ++stats.n_default_constructs; }
+        copy_stats priv_stats ;
 
-        copy_counter             ( copy_counter const & ) { ++stats.n_copies;               }
-        copy_counter & operator= ( copy_counter const & ) { ++stats.n_copies; return *this; }
+        copy_counter () noexcept { ++stats.n_default_constructs; ++priv_stats.n_default_constructs; }
 
-        copy_counter             ( copy_counter && ) { ++stats.n_moves;               }
-        copy_counter & operator= ( copy_counter && ) { ++stats.n_moves; return *this; }
+        copy_counter             ( copy_counter const & ) noexcept { ++stats.n_copies; ++priv_stats.n_copies;               }
+        copy_counter & operator= ( copy_counter const & ) noexcept { ++stats.n_copies; ++priv_stats.n_copies; return *this; }
 
-        static copy_stats reset ()
+        copy_counter             ( copy_counter && ) noexcept { ++stats.n_moves; ++priv_stats.n_moves;               }
+        copy_counter & operator= ( copy_counter && ) noexcept { ++stats.n_moves; ++priv_stats.n_moves; return *this; }
+
+        ~copy_counter () noexcept { ++stats.n_destructs; }
+
+        static copy_stats reset () noexcept
         {
                 copy_stats old_stats = stats;
 
