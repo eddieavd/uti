@@ -14,7 +14,15 @@ namespace uti
 
 
 template< typename T >
-using _swap_result_t = enable_if_t< is_move_constructible_v< T > && is_move_assignable_v< T > > ;
+using _swap_result_t = enable_if_t
+<
+        conjunction_v
+        <
+                is_not< _is_tuple_like< T > >,
+                is_move_constructible< T >,
+                is_move_assignable< T >
+        >
+>;
 
 template< typename T >
 inline constexpr _swap_result_t< T > swap ( T & _lhs_, T & _rhs_ )

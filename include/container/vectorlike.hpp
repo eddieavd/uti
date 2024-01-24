@@ -37,50 +37,7 @@ public:
 
 
 template< typename T >
-class _vectorlike_buffer : _vectorlike_base< T >
-{
-        using _self = _vectorlike_buffer    ;
-        using _base = _vectorlike_base< T > ;
-public:
-        using      value_type = typename _base::     value_type ;
-        using       size_type = typename _base::      size_type ;
-        using      ssize_type = typename _base::     ssize_type ;
-        using difference_type = typename _base::difference_type ;
-
-        using         pointer = typename _base::        pointer ;
-        using   const_pointer = typename _base::  const_pointer ;
-        using       reference = typename _base::      reference ;
-        using const_reference = typename _base::const_reference ;
-
-        using        iterator = typename _base::       iterator ;
-        using  const_iterator = typename _base:: const_iterator ;
-
-        constexpr _vectorlike_buffer (                             ) noexcept = default ;
-        explicit  _vectorlike_buffer ( ssize_type const _capacity_ )                    ;
-
-        _vectorlike_buffer             ( _vectorlike_buffer const &  _other_ )          ;
-        _vectorlike_buffer & operator= ( _vectorlike_buffer const &  _other_ )          ;
-        _vectorlike_buffer             ( _vectorlike_buffer       && _other_ ) noexcept ;
-        _vectorlike_buffer & operator= ( _vectorlike_buffer       && _other_ ) noexcept ;
-
-        ~_vectorlike_buffer () noexcept ;
-
-        ssize_type reserve ( ssize_type const _capacity_ ) ;
-
-        void deallocate () noexcept ;
-
-        UTI_NODISCARD ssize_type capacity () const noexcept { return capacity_; }
-protected:
-        pointer      buffer_ { nullptr } ;
-        ssize_type capacity_ {       0 } ;
-
-              pointer _buff_end ()       noexcept { return buffer_ + capacity_ ; }
-        const_pointer _buff_end () const noexcept { return buffer_ + capacity_ ; }
-};
-
-
-template< typename T >
-class _vectorlike_view : _vectorlike_base< T >
+class _vectorlike_view
 {
         using _self = _vectorlike_view      ;
         using _base = _vectorlike_base< T > ;
@@ -104,9 +61,9 @@ public:
                 : begin_( _begin_ ), end_( _end_ ) {}
 
         constexpr _vectorlike_view             ( _vectorlike_view const &  _other_ ) noexcept = default ;
-        constexpr _vectorlike_view             ( _vectorlike_view       && _other_ ) noexcept           ;
+        constexpr _vectorlike_view             ( _vectorlike_view       && _other_ ) noexcept = default ;
         constexpr _vectorlike_view & operator= ( _vectorlike_view const &  _other_ ) noexcept = default ;
-        constexpr _vectorlike_view & operator= ( _vectorlike_view       && _other_ ) noexcept           ;
+        constexpr _vectorlike_view & operator= ( _vectorlike_view       && _other_ ) noexcept = default ;
 
         constexpr ~_vectorlike_view () noexcept = default ;
 
@@ -131,7 +88,8 @@ public:
 
         template< typename Self, typename... Idxs >
         UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) at ( this Self && self, ssize_type const _x_, Idxs... _idxs_ ) noexcept requires( is_n_dim_container_v< _self, sizeof...( _idxs_ ) + 1 > )
+        decltype( auto ) at ( this Self && self, ssize_type const _x_, Idxs... _idxs_ )
+                noexcept requires( is_n_dim_container_v< _self, sizeof...( _idxs_ ) + 1 > )
         {
                 return UTI_FWD( self ).at( _x_ ).at( _idxs_... );
         }
@@ -173,35 +131,62 @@ protected:
 
 
 template< typename T >
-constexpr _vectorlike_view< T >::_vectorlike_view ( _vectorlike_view && _other_ ) noexcept
-        : begin_( _other_.begin_ ), end_( _other_.end_ )
+class _vectorlike_buffer
 {
-        _other_.begin_ = _other_.end_ = nullptr ;
-}
+        using _self = _vectorlike_buffer    ;
+        using _base = _vectorlike_base< T > ;
+public:
+        using      value_type = typename _base::     value_type ;
+        using       size_type = typename _base::      size_type ;
+        using      ssize_type = typename _base::     ssize_type ;
+        using difference_type = typename _base::difference_type ;
 
-template< typename T >
-constexpr
-_vectorlike_view< T > &
-_vectorlike_view< T >::operator= ( _vectorlike_view && _other_ ) noexcept
-{
-        begin_ = _other_.begin_ ;
-        end_   = _other_.end_   ;
+        using  allocator_type = allocator< value_type >         ;
 
-        _other_.begin_ = _other_.end_ = nullptr ;
+        using         pointer = typename _base::        pointer ;
+        using   const_pointer = typename _base::  const_pointer ;
+        using       reference = typename _base::      reference ;
+        using const_reference = typename _base::const_reference ;
 
-        return *this;
-}
+        using        iterator = typename _base::       iterator ;
+        using  const_iterator = typename _base:: const_iterator ;
+
+        constexpr _vectorlike_buffer (                             ) noexcept = default ;
+        explicit  _vectorlike_buffer ( ssize_type const _capacity_ )                    ;
+
+        _vectorlike_buffer             ( _vectorlike_buffer const &  _other_ )                    ;
+        _vectorlike_buffer & operator= ( _vectorlike_buffer const &  _other_ )                    ;
+        _vectorlike_buffer             ( _vectorlike_buffer       && _other_ ) noexcept = default ;
+        _vectorlike_buffer & operator= ( _vectorlike_buffer       && _other_ ) noexcept = default ;
+
+        ~_vectorlike_buffer () noexcept ;
+
+        ssize_type reserve ( ssize_type const _capacity_ ) ;
+
+        void deallocate () noexcept ;
+
+        UTI_NODISCARD ssize_type const & capacity () const noexcept { return capacity_; }
+protected:
+        pointer      buffer_ { nullptr } ;
+        ssize_type capacity_ {       0 } ;
+
+              pointer  begin ()       noexcept { return buffer_             ; }
+        const_pointer  begin () const noexcept { return buffer_             ; }
+        const_pointer cbegin () const noexcept { return buffer_             ; }
+              pointer    end ()       noexcept { return buffer_ + capacity_ ; }
+        const_pointer    end () const noexcept { return buffer_ + capacity_ ; }
+        const_pointer   cend () const noexcept { return buffer_ + capacity_ ; }
+
+        UTI_NODISCARD ssize_type & capacity () noexcept { return capacity_; }
+};
 
 
 template< typename T >
 _vectorlike_buffer< T >::_vectorlike_buffer ( ssize_type const _capacity_ )
 {
-        buffer_ = ::uti::alloc_typed_buffer< value_type >( _capacity_ );
+        buffer_ = allocator_type::allocate( _capacity_ );
 
-        if( buffer_ )
-        {
-                capacity_ = _capacity_;
-        }
+        if( buffer_ ) capacity_ = _capacity_;
 }
 
 template< typename T >
@@ -211,31 +196,10 @@ _vectorlike_buffer< T >::_vectorlike_buffer ( _vectorlike_buffer const & _other_
 }
 
 template< typename T >
-_vectorlike_buffer< T >::_vectorlike_buffer ( _vectorlike_buffer && _other_ ) noexcept
-        : buffer_( _other_.buffer_ ), capacity_( _other_.capacity_ )
-{
-        _other_.buffer_   = nullptr ;
-        _other_.capacity_ =       0 ;
-}
-
-template< typename T >
 _vectorlike_buffer< T > &
 _vectorlike_buffer< T >::operator= ( _vectorlike_buffer const & _other_ )
 {
         reserve( _other_.capacity_ );
-
-        return *this;
-}
-
-template< typename T >
-_vectorlike_buffer< T > &
-_vectorlike_buffer< T >::operator= ( _vectorlike_buffer && _other_ ) noexcept
-{
-        buffer_   = _other_.buffer_   ;
-        capacity_ = _other_.capacity_ ;
-
-        _other_.buffer_   = nullptr ;
-        _other_.capacity_ =       0 ;
 
         return *this;
 }
@@ -252,7 +216,7 @@ _vectorlike_buffer< T >::reserve ( ssize_type const _capacity_ )
 {
         if( _capacity_ <= capacity_ ) return capacity_;
 
-        auto tmp = ::uti::realloc_typed_buffer( buffer_, _capacity_ );
+        auto tmp = allocator_type::reallocate( buffer_, _capacity_ );
 
         if( tmp != nullptr )
         {
@@ -266,7 +230,7 @@ template< typename T >
 void
 _vectorlike_buffer< T >::deallocate () noexcept
 {
-        if( buffer_ ) ::uti::dealloc_typed_buffer( buffer_ );
+        if( buffer_ ) allocator_type::deallocate( buffer_ );
 }
 
 

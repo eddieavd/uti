@@ -1184,5 +1184,75 @@ public:
 template< typename T >
 using decay_t = typename decay< T >::type ;
 
+////////////////////////////////////////////////////////////////////////////////
+///     swappability
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T > struct _is_swappable         ;
+template< typename T > struct _is_nothrow_swappable ;
+
+template< typename... Ts > class tuple ;
+
+template< typename >       struct _is_tuple_like_impl                   : false_type {} ;
+template< typename... Ts > struct _is_tuple_like_impl< tuple< Ts... > > :  true_type {} ;
+
+template< typename T > struct _is_tuple_like : public _is_tuple_like_impl< remove_cvref_t< T > >::type {} ;
+
+template< typename T >
+inline constexpr
+enable_if_t
+<
+        conjunction_v
+        <
+                is_not< _is_tuple_like< T > >,
+                is_move_constructible< T >,
+                is_move_assignable< T >
+        >
+>
+swap ( T &, T & )
+        noexcept( is_nothrow_move_constructible_v< T > && is_nothrow_move_assignable_v< T > ) ;
+
+template< typename T, ssize_t N >
+inline constexpr
+enable_if_t< _is_swappable< T >::value >
+swap ( T ( & a )[ N ], T ( & b )[ N ] ) noexcept( _is_nothrow_swappable< T >::value ) ;
+
+namespace _swappable
+{
+
+
+using uti::swap ;
+
+struct _do_is_swappable_impl
+{
+        template< typename T, typename = decltype( swap( uti::declval< T & >(), uti::declval< T & >() ) ) > static  true_type _test ( int ) ;
+        template< typename                                                                                > static false_type _test ( ... ) ;
+};
+
+struct _do_is_nothrow_swappable_impl
+{
+        template< typename T > static integral_constant< noexcept( swap( uti::declval< T & >(), uti::declval< T & >() ) ) > _test ( int ) ;
+        template< typename   > static false_type                                                                            _test ( ... ) ;
+};
+
+
+} // namespace _swappable
+
+
+template< typename T >
+struct _is_swappable_impl : public _swappable::_do_is_swappable_impl { using type = decltype( _test< T >( 0 ) ) ; } ;
+
+template< typename T >
+struct _is_nothrow_swappable_impl : public _swappable::_do_is_nothrow_swappable_impl { using type = decltype( _test< T >( 0 ) ) ; } ;
+
+template< typename T > struct _is_swappable         : public _is_swappable_impl        < T >::type {} ;
+template< typename T > struct _is_nothrow_swappable : public _is_nothrow_swappable_impl< T >::type {} ;
+
+template< typename T > using is_swappable         = _is_swappable        < T > ;
+template< typename T > using is_nothrow_swappable = _is_nothrow_swappable< T > ;
+
+template< typename T > inline constexpr bool is_swappable_v         = is_swappable        < T >::value ;
+template< typename T > inline constexpr bool is_nothrow_swappable_v = is_nothrow_swappable< T >::value ;
+
 
 } // namespace uti
