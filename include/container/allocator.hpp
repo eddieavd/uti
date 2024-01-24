@@ -66,15 +66,15 @@ public:
 
         static pointer allocate ( ssize_type const _capacity_ )
         {
-                return static_cast< pointer >( UTI_MALLOC( _capacity_ ) );
+                return alloc_typed_buffer< T >( _capacity_ );
         }
         static pointer reallocate ( pointer const _ptr_, ssize_type const _new_capacity_ )
         {
-                return static_cast< pointer >( UTI_REALLOC( _ptr_, _new_capacity_ ) );
+                return realloc_typed_buffer( _ptr_, _new_capacity_ );
         }
         static void deallocate ( pointer const _ptr_ ) noexcept
         {
-                UTI_FREE( _ptr_ );
+                dealloc_typed_buffer( _ptr_ );
         }
 
         template< typename... Args >

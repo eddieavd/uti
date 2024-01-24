@@ -8,6 +8,7 @@
 
 #include <meta/traits.hpp>
 #include <algo/copy.hpp>
+#include <algo/swap.hpp>
 #include <container/vectorlike.hpp>
 
 
@@ -43,10 +44,10 @@ public:
 
         vector ( ssize_type const _count_, value_type const & _val_ ) ;
 
-        vector             ( vector const &  _other_ )                    ;
-        vector             ( vector       && _other_ ) noexcept = default ;
-        vector & operator= ( vector const &  _other_ )                    ;
-        vector & operator= ( vector       && _other_ ) noexcept = default ;
+        vector             ( vector const &  _other_ )          ;
+        vector             ( vector       && _other_ ) noexcept ;
+        vector & operator= ( vector const &  _other_ )          ;
+        vector & operator= ( vector       && _other_ ) noexcept ;
 
         ~vector () noexcept ;
 
@@ -77,6 +78,14 @@ public:
         void erase_stable ( ssize_type const _position_ ) noexcept( is_nothrow_move_assignable_v< value_type > ) ;
 
         void clear () noexcept ;
+
+        UTI_NODISCARD       iterator  begin ()       noexcept { return _view_base:: begin(); }
+        UTI_NODISCARD const_iterator  begin () const noexcept { return _view_base:: begin(); }
+        UTI_NODISCARD const_iterator cbegin () const noexcept { return _view_base::cbegin(); }
+
+        UTI_NODISCARD       iterator  end ()       noexcept { return _view_base:: end(); }
+        UTI_NODISCARD const_iterator  end () const noexcept { return _view_base:: end(); }
+        UTI_NODISCARD const_iterator cend () const noexcept { return _view_base::cend(); }
 private:
         template< typename... Args >
         void _emplace ( Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > ) ;
@@ -111,7 +120,7 @@ template< typename T >
 void
 vector< T >::_swap_buffer ( _buff_base & _buff_ ) noexcept
 {
-        ::uti::swap( _buff_base::begin()   , _buff_.begin()    );
+        ::uti::swap( _buff_base::  _begin(), _buff_.  _begin() );
         ::uti::swap( _buff_base::capacity(), _buff_.capacity() );
 }
 
@@ -144,14 +153,20 @@ vector< T >::vector ( vector const & _other_ )
                 }
                 else
                 {
-                        for( ssize_type i = 0; i < _other_.size(); ++i )
+                        reserve( _other_.size() );
+
+                        for( auto const & val : _other_ )
                         {
-                                allocator_type::construct( _view_base::begin() + i, _other_.at( i ) );
+                                _emplace( val );
                         }
                 }
-                _view_base::end() = _view_base::begin() + _other_.size();
+                _view_base::_end() = _view_base::begin() + _other_.size();
         }
 }
+
+template< typename T >
+vector< T >::vector ( vector && _other_ ) noexcept
+        : _buff_base( UTI_MOVE( _other_ ) ), _view_base( UTI_MOVE( _other_ ) ) {}
 
 template< typename T >
 vector< T > &
@@ -187,7 +202,25 @@ vector< T >::operator= ( vector const & _other_ )
                         }
                 }
         }
-        _view_base::end() = _view_base::begin() + _other_.size();
+        _view_base::_end() = _view_base::begin() + _other_.size();
+
+        return *this;
+}
+
+template< typename T >
+vector< T > &
+vector< T >::operator= ( vector && _other_ ) noexcept
+{
+        clear();
+        _buff_base::deallocate();
+
+        this->buffer_   = _other_.buffer_   ;
+        this->begin_    = _other_.begin_    ;
+        this->end_      = _other_.end_      ;
+        this->capacity_ = _other_.capacity_ ;
+
+        _other_.buffer_ = _other_.begin_ = _other_.end_ = nullptr;
+        _other_.capacity_ = 0 ;
 
         return *this;
 }
@@ -228,16 +261,18 @@ template< typename... Args >
 void
 vector< T >::_emplace ( Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > )
 {
-        allocator_type::construct( _view_base::end()++, UTI_FWD( _args_ )... );
+        allocator_type::construct( _view_base::_end()++, UTI_FWD( _args_ )... );
 }
 
 template< typename T >
 void
 vector< T >::pop_back () noexcept
 {
+        UTI_ASSERT( !_view_base::empty(), "uti::vector::pop_back: called on empty vector" );
+
         if constexpr( !is_trivially_destructible_v< value_type > )
         {
-                allocator_type::destroy( _view_base::end() );
+                allocator_type::destroy( _view_base::end() - 1 );
         }
         _view_base::pop_back();
 }
@@ -246,6 +281,8 @@ template< typename T >
 void
 vector< T >::pop_front () noexcept
 {
+        UTI_ASSERT( !_view_base::empty(), "uti::vector::pop_front: called on empty vector" );
+
         if constexpr( !is_trivially_destructible_v< value_type > )
         {
                 allocator_type::destroy( _view_base::begin() );
@@ -288,14 +325,34 @@ vector< T >::reserve ( ssize_type const _capacity_ )
 {
         if( _capacity_ <= _buff_base::capacity() ) return _buff_base::capacity();
 
-        ssize_type begin_pos = _view_base::begin() - _buff_base::begin() ;
-        ssize_type   end_pos = _view_base::  end() - _buff_base::begin() ;
+        if( _buff_base::capacity() == 0 )
+        {
+                _buff_base::reserve( _capacity_ );
+                _view_base::_begin() = _view_base::_end() = _buff_base::begin();
 
-        _buff_base::reserve( _capacity_ );
+                return _buff_base::capacity();
+        }
+        if constexpr( is_trivially_relocatable_v< value_type > )
+        {
+                ssize_type begin_pos = _view_base::begin() - _buff_base::begin();
+                ssize_type   end_pos = _view_base::  end() - _buff_base::begin();
 
-        _view_base::begin() = _buff_base::begin() + begin_pos ;
-        _view_base::  end() = _buff_base::begin() +   end_pos ;
+                _buff_base::reserve( _capacity_ );
 
+                _view_base::_begin() = _buff_base::begin() + begin_pos ;
+                _view_base::  _end() = _buff_base::begin() +   end_pos ;
+        }
+        else
+        {
+                ssize_type size = _view_base::size();
+                _buff_base buff( _capacity_ );
+
+                _copy_buffer( buff );
+                _swap_buffer( buff );
+
+                _view_base::_begin() = _buff_base::begin();
+                _view_base::  _end() = _buff_base::begin() + size;
+        }
         return _buff_base::capacity();
 }
 
@@ -320,8 +377,8 @@ vector< T >::shrink_to_fit ()
         _copy_buffer( buff );
         _swap_buffer( buff );
 
-        _view_base::begin() = _buff_base::begin();
-        _view_base::  end() = _buff_base::begin() + _buff_base::capacity();
+        _view_base::_begin() = _buff_base::begin();
+        _view_base::  _end() = _buff_base::begin() + _buff_base::capacity();
 }
 
 template< typename T >
@@ -337,7 +394,7 @@ vector< T >::shrink_size ( ssize_type const _size_ ) noexcept
                         allocator_type::destroy( _view_base::begin() + i );
                 }
         }
-        _view_base::end() = _view_base::begin + _size_;
+        _view_base::_end() = _view_base::begin() + _size_;
 }
 
 template< typename T >
@@ -353,12 +410,13 @@ vector< T >::insert ( value_type const & _val_, ssize_type const _position_ )
         }
         reserve();
 
-        for( ssize_type i = _view_base::size(); i > _position_; --i )
+        allocator_type::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) );
+        for( ssize_type i = _view_base::size() - 1; i > _position_; --i )
         {
                 _view_base::at( i ) = UTI_MOVE( _view_base::at( i - 1 ) );
         }
         _view_base::at( _position_ ) = _val_;
-        ++_view_base::end();
+        ++_view_base::_end();
 }
 
 template< typename T >
@@ -374,12 +432,13 @@ vector< T >::insert ( value_type && _val_, ssize_type const _position_ )
         }
         reserve();
 
-        for( ssize_type i = _view_base::size(); i > _position_; --i )
+        allocator_type::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) );
+        for( ssize_type i = _view_base::size() - 1; i > _position_; --i )
         {
                 _view_base::at( i ) = UTI_MOVE( _view_base::at( i - 1 ) );
         }
         _view_base::at( _position_ ) = UTI_MOVE( _val_ );
-        ++_view_base::end();
+        ++_view_base::_end();
 }
 
 template< typename T >
@@ -417,7 +476,7 @@ vector< T >::clear () noexcept
                         allocator_type::destroy( _view_base::begin() + i );
                 }
         }
-        _view_base::begin() = _view_base::end() = _buff_base::begin();
+        _view_base::_begin() = _view_base::_end() = _buff_base::begin();
 }
 
 

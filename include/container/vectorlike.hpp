@@ -61,9 +61,9 @@ public:
                 : begin_( _begin_ ), end_( _end_ ) {}
 
         constexpr _vectorlike_view             ( _vectorlike_view const &  _other_ ) noexcept = default ;
-        constexpr _vectorlike_view             ( _vectorlike_view       && _other_ ) noexcept = default ;
+        constexpr _vectorlike_view             ( _vectorlike_view       && _other_ ) noexcept           ;
         constexpr _vectorlike_view & operator= ( _vectorlike_view const &  _other_ ) noexcept = default ;
-        constexpr _vectorlike_view & operator= ( _vectorlike_view       && _other_ ) noexcept = default ;
+        constexpr _vectorlike_view & operator= ( _vectorlike_view       && _other_ ) noexcept           ;
 
         constexpr ~_vectorlike_view () noexcept = default ;
 
@@ -127,7 +127,31 @@ public:
 protected:
         pointer begin_ { nullptr } ;
         pointer   end_ { nullptr } ;
+
+        UTI_NODISCARD constexpr pointer       & _begin ()       noexcept { return begin_; }
+        UTI_NODISCARD constexpr pointer const & _begin () const noexcept { return begin_; }
+        UTI_NODISCARD constexpr pointer       & _end   ()       noexcept { return   end_; }
+        UTI_NODISCARD constexpr pointer const & _end   () const noexcept { return   end_; }
 };
+
+template< typename T >
+constexpr
+_vectorlike_view< T >::_vectorlike_view ( _vectorlike_view && _other_ ) noexcept
+        : begin_( _other_.begin_ ), end_( _other_.end_ )
+{
+        _other_.begin_ = _other_.end_ = nullptr ;
+}
+
+template< typename T >
+constexpr
+_vectorlike_view< T > &
+_vectorlike_view< T >::operator= ( _vectorlike_view && _other_ ) noexcept
+{
+        begin_ = _other_.begin_ ;
+        end_   = _other_.end_   ;
+
+        _other_.begin_ = _other_.end_ = nullptr ;
+}
 
 
 template< typename T >
@@ -154,10 +178,13 @@ public:
         constexpr _vectorlike_buffer (                             ) noexcept = default ;
         explicit  _vectorlike_buffer ( ssize_type const _capacity_ )                    ;
 
-        _vectorlike_buffer             ( _vectorlike_buffer const &  _other_ )                    ;
-        _vectorlike_buffer & operator= ( _vectorlike_buffer const &  _other_ )                    ;
-        _vectorlike_buffer             ( _vectorlike_buffer       && _other_ ) noexcept = default ;
-        _vectorlike_buffer & operator= ( _vectorlike_buffer       && _other_ ) noexcept = default ;
+        constexpr _vectorlike_buffer ( pointer const _ptr_, ssize_type const _cap_ ) noexcept
+                : buffer_( _ptr_ ), capacity_( _cap_ ) {}
+
+        _vectorlike_buffer             ( _vectorlike_buffer const &  _other_ )          ;
+        _vectorlike_buffer & operator= ( _vectorlike_buffer const &  _other_ )          ;
+        _vectorlike_buffer             ( _vectorlike_buffer       && _other_ ) noexcept ;
+        _vectorlike_buffer & operator= ( _vectorlike_buffer       && _other_ ) noexcept ;
 
         ~_vectorlike_buffer () noexcept ;
 
@@ -165,10 +192,8 @@ public:
 
         void deallocate () noexcept ;
 
-        UTI_NODISCARD ssize_type const & capacity () const noexcept { return capacity_; }
-protected:
-        pointer      buffer_ { nullptr } ;
-        ssize_type capacity_ {       0 } ;
+        UTI_NODISCARD ssize_type       & capacity ()       noexcept { return capacity_ ; }
+        UTI_NODISCARD ssize_type const & capacity () const noexcept { return capacity_ ; }
 
               pointer  begin ()       noexcept { return buffer_             ; }
         const_pointer  begin () const noexcept { return buffer_             ; }
@@ -177,7 +202,11 @@ protected:
         const_pointer    end () const noexcept { return buffer_ + capacity_ ; }
         const_pointer   cend () const noexcept { return buffer_ + capacity_ ; }
 
-        UTI_NODISCARD ssize_type & capacity () noexcept { return capacity_; }
+        pointer       & _begin ()       noexcept { return buffer_ ; }
+        pointer const & _begin () const noexcept { return buffer_ ; }
+protected:
+        pointer      buffer_ { nullptr } ;
+        ssize_type capacity_ {       0 } ;
 };
 
 
@@ -196,12 +225,31 @@ _vectorlike_buffer< T >::_vectorlike_buffer ( _vectorlike_buffer const & _other_
 }
 
 template< typename T >
+_vectorlike_buffer< T >::_vectorlike_buffer ( _vectorlike_buffer && _other_ ) noexcept
+        : buffer_( _other_.buffer_ ), capacity_( _other_.capacity_ )
+{
+        _other_.buffer_   = nullptr ;
+        _other_.capacity_ =       0 ;
+}
+
+template< typename T >
 _vectorlike_buffer< T > &
 _vectorlike_buffer< T >::operator= ( _vectorlike_buffer const & _other_ )
 {
         reserve( _other_.capacity_ );
 
         return *this;
+}
+
+template< typename T >
+_vectorlike_buffer< T > &
+_vectorlike_buffer< T >::operator= ( _vectorlike_buffer && _other_ ) noexcept
+{
+        buffer_   = _other_.buffer_   ;
+        capacity_ = _other_.capacity_ ;
+
+        _other_.buffer_   = nullptr ;
+        _other_.capacity_ =       0 ;
 }
 
 template< typename T >
