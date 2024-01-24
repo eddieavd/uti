@@ -6,7 +6,8 @@
 
 #pragma once
 
-#include <type_traits.hpp>
+#include <util/assert.hpp>
+#include <meta/traits.hpp>
 
 #define SV_FMT "%.*s"
 #define SV_ARG(sv) (int) (sv).size(), (sv).data()
@@ -25,9 +26,9 @@ using string_view_t = string_view< char const > ;
 template< typename CharType >
 struct string_view
 {
-        using value_type =      CharType ;
-        using  size_type = unsigned long ;
-        using ssize_type =     long long ;
+        using value_type = CharType ;
+        using  size_type =   size_t ;
+        using ssize_type =  ssize_t ;
 
         using         pointer = value_type       * ;
         using   const_pointer = value_type const * ;
@@ -67,9 +68,9 @@ struct string_view
         [[ nodiscard ]] constexpr bool   ends_with             ( string_view const & _suffix_ ) const noexcept ;
         [[ nodiscard ]] constexpr bool   ends_with_insensitive ( string_view const & _suffix_ ) const noexcept ;
 
-        constexpr size_type trim       () noexcept ;
-        constexpr size_type trim_left  () noexcept ;
-        constexpr size_type trim_right () noexcept ;
+        constexpr ssize_type trim       () noexcept ;
+        constexpr ssize_type trim_left  () noexcept ;
+        constexpr ssize_type trim_right () noexcept ;
 
         [[ nodiscard ]] constexpr string_view trimmed       () const noexcept ;
         [[ nodiscard ]] constexpr string_view trimmed_left  () const noexcept ;
@@ -251,7 +252,7 @@ template< typename CharType >
 [[ nodiscard ]] constexpr bool
 string_view< CharType >::starts_with ( string_view const & _prefix_ ) const noexcept
 {
-//      UTI_CONSTEXPR_ASSERT( size() >= _prefix_.size(), "string_view::starts_with: prefix longer than string" );
+        if( _prefix_.len() > len() ) return false;
 
         if( !uti::is_constant_evaluated() && data() == _prefix_.data() )
         {
@@ -271,7 +272,7 @@ template< typename CharType >
 [[ nodiscard ]] constexpr bool
 string_view< CharType >::starts_with_insensitive ( string_view const & _prefix_ ) const noexcept
 {
-//      UTI_CONSTEXPR_ASSERT( size() >= _prefix_.size(), "string_view::starts_with: prefix longer than string" );
+        if( _prefix_.len() > len() ) return false;
 
         if( !uti::is_constant_evaluated() && data() == _prefix_.data() )
         {
@@ -291,7 +292,7 @@ template< typename CharType >
 [[ nodiscard ]] constexpr bool
 string_view< CharType >::ends_with ( string_view const & _suffix_ ) const noexcept
 {
-//      UTI_CONSTEXPR_ASSERT( size() >= _suffix_.size(), "string_view::ends_with: suffix longer than string" );
+        if( _suffix_.len() > len() ) return false;
 
         ssize_type pos = size() - _suffix_.size();
 
@@ -313,7 +314,7 @@ template< typename CharType >
 [[ nodiscard ]] constexpr bool
 string_view< CharType >::ends_with_insensitive ( string_view const & _suffix_ ) const noexcept
 {
-//      UTI_CONSTEXPR_ASSERT( size() >= _suffix_.size(), "string_view::ends_with: suffix longer than string" );
+        if( _suffix_.len() > len() ) return false;
 
         ssize_type pos = size() - _suffix_.size();
 
@@ -332,20 +333,20 @@ string_view< CharType >::ends_with_insensitive ( string_view const & _suffix_ ) 
 }
 
 template< typename CharType >
-constexpr typename string_view< CharType >::size_type
+constexpr typename string_view< CharType >::ssize_type
 string_view< CharType >::trim () noexcept
 {
-        size_type count { 0 } ;
+        ssize_type count { 0 } ;
         count += trim_left();
         count += trim_right();
         return count;
 }
 
 template< typename CharType >
-constexpr typename string_view< CharType >::size_type
+constexpr typename string_view< CharType >::ssize_type
 string_view< CharType >::trim_left () noexcept
 {
-        size_type count { 0 } ;
+        ssize_type count { 0 } ;
         while( !empty() && ( front() ==  ' ' || front() == '\t' ) )
         {
                 data_++;
@@ -356,10 +357,10 @@ string_view< CharType >::trim_left () noexcept
 }
 
 template< typename CharType >
-constexpr typename string_view< CharType >::size_type
+constexpr typename string_view< CharType >::ssize_type
 string_view< CharType >::trim_right () noexcept
 {
-        size_type count { 0 } ;
+        ssize_type count { 0 } ;
         while( !empty() && ( back() ==  ' ' || back() == '\t' ) )
         {
                 size_--;
@@ -405,7 +406,7 @@ string_view< CharType >::substr ( ssize_type const _start_, ssize_type const _le
 
         ( void ) sub.chop_left( _start_ );
 
-        if( _len_ )
+        if( _len_ < sub.len() )
         {
                 sub.size_ = _len_;
         }
@@ -478,7 +479,7 @@ template< typename CharType >
 [[ nodiscard ]] constexpr typename string_view< CharType >::value_type
 string_view< CharType >::chop_char_left () noexcept
 {
-        // assert !empty()
+        UTI_CEXPR_ASSERT( !empty(), "uti::string_view::chop_char_left: called on empty string_view" );
 
         size_--;
 
@@ -489,7 +490,7 @@ template< typename CharType >
 [[ nodiscard ]] constexpr typename string_view< CharType >::value_type
 string_view< CharType >::chop_char_right () noexcept
 {
-        // assert !empty()
+        UTI_CEXPR_ASSERT( !empty(), "uti::string_view::chop_char_right: called on empty string_view" );
 
         return data_[ --size_ ];
 }
@@ -675,7 +676,7 @@ template< typename CharType >
 [[ nodiscard ]] constexpr typename string_view< CharType >::reference
 string_view< CharType >::at ( ssize_type const _index_ ) noexcept
 {
-//      UTI_CONSTEXPR_ASSERT( !empty() && _index_ >= 0 && _index_ < size(), "string_view::at: index out of bounds" );
+        UTI_CEXPR_ASSERT( !empty() && 0 <= _index_ && _index_ < size(), "uti::string_view::at: index out of bounds" );
 
         return data_[ _index_ ];
 }
@@ -684,7 +685,7 @@ template< typename CharType >
 [[ nodiscard ]] constexpr typename string_view< CharType >::const_reference
 string_view< CharType >::at ( ssize_type const _index_ ) const noexcept
 {
-//      UTI_CONSTEXPR_ASSERT( !empty() && _index_ >= 0 && _index_ < size(), "string_view::at: index out of bounds" );
+        UTI_CEXPR_ASSERT( !empty() && 0 <= _index_ && _index_ < size(), "uti::string_view::at: index out of bounds" );
 
         return data_[ _index_ ];
 }
