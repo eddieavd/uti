@@ -1,45 +1,13 @@
 //
 //
 //      uti
-//      test/traits.hpp
+//      gtest_traits.cpp
 //
 
-#include <type_traits>
-#include <string>
-
-#include <meta/traits.hpp>
+#include "gtest_traits.hpp"
 
 
-constexpr int test_traits () noexcept ;
-
-struct nocopynoassign
-{
-        nocopynoassign             ( nocopynoassign const & ) = delete ;
-        nocopynoassign & operator= ( nocopynoassign const & ) = delete ;
-
-        nocopynoassign             ( nocopynoassign && ) = delete ;
-        nocopynoassign & operator= ( nocopynoassign && ) = delete ;
-};
-
-struct throwcopythrowassign
-{
-        throwcopythrowassign             ( throwcopythrowassign const & ) ;
-        throwcopythrowassign & operator= ( throwcopythrowassign const & ) ;
-
-        throwcopythrowassign             ( throwcopythrowassign && ) ;
-        throwcopythrowassign & operator= ( throwcopythrowassign && ) ;
-};
-
-struct noexcopynoexassign
-{
-        noexcopynoexassign             ( noexcopynoexassign const & ) noexcept ;
-        noexcopynoexassign & operator= ( noexcopynoexassign const & ) noexcept ;
-
-        noexcopynoexassign             ( noexcopynoexassign && ) noexcept ;
-        noexcopynoexassign & operator= ( noexcopynoexassign && ) noexcept ;
-};
-
-constexpr int test_traits () noexcept
+TEST( TraitsTest, Identity )
 {
         static_assert( uti::is_v    < uti:: true_type > ) ;
         static_assert( uti::is_not_v< uti::false_type > ) ;
@@ -56,16 +24,37 @@ constexpr int test_traits () noexcept
         static_assert( uti::is_convertible_v< uti:: true_type, std:: true_type > ) ;
         static_assert( uti::is_convertible_v< uti::false_type, std::false_type > ) ;
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         static_assert( uti::is_same_v    < int,   int > ) ;
         static_assert( uti::is_not_same_v< int, float > ) ;
 
         static_assert( uti::is_same_raw_v< int, int const > ) ;
         static_assert( uti::is_not_same_v< int, int const > ) ;
 
-        ////////////////////////////////////////////////////////////////////////////////
+        static_assert( uti::is_same_v< int, uti::enable_if_t< true, int > > ) ;
 
+        static_assert( uti::is_not_v< uti::is_one_of< int > > ) ;
+
+        static_assert( uti::is_v< uti::is_one_of< int, int              > > ) ;
+        static_assert( uti::is_v< uti::is_one_of< int, int, float       > > ) ;
+        static_assert( uti::is_v< uti::is_one_of< int, int, float, char > > ) ;
+
+        static_assert( uti::is_v< uti::is_one_of< int, float, int, double > > ) ;
+
+        static_assert( uti::is_not_v< uti::is_one_of< int, float, char, double > > ) ;
+
+        static_assert( uti::is_v    < uti::is_referenceable<  int > > ) ;
+        static_assert( uti::is_not_v< uti::is_referenceable< void > > ) ;
+
+        static_assert( uti::is_same_v< int & , uti::add_lvalue_reference_t< int > > ) ;
+        static_assert( uti::is_same_v< int &&, uti::add_rvalue_reference_t< int > > ) ;
+
+        static_assert( std::is_same_v< uti::ptrdiff_t, std::ptrdiff_t > ) ;
+
+        static_assert( uti::is_same_v< int, uti::remove_all_extents< int[] >::type > ) ;
+}
+
+TEST( TraitsTest, CVREF )
+{
         static_assert( uti::is_v    < uti::is_const< int const > > ) ;
         static_assert( uti::is_not_v< uti::is_const< int       > > ) ;
 
@@ -77,8 +66,6 @@ constexpr int test_traits () noexcept
 
         static_assert( uti::is_same_v< int, uti::remove_const_t   < int    const > > ) ;
         static_assert( uti::is_same_v< int, uti::remove_volatile_t< int volatile > > ) ;
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         static_assert( uti::is_same_v< int, uti::remove_reference_t< int    > > ) ;
         static_assert( uti::is_same_v< int, uti::remove_reference_t< int &  > > ) ;
@@ -93,25 +80,10 @@ constexpr int test_traits () noexcept
         static_assert( uti::is_same_v< int, uti::remove_cvref_t< int const          & > > ) ;
         static_assert( uti::is_same_v< int, uti::remove_cvref_t< int       volatile & > > ) ;
         static_assert( uti::is_same_v< int, uti::remove_cvref_t< int const volatile & > > ) ;
+}
 
-        ////////////////////////////////////////////////////////////////////////////////
-
-        static_assert( uti::is_same_v< int, uti::enable_if_t< true, int > > ) ;
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        static_assert( uti::is_not_v< uti::is_one_of< int > > ) ;
-
-        static_assert( uti::is_v< uti::is_one_of< int, int              > > ) ;
-        static_assert( uti::is_v< uti::is_one_of< int, int, float       > > ) ;
-        static_assert( uti::is_v< uti::is_one_of< int, int, float, char > > ) ;
-
-        static_assert( uti::is_v< uti::is_one_of< int, float, int, double > > ) ;
-
-        static_assert( uti::is_not_v< uti::is_one_of< int, float, char, double > > ) ;
-
-        ////////////////////////////////////////////////////////////////////////////////
-
+TEST( TraitsTest, Conditionals )
+{
         static_assert( uti::is_same_v<   int, uti::conditional_t<  true, int, float > > ) ;
         static_assert( uti::is_same_v< float, uti::conditional_t< false, int, float > > ) ;
 
@@ -134,25 +106,10 @@ constexpr int test_traits () noexcept
         static_assert( uti::is_not_v< uti::conjunction< uti:: true_type, uti::false_type > > ) ;
         static_assert( uti::is_not_v< uti::conjunction< uti::false_type, uti:: true_type > > ) ;
         static_assert( uti::is_not_v< uti::conjunction< uti::false_type, uti::false_type > > ) ;
+}
 
-        ////////////////////////////////////////////////////////////////////////////////
-
-        static_assert( uti::is_v    < uti::is_referenceable<  int > > ) ;
-        static_assert( uti::is_not_v< uti::is_referenceable< void > > ) ;
-
-        static_assert( uti::is_same_v< int & , uti::add_lvalue_reference_t< int > > ) ;
-        static_assert( uti::is_same_v< int &&, uti::add_rvalue_reference_t< int > > ) ;
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        static_assert( std::is_same_v< uti::ptrdiff_t, std::ptrdiff_t > ) ;
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        static_assert( uti::is_same_v< int, uti::remove_all_extents< int[] >::type > ) ;
-
-        ////////////////////////////////////////////////////////////////////////////////
-
+TEST( TraitsTest, Assignability )
+{
         static_assert( !uti::is_assignable_v<       int  ,    int > ) ;
         static_assert(  uti::is_assignable_v<       int &,    int > ) ;
         static_assert( !uti::is_assignable_v<       int  , double > ) ;
@@ -180,9 +137,10 @@ constexpr int test_traits () noexcept
         static_assert( !uti::is_nothrow_move_assignable_v< throwcopythrowassign > ) ;
         static_assert(  uti::is_nothrow_move_assignable_v<   noexcopynoexassign > ) ;
         static_assert( !uti::is_nothrow_move_assignable_v<       nocopynoassign > ) ;
+}
 
-        ////////////////////////////////////////////////////////////////////////////////
-
+TEST( TraitsTest, Constructibility )
+{
         static_assert( uti::is_copy_constructible_v< int > ) ;
         static_assert( uti::is_move_constructible_v< int > ) ;
         static_assert( uti::is_nothrow_copy_constructible_v< int > ) ;
@@ -203,8 +161,9 @@ constexpr int test_traits () noexcept
         static_assert( !uti::is_nothrow_move_constructible_v< throwcopythrowassign > ) ;
         static_assert(  uti::is_nothrow_move_constructible_v<   noexcopynoexassign > ) ;
         static_assert( !uti::is_nothrow_move_constructible_v<       nocopynoassign > ) ;
+}
 
-        ////////////////////////////////////////////////////////////////////////////////
-
-        return 0;
+TEST( TraitsTest, Swappability )
+{
+        EXPECT_EQ( "not implemented", "bruh" ) ;
 }
