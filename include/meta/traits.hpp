@@ -1191,7 +1191,7 @@ using decay_t = typename decay< T >::type ;
 template< typename T > struct _is_swappable         ;
 template< typename T > struct _is_nothrow_swappable ;
 
-template< typename... Ts > class tuple ;
+template< typename... Ts > struct tuple ;
 
 template< typename >       struct _is_tuple_like_impl                   : false_type {} ;
 template< typename... Ts > struct _is_tuple_like_impl< tuple< Ts... > > :  true_type {} ;

@@ -370,7 +370,7 @@ template< typename T >
 void
 vector< T >::shrink_to_fit ()
 {
-        if( _view_base::size() == _buff_base::capacity() ) return _buff_base::capacity();
+        if( _view_base::size() == _buff_base::capacity() ) return;
 
         _buff_base buff( _view_base::size() );
 
