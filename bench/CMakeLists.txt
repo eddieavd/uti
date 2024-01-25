@@ -2,7 +2,6 @@ add_executable(
         gbench_uti
         gbench_uti.cpp
 )
-
 find_package( benchmark REQUIRED )
 
 target_link_libraries( gbench_uti PUBLIC benchmark::benchmark      )
