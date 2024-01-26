@@ -15,21 +15,34 @@ if( UTI_RELEASE )
 elseif( UTI_DEBUG )
         add_compile_options( -O0 )
         add_compile_definitions( UTI_DEBUG )
-        add_link_options( -fsanitize=address -fsanitize=undefined )
+#       add_link_options( -fsanitize=address -fsanitize=undefined )
 endif()
 
 if( UTI_HAS_STL )
         add_compile_definitions( UTI_HAS_STL )
-endif()
-
-if( UTI_TEST )
-        add_subdirectory( test )
-endif()
-
-if( UTI_BENCH )
-        add_subdirectory( bench )
+        if( UTI_USE_LIBCXX )
+                add_compile_definitions( UTI_USE_LIBCXX )
+        else
+                add_compile_definitions( UTI_USE_LIBSTDCXX )
+        endif()
 endif()
 
 add_executable( uti main.cpp )
 
 target_include_directories( uti PUBLIC include )
+
+#if( UTI_USE_LIBCXX )
+#        add_compile_options( -stdlib=libc++ )
+#        link_directories( /usr/lib/llvm-18/lib )
+#
+#        target_link_libraries( uti c++ c++abi )
+#elseif( UTI_HAS_STL )
+#
+#endif()
+
+if( UTI_TEST )
+        add_subdirectory( test )
+endif()
+if( UTI_BENCH )
+        add_subdirectory( bench )
+endif()
