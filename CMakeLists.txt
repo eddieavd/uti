@@ -22,7 +22,7 @@ if( UTI_HAS_STL )
         add_compile_definitions( UTI_HAS_STL )
         if( UTI_USE_LIBCXX )
                 add_compile_definitions( UTI_USE_LIBCXX )
-        else
+        else()
                 add_compile_definitions( UTI_USE_LIBSTDCXX )
         endif()
 endif()
