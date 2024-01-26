@@ -77,11 +77,11 @@ jobs:
             set( ninja_suffix "mac.zip" )
           endif()
 
-        set( ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}" )
-        file( DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS )
-        execute_process( COMMAND ${CMAKE_COMMAND } -E tar xvf ./ninja.zip )
+          set( ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}" )
+          file( DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS )
+          execute_process( COMMAND ${CMAKE_COMMAND } -E tar xvf ./ninja.zip )
 
-        execute_process( COMMAND chmod +x ninja )
+          execute_process( COMMAND chmod +x ninja )
 
       - name: configure
         shell: cmake -P {0}
