@@ -1,58 +1,57 @@
 name: test_multiplatform
 
-on:
-        push:
-        jobs:
-                build:
-                        runs-on: ${{ matrix.os }}
-                        strategy:
-                                fail-test: false
+on: push
+jobs:
+        build:
+                runs-on: ${{ matrix.os }}
+                strategy:
+                        fail-test: false
 
-                                matrix:
-                                        os: [ macos-latest, ubuntu-latest ]
-                                        build_type: [ Release ]
-                                        c_compiler: [ gcc, clang ]
-                                        include:
-                                                - os: macos-latest
-                                                  c_compiler: clang
-                                                  cpp_compiler: clang++
-                                                - os: ubuntu-latest
-                                                  c_compiler: gcc
-                                                  cpp_compiler: g++
-                                                - os: ubuntu-latest
-                                                  c_compiler: clang
-                                                  cpp_compiler: clang++
-                                        exclude:
-                                                - os: macos-latest
-                                                  c_compiler: gcc
-                                steps:
-                                        - uses: actions/checkout@v3
+                        matrix:
+                                os: [ macos-latest, ubuntu-latest ]
+                                build_type: [ Release ]
+                                c_compiler: [ gcc, clang ]
+                                include:
+                                        - os: macos-latest
+                                          c_compiler: clang
+                                          cpp_compiler: clang++
+                                        - os: ubuntu-latest
+                                          c_compiler: gcc
+                                          cpp_compiler: g++
+                                        - os: ubuntu-latest
+                                          c_compiler: clang
+                                          cpp_compiler: clang++
+                                exclude:
+                                        - os: macos-latest
+                                          c_compiler: gcc
+                        steps:
+                                - uses: actions/checkout@v3
 
-                                        - name: set reusable strings
+                                - name: set reusable strings
 
-                                          id: strings
-                                          shell: bash
-                                          run: |
-                                                echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+                                  id: strings
+                                  shell: bash
+                                  run: |
+                                        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-                                        - name: configure cmake
+                                - name: configure cmake
 
-                                          run: >
-                                                cmake -B ${{ steps.strings.outputs.build-output-dir }}
-                                                -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-                                                -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-                                                -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-                                                -DUTI_RELEASE=ON
-                                                -DUTI_HAS_STL=OFF
-                                                -DUTI_TEST=ON
-                                                -S ${{ github.workspace }}
+                                  run: >
+                                        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+                                        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+                                        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+                                        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+                                        -DUTI_RELEASE=ON
+                                        -DUTI_HAS_STL=OFF
+                                        -DUTI_TEST=ON
+                                        -S ${{ github.workspace }}
 
-                                        - name: build
+                                - name: build
 
-                                          run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+                                  run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
-                                        - name: test
+                                - name: test
 
-                                          working-directory: ${{ steps.strings.outputs.build-output-dir }}
+                                  working-directory: ${{ steps.strings.outputs.build-output-dir }}
 
-                                          run: ./test/gtest_uti
+                                  run: ./test/gtest_uti
