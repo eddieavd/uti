@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #define UTI_MALLOC(           size )  malloc(          size )
 #define UTI_REALLOC( ptr, new_size ) realloc( ptr, new_size )
-#define UTI_FREE(   ptr            )    free( ptr           )
+#define UTI_FREE(    ptr           )    free( ptr           )
 #endif
 
 

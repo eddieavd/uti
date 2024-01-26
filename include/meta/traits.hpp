@@ -1047,20 +1047,20 @@ template< typename T                   > inline constexpr bool    is_trivially_m
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#if __has_builtin( __is_trivially_destructible )
+#if !__has_builtin( __is_trivially_destructible )
 
 template< typename T >
 using _is_trivially_destructible_impl = integral_constant< __is_trivially_destructible( T ) > ;
 
 #elif __has_builtin( __has_trivial_destructor )
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-builtins"
+UTI_DIAGS_PUSH()
+UTI_DIAGS_CLANG_DISABLE( -Wdeprecated-builtins )
 
 template< typename T >
 using _is_trivially_destructible_impl = integral_constant< __has_trivial_destructor( T ) > ;
 
-#pragma GCC diagnostic pop
+UTI_DIAGS_POP()
 
 #elif defined( UTI_HAS_STL )
 
