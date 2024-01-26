@@ -55,7 +55,6 @@ jobs:
 
       - name: install llvm + clang
 
-        if: startsWith( matrix.config.name, 'ubuntu clang' )
         run: |
           sudo apt-get remove clang-${{ matrix.config.installed_clang_version }} \
             lldb-${{ matrix.config.installed_clang_version }} \
