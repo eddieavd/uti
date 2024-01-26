@@ -48,9 +48,10 @@ jobs:
           cd bench/lib
           git clone https://github.com/google/benchmark.git
           cd benchmark
-          cmake -E make_directory "build"
-          cmake -E chdir "build" cmake -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILID_TYPE=Release
-          sudo cmake --build "build" --config Release --target install
+          mkdir build
+          cd build
+          cmake .. -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILID_TYPE=Release
+          sudo cmake --build --config Release --target install
 
       - name: install llvm + clang
 
