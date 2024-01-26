@@ -93,9 +93,7 @@ jobs:
         run: |
           set(ninja_version "1.11.1")
 
-          if ("${{ runner.os }}" STREQUAL "Windows")
-            set(ninja_suffix "win.zip")
-          elseif ("${{ runner.os }}" STREQUAL "Linux")
+          if ("${{ runner.os }}" STREQUAL "Linux")
             set(ninja_suffix "linux.zip")
           elseif ("${{ runner.os }}" STREQUAL "macOS")
             set(ninja_suffix "mac.zip")
@@ -105,11 +103,9 @@ jobs:
           file(DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS)
           execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ninja.zip)
 
-          if ("${{ runner.os }}" STREQUAL "Linux")
-            execute_process(
-              COMMAND chmod +x ninja
-            )
-          endif()
+          execute_process(
+            COMMAND chmod +x ninja
+          )
 
       - name: configure
         shell: cmake -P {0}
