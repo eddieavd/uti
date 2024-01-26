@@ -39,13 +39,13 @@ on:
 
                                           run: >
                                                 cmake -B ${{ steps.strings.outputs.build-output-dir }}
-                                        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-                                        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-                                        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-                                        -DUTI_RELEASE=ON
-                                        -DUTI_HAS_STL=OFF
-                                        -DUTI_TEST=ON
-                                        -S ${{ github.workspace }}
+                                                -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+                                                -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+                                                -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+                                                -DUTI_RELEASE=ON
+                                                -DUTI_HAS_STL=OFF
+                                                -DUTI_TEST=ON
+                                                -S ${{ github.workspace }}
 
                                         - name: build
 
