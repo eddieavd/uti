@@ -69,19 +69,25 @@ jobs:
         id: ninja
         shell: cmake -P {0}
         run: |
-          set( ninja_version "1.11.1" )
+          set(ninja_version "1.11.1")
 
-          if( "${{ runner.os }}" STREQUAL "Linux" )
-            set( ninja_suffix "linux.zip" )
-          elseif( "${{ runner.os }}" STREQUAL "macOS" )
-            set( ninja_suffix "mac.zip" )
+          if ("${{ runner.os }}" STREQUAL "Windows")
+            set(ninja_suffix "win.zip")
+          elseif ("${{ runner.os }}" STREQUAL "Linux")
+            set(ninja_suffix "linux.zip")
+          elseif ("${{ runner.os }}" STREQUAL "macOS")
+            set(ninja_suffix "mac.zip")
           endif()
 
-          set( ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}" )
-          file( DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS )
-          execute_process( COMMAND ${CMAKE_COMMAND } -E tar xvf ./ninja.zip )
+          set(ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}")
+          file(DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS)
+          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ninja.zip)
 
-          execute_process( COMMAND chmod +x ninja )
+          if (NOT "${{ runner.os }}" STREQUAL "Windows")
+            execute_process(
+              COMMAND chmod +x ninja
+            )
+          endif()
 
       - name: configure
         shell: cmake -P {0}
