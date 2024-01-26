@@ -36,6 +36,9 @@ jobs:
       - name: get cmake
         uses: lukka/get-cmake@latest
 
+      - name: get clang18
+        run:  mkdir llvm && cd llvm && wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 18
+
       - name: build and run tests
         run:  export CXX=$(which clang++18) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DUTI_RELEASE=ON -DUTI_HAS_STL=OFF -DUTI_TEST=ON && make -j8 && ./tests/gtest_nplib
 
@@ -47,6 +50,9 @@ jobs:
 
       - name: get cmake
         uses: lukka/get-cmake@latest
+
+      - name: get clang18
+        run:  mkdir llvm && cd llvm && wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 18
 
       - name: build and run tests
         run:  export CXX=$(which clang++18) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DUTI_RELEASE=ON -DUTI_HAS_STL=ON -DUTI_TEST=ON && make -j8 && ./tests/gtest_nplib
@@ -61,10 +67,10 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: update g++
-        run:  sudo apt install g++-13
+        run:  sudo apt install g++-14
 
       - name: build and run tests
-        run:  export CXX=$(which g++-13) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DUTI_RELEASE=ON -DUTI_HAS_STL=OFF -DUTI_TEST=ON && make -j8 && ./tests/gtest_nplib
+        run:  export CXX=$(which g++-14) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DUTI_RELEASE=ON -DUTI_HAS_STL=OFF -DUTI_TEST=ON && make -j8 && ./tests/gtest_nplib
 
   googletest_ubuntu_gcc:
 
@@ -76,7 +82,7 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: update g++
-        run:  sudo apt install g++-13
+        run:  sudo apt install g++-14
 
       - name: build and run tests
-        run:  export CXX=$(which g++-13) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DUTI_RELEASE=ON -DUTI_HAS_STL=ON -DUTI_TEST=ON && make -j8 && ./tests/gtest_nplib
+        run:  export CXX=$(which g++-14) && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DUTI_RELEASE=ON -DUTI_HAS_STL=ON -DUTI_TEST=ON && make -j8 && ./tests/gtest_nplib
