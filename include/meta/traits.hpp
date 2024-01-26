@@ -1047,7 +1047,7 @@ template< typename T                   > inline constexpr bool    is_trivially_m
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#if !__has_builtin( __is_trivially_destructible )
+#if __has_builtin( __is_trivially_destructible )
 
 template< typename T >
 using _is_trivially_destructible_impl = integral_constant< __is_trivially_destructible( T ) > ;
@@ -1058,7 +1058,7 @@ UTI_DIAGS_PUSH()
 UTI_DIAGS_CLANG_DISABLE( -Wdeprecated-builtins )
 
 template< typename T >
-using _is_trivially_destructible_impl = integral_constant< __has_trivial_destructor( T ) > ;
+using _is_trivially_destructible_impl = integral_constant< is_destructible_v< T > && __has_trivial_destructor( T ) > ;
 
 UTI_DIAGS_POP()
 
