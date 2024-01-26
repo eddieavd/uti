@@ -15,7 +15,7 @@ jobs:
       matrix:
         config:
         - {
-            name: "benchmark debug"
+            name: "benchmark debug",
             os: ubuntu-latest,
             build_type: "Debug",
             is_debug_build: "ON",
@@ -27,7 +27,7 @@ jobs:
             has_stl: "OFF"
           }
         - {
-            name: "benchmark release"
+            name: "benchmark release",
             os: ubuntu-latest,
             build_type: "Release",
             is_debug_build: "OFF",
