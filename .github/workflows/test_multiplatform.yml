@@ -23,8 +23,8 @@ jobs:
             name: "ubuntu gcc",
             os: ubuntu-latest,
             build_type: "Release",
-            cc: "gcc-13",
-            cxx: "g++-13",
+            cc: "gcc-14",
+            cxx: "g++-14",
             clang_version: 18,
             installed_clang_version: 14
           }
@@ -57,12 +57,12 @@ jobs:
           chmod +x llvm.sh
           sudo ./llvm.sh ${{ matrix.config.clang_version }} all
 
-      - name: install gcc 13
+      - name: install gcc 14
         if: matrix.config.name == 'ubuntu gcc'
         run: |
           sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
           sudo apt update
-          sudo apt-get install g++-13
+          sudo apt-get install g++-14
           echo "CXXFLAGS=$CXXFLAGS" >> $GITHUB_ENV
 
       - name: download ninja
