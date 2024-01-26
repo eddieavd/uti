@@ -11,59 +11,29 @@ jobs:
       matrix:
         config:
         - {
-            name: "ubuntu clang-18 debug nostl",
-            os: ubuntu-latest,
-            build_type: "Debug",
-            is_debug_build: "ON",
-            is_release_build: "OFF",
-            cc: "clang-18",
-            cxx: "clang++-18",
-            clang_version: 18,
-            installed_clang_version: 14,
-            has_stl: "OFF"
-          }
-        - {
-            name: "ubuntu clang-18 release nostl",
-            os: ubuntu-latest,
-            build_type: "Release",
-            is_debug_build: "OFF",
-            is_release_build: "ON",
-            cc: "clang-18",
-            cxx: "clang++-18",
-            clang_version: 18,
-            installed_clang_version: 14,
-            has_stl: "OFF"
-          }
-        - {
-            name: "ubuntu clang-18 debug",
-            os: ubuntu-latest,
-            build_type: "Debug",
-            is_debug_build: "ON",
-            is_release_build: "OFF",
-            cc: "clang-18",
-            cxx: "clang++-18",
-            clang_version: 18,
-            installed_clang_version: 14,
-            has_stl: "ON"
-          }
-        - {
             name: "ubuntu clang-18 release",
             os: ubuntu-latest,
             build_type: "Release",
-            is_debug_build: "OFF",
-            is_release_build: "ON",
             cc: "clang-18",
             cxx: "clang++-18",
             clang_version: 18,
-            installed_clang_version: 14,
-            has_stl: "ON"
+            installed_clang_version: 14
+          }
+        - {
+            name: "ubuntu gcc",
+            os: ubuntu-latest,
+            build_type: "Release",
+            cc: "gcc-14",
+            cxx: "g++-14",
+            clang_version: 18,
+            installed_clang_version: 14
           }
     steps:
       - uses: actions/checkout@v3
 
       - name: install llvm + clang
 
-        if: startsWith( matrix.config.name, 'ubuntu clang' )
+        if: startsWith( matrix.config.os, 'ubuntu-' )
         run: |
           sudo apt-get remove clang-${{ matrix.config.installed_clang_version }} \
             lldb-${{ matrix.config.installed_clang_version }} \
@@ -87,13 +57,23 @@ jobs:
           chmod +x llvm.sh
           sudo ./llvm.sh ${{ matrix.config.clang_version }} all
 
+      - name: install gcc 14
+        if: matrix.config.name == 'ubuntu gcc'
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
+          sudo apt update
+          sudo apt-get install g++-14
+          echo "CXXFLAGS=$CXXFLAGS" >> $GITHUB_ENV
+
       - name: download ninja
         id: ninja
         shell: cmake -P {0}
         run: |
           set(ninja_version "1.11.1")
 
-          if ("${{ runner.os }}" STREQUAL "Linux")
+          if ("${{ runner.os }}" STREQUAL "Windows")
+            set(ninja_suffix "win.zip")
+          elseif ("${{ runner.os }}" STREQUAL "Linux")
             set(ninja_suffix "linux.zip")
           elseif ("${{ runner.os }}" STREQUAL "macOS")
             set(ninja_suffix "mac.zip")
@@ -103,9 +83,11 @@ jobs:
           file(DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS)
           execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ninja.zip)
 
-          execute_process(
-            COMMAND chmod +x ninja
-          )
+          if (NOT "${{ runner.os }}" STREQUAL "Windows")
+            execute_process(
+              COMMAND chmod +x ninja
+            )
+          endif()
 
       - name: configure
         shell: cmake -P {0}
@@ -128,9 +110,8 @@ jobs:
               -D CMAKE_EXPORT_COMPILE_COMMANDS=ON
               -G Ninja
               -D CMAKE_MAKE_PROGRAM=${ninja_program}
-              -D UTI_DEBUG=${{ matrix.config.is_debug_build }}
-              -D UTI_RELEASE=${{ matrix.config.is_release_build }}
-              -D UTI_HAS_STL=${{ matrix.config.has_stl }}
+              -D UTI_RELEASE=ON
+              -D UTI_HAS_STL=OFF
               -D UTI_TEST=ON
             RESULT_VARIABLE result
           )
