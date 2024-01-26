@@ -8,6 +8,10 @@
 
 #include <util/config.hpp>
 
+#ifdef UTI_HAS_STL
+#include <type_traits>
+#endif
+
 
 #ifndef UTI_MOVE
 #define UTI_MOVE(...) \
