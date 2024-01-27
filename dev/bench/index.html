@@ -145,7 +145,7 @@
             {
               const { commit, date, tool, benches } = entry;
               const tstamp = new Date( commit.timestamp );
-              if( tstamp === latestDate )
+              if( tstamp.getTime() === latestDate.getTime() )
               {
                 for( const bench of benches )
                 {
