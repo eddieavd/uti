@@ -137,7 +137,7 @@
               {
                 const result = { commit, date, tool, bench };
 
-                const bm_name = result.bench.name.split( '/' )[ 0 ];
+                const bm_name = result.bench.name.split( '<' )[ 0 ];
                 const arr = map.get( bm_name );
 
                 if( arr === undefined )
