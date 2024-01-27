@@ -132,12 +132,14 @@
           function collectBenches( entries )
           {
             const map = new Map();
-            let latestDate = new Date("1997-01-01T12:00:00+01:00");
+            let latestDate = new Date( "1997-01-01T12:00:00+01:00" );
+            let secondLatestDate = new Date( "1997-01-01T12:00:00+01:00" );
             for( const entry of entries )
             {
               let date = new Date( entry.commit.timestamp );
               if( date > latestDate )
               {
+                secondLatestDate = latestDate;
                 latestDate = date;
               }
             }
@@ -145,13 +147,13 @@
             {
               const { commit, date, tool, benches } = entry;
               const tstamp = new Date( commit.timestamp );
-              if( tstamp.getTime() === latestDate.getTime() )
+              if( tstamp.getTime() === latestDate.getTime() || tstamp.getTime() == secondLatestDate.getTime() )
               {
                 for( const bench of benches )
                 {
-                const result = { commit, date, tool, bench };
+                  const result = { commit, date, tool, bench };
 
-                  const bm_name = result.bench.name.split( '<' )[ 0 ];
+                  const bm_name = result.bench.name.split( '<' )[ 0 ].concat( commit.id );
                   const arr = map.get( bm_name );
         
                   if( arr === undefined )
@@ -259,7 +261,7 @@
                     {
                       scaleLabel: {
                         display: true,
-                        labelString: bm[ 1 ][ 0 ].bench.name.split( '<' )[ 0 ],
+                        labelString: bm[ 0 ],
                       },
                     }
                   ],
