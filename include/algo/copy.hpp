@@ -32,7 +32,7 @@ template< typename InVal, typename OutVal,
           typename = enable_if_t< is_same_v< remove_cv_t< InVal >, OutVal > > >
 void copy ( InVal * begin, InVal * end, OutVal * dest )
 {
-        if constexpr( is_trivially_copy_assignable_v< InVal > )
+        if constexpr( is_trivially_relocatable_v< InVal > )
         {
                 ssize_t const n = static_cast< ssize_t >( end - begin );
                 if( n > 0 )

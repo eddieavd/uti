@@ -102,7 +102,7 @@ template< typename T >
 void
 vector< T >::_copy_buffer ( _buff_base & _buff_ ) noexcept( is_nothrow_copy_assignable_v< value_type > && is_nothrow_destructible_v< value_type > )
 {
-        if constexpr( is_trivially_copy_assignable_v< value_type > && is_trivially_destructible_v< value_type > )
+        if constexpr( is_trivially_relocatable_v< value_type > )
         {
                 ::uti::copy( _view_base::begin(), _view_base::end(), _buff_.begin() );
         }
