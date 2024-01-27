@@ -245,7 +245,7 @@
                   points.push( point );
                 }
                 const cset = {
-                  label: bms[ 1 ][ 0 ].bench.name.split( '/' )[ 0 ].concat( bms[ 1 ][ 0 ].commit.timestamp ),
+                  label: bms[ 1 ][ 0 ].bench.name.split( '/' )[ 0 ].concat( bms[ 1 ][ 0 ].commit.id ),
                   data: points,
                   borderWidth: 1,
                   borderColor: colors[ col_idx ],
