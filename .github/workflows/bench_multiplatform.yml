@@ -145,7 +145,7 @@ jobs:
           output-file-path: benchmark.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
-          alert-threshold: '20%'
+          alert-threshold: '1%'
           comment-on-alert: true
           fail-on-alert: false
           alert-comment-cc-users: '@eddieavd'
