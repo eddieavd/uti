@@ -181,10 +181,10 @@
         {
           function getChartData( benchmarks )
           {
+            const name = benchmarks[ 0 ].bench.name;
             const bmname = benchmarks[ 0 ].bench.name.split( '/' )[ 0 ];
             const valuesmap = new Map();
 
-            const values = [];
             const labels = [];
 
             for( const bm of benchmarks )
@@ -192,11 +192,11 @@
               const label = bm.bench.name.split( '/' )[ 1 ];
               const value = bm.bench.value;
 
-              const vals = valuesmap.get( label );
+              const vals = valuesmap.get( bmname );
 
               if( vals === undefined )
               {
-                valuesmap.set( label, [value] );
+                valuesmap.set( bmname, [value] );
                 labels.push( label );
               }
               else
@@ -208,8 +208,8 @@
             for( const label of labels )
             {
               const cset = {
-                label: bmname,
-                data: valuesmap.get( label ),
+                label: name,
+                data: valuesmap.get( bmname ),
                 borderWidth: 1
               };
               charsets.push( cset );
