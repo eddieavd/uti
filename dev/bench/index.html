@@ -153,7 +153,7 @@
                 {
                   const result = { commit, date, tool, bench };
 
-                  const bm_name = result.bench.name.split( '<' )[ 0 ].concat( commit.id );
+                  const bm_name = result.bench.name.split( '<' )[ 0 ];
                   const arr = map.get( bm_name );
         
                   if( arr === undefined )
@@ -219,25 +219,41 @@
             const chartsets = [];
             for( const entry of instantiations )
             {
-              const points = [];
-              for( const bm of entry[1] )
+              const commitMap = new Map();
+              for( const bm of entry[ 1 ] )
               {
-                const point = {
-                  x: Number( bm.bench.name.split( '/' )[ 1 ] ),
-                  y: bm.bench.value
-                };
-                points.push( point );
+                const arr = commitMap.get( bm.commit.id );
+                if( arr === undefined )
+                {
+                  commitMap.set( bm.commit.id, [bm] );
+                }
+                else
+                {
+                  arr.push( bm );
+                }
                 labels.add( bm.bench.name.split( '/' )[ 1 ] );
               }
-              const cset = {
-                label: entry[1][0].bench.name.split( '/' )[ 0 ],
-                data: points,
-                borderWidth: 1,
-                borderColor: colors[ col_idx ],
-                backgroundColor: colors_bg[ col_idx ]
-              };
-              chartsets.push( cset );
-              col_idx = ( col_idx + 1 ) % colors.length;
+              for( const bms of commitMap )
+              {
+                const points = [];
+                for( const bm of bms[ 1 ] )
+                {
+                  const point = {
+                    x: Number( bm.bench.name.split( '/' )[ 1 ] ),
+                    y: bm.bench.value
+                  };
+                  points.push( point );
+                }
+                const cset = {
+                  label: bms[ 1 ][ 0 ].bench.name.split( '/' )[ 0 ].concat( bms[ 1 ][ 0 ].commit.timestamp! ),
+                  data: points,
+                  borderWidth: 1,
+                  borderColor: colors[ col_idx ],
+                  backgroundColor: colors_bg[ col_idx ]
+                };
+                chartsets.push( cset );
+                col_idx = ( col_idx + 1 ) % colors.length;
+              }
             }
             const chartdata = {
               labels: Array.from( labels ),
