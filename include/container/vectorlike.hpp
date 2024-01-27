@@ -167,7 +167,8 @@ public:
         using      ssize_type = typename _base::     ssize_type ;
         using difference_type = typename _base::difference_type ;
 
-        using  allocator_type = allocator< value_type >         ;
+        using allocator_type = static_bump_allocator< value_type, 1024 > ;
+        using  _alloc_traits = allocator_traits< allocator_type > ;
 
         using         pointer = typename _base::        pointer ;
         using   const_pointer = typename _base::  const_pointer ;
@@ -192,6 +193,8 @@ public:
 
         ssize_type reserve ( ssize_type const _capacity_ ) ;
 
+        bool can_realloc_inplace ( ssize_type const _capacity_ ) noexcept ;
+
         void deallocate () noexcept ;
 
         UTI_NODISCARD ssize_type       & capacity ()       noexcept { return capacity_ ; }
@@ -215,7 +218,7 @@ protected:
 template< typename T >
 _vectorlike_buffer< T >::_vectorlike_buffer ( ssize_type const _capacity_ )
 {
-        buffer_ = allocator_type::allocate( _capacity_ );
+        buffer_ = _alloc_traits::allocate( _capacity_ ).ptr;
 
         if( buffer_ ) capacity_ = _capacity_;
 }
@@ -268,7 +271,7 @@ _vectorlike_buffer< T >::reserve ( ssize_type const _capacity_ )
 {
         if( _capacity_ <= capacity_ ) return capacity_;
 
-        auto tmp = allocator_type::reallocate( buffer_, _capacity_ );
+        auto tmp = _alloc_traits::reallocate( { buffer_, capacity_ }, _capacity_ ).ptr;
 
         if( tmp != nullptr )
         {
@@ -279,10 +282,17 @@ _vectorlike_buffer< T >::reserve ( ssize_type const _capacity_ )
 }
 
 template< typename T >
+bool
+_vectorlike_buffer< T >::can_realloc_inplace ( ssize_type const _capacity_ ) noexcept
+{
+        return _alloc_traits::can_realloc_inplace( { buffer_, capacity_ }, _capacity_ );
+}
+
+template< typename T >
 void
 _vectorlike_buffer< T >::deallocate () noexcept
 {
-        if( buffer_ ) allocator_type::deallocate( buffer_ );
+        if( buffer_ ) _alloc_traits::deallocate( { buffer_, capacity_ } );
 }
 
 

@@ -29,11 +29,16 @@ _move_if_noexcept ( T & _val_ ) noexcept
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template< typename T > using has_value_type     = T::    value_type ;
-template< typename T > using has_size_type      = T::     size_type ;
-template< typename T > using has_ssize_type     = T::    ssize_type ;
-template< typename T > using has_iterator       = T::      iterator ;
-template< typename T > using has_const_iterator = T::const_iterator ;
+template< typename T > using has_value_type      = T::     value_type ;
+template< typename T > using has_size_type       = T::      size_type ;
+template< typename T > using has_ssize_type      = T::     ssize_type ;
+template< typename T > using has_difference_type = T::difference_type ;
+template< typename T > using has_pointer         = T::        pointer ;
+template< typename T > using has_const_pointer   = T::  const_pointer ;
+template< typename T > using has_reference       = T::      reference ;
+template< typename T > using has_const_reference = T::const_reference ;
+template< typename T > using has_iterator        = T::       iterator ;
+template< typename T > using has_const_iterator  = T:: const_iterator ;
 
 template< typename T > using has_begin = decltype( uti::declval< T >().begin() ) ;
 template< typename T > using has_end   = decltype( uti::declval< T >().  end() ) ;
