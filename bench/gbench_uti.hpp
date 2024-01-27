@@ -14,7 +14,7 @@ namespace uti::bench
 
 
 template< typename T >
-static void bm_push_back ( benchmark::State & state )
+static void bm_push_back_trivial ( benchmark::State & state )
 {
         for( auto _ : state )
         {
@@ -46,7 +46,7 @@ static void bm_push_back_nontrivial ( benchmark::State & state )
 }
 
 template< typename T >
-static void bm_push_back_reserved ( benchmark::State & state )
+static void bm_push_back_reserved_trivial ( benchmark::State & state )
 {
         for( auto _ : state )
         {
@@ -76,6 +76,40 @@ static void bm_push_back_reserved_nontrivial ( benchmark::State & state )
                 }
                 benchmark::ClobberMemory();
                 benchmark::DoNotOptimize( container );
+        }
+}
+
+template< typename T >
+static void bm_copy_container_trivial ( benchmark::State & state )
+{
+        T container;
+        for( ssize_t i = 0; i < state.range( 0 ); ++i )
+        {
+                container.push_back( i );
+        }
+        for( auto _ : state )
+        {
+                T copy( container );
+
+                benchmark::ClobberMemory();
+                benchmark::DoNotOptimize( copy );
+        }
+}
+
+template< typename T >
+static void bm_copy_container_nontrivial ( benchmark::State & state )
+{
+        T container;
+        for( ssize_t i = 0; i < state.range( 0 ); ++i )
+        {
+                container.emplace_back();
+        }
+        for( auto _ : state )
+        {
+                T copy( container );
+
+                benchmark::ClobberMemory();
+                benchmark::DoNotOptimize( copy );
         }
 }
 
