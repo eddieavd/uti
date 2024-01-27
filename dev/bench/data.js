@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706322360840,
+  "lastUpdate": 1706322976318,
   "repoUrl": "https://github.com/eddieavd/uti",
   "entries": {
     "uti benchmark": [
@@ -252,6 +252,90 @@ window.BENCHMARK_DATA = {
             "value": 1630.1476088992742,
             "unit": "us/iter",
             "extra": "iterations: 427\ncpu: 1630.1632318501179 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "edhemavdagic@gmail.com",
+            "name": "Edhem Avdagic",
+            "username": "eddieavd"
+          },
+          "committer": {
+            "email": "edhemavdagic@gmail.com",
+            "name": "Edhem Avdagic",
+            "username": "eddieavd"
+          },
+          "distinct": true,
+          "id": "a899f63f87c186e8039d4cc6d01b433a3293f7e5",
+          "message": "low value so it always complains and leaves a nicely formatted table of benchmarks on the commit hehe",
+          "timestamp": "2024-01-27T03:33:53+01:00",
+          "tree_id": "af60884b93c766410e2b2e7ecacaf2c5f975bfda",
+          "url": "https://github.com/eddieavd/uti/commit/a899f63f87c186e8039d4cc6d01b433a3293f7e5"
+        },
+        "date": 1706322975366,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "bm_push_back< std::vector< int > >/512",
+            "value": 0.4675506460162025,
+            "unit": "us/iter",
+            "extra": "iterations: 1462889\ncpu: 0.46754565794123815 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< std::vector< int > >/4096",
+            "value": 6.589288406075689,
+            "unit": "us/iter",
+            "extra": "iterations: 109221\ncpu: 6.589213612766776 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< std::vector< int > >/32768",
+            "value": 119.7520158569484,
+            "unit": "us/iter",
+            "extra": "iterations: 5928\ncpu: 119.64795883940619 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< std::vector< int > >/262144",
+            "value": 1356.6595826771202,
+            "unit": "us/iter",
+            "extra": "iterations: 508\ncpu: 1356.6311023622054 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< std::vector< int > >/2097152",
+            "value": 8782.761975000143,
+            "unit": "us/iter",
+            "extra": "iterations: 80\ncpu: 8782.391249999999 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< uti::vector< int > >/512",
+            "value": 0.5406199161608725,
+            "unit": "us/iter",
+            "extra": "iterations: 1329212\ncpu: 0.540611128999738 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< uti::vector< int > >/4096",
+            "value": 3.2539263809127905,
+            "unit": "us/iter",
+            "extra": "iterations: 214007\ncpu: 3.2538837514660734 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< uti::vector< int > >/32768",
+            "value": 23.884224535771967,
+            "unit": "us/iter",
+            "extra": "iterations: 29296\ncpu: 23.883564309120715 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< uti::vector< int > >/262144",
+            "value": 192.92749635234298,
+            "unit": "us/iter",
+            "extra": "iterations: 3701\ncpu: 192.92383139691987 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< uti::vector< int > >/2097152",
+            "value": 1520.5738599562335,
+            "unit": "us/iter",
+            "extra": "iterations: 457\ncpu: 1520.5654266958416 us\nthreads: 1"
           }
         ]
       }
