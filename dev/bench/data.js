@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706322976318,
+  "lastUpdate": 1706343286543,
   "repoUrl": "https://github.com/eddieavd/uti",
   "entries": {
     "uti benchmark": [
@@ -336,6 +336,102 @@ window.BENCHMARK_DATA = {
             "value": 1520.5738599562335,
             "unit": "us/iter",
             "extra": "iterations: 457\ncpu: 1520.5654266958416 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "edhemavdagic@gmail.com",
+            "name": "Edhem Avdagic",
+            "username": "eddieavd"
+          },
+          "committer": {
+            "email": "edhemavdagic@gmail.com",
+            "name": "Edhem Avdagic",
+            "username": "eddieavd"
+          },
+          "distinct": true,
+          "id": "333e83c79f6b09c34e70bb1aee3324208c0d323a",
+          "message": "update benchmarks",
+          "timestamp": "2024-01-27T09:12:08+01:00",
+          "tree_id": "5aab926d6b844426b4a2116da6e7fa7b4db65a08",
+          "url": "https://github.com/eddieavd/uti/commit/333e83c79f6b09c34e70bb1aee3324208c0d323a"
+        },
+        "date": 1706343285601,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "bm_push_back< std::vector< int > >/512",
+            "value": 0.5039187215135125,
+            "unit": "us/iter",
+            "extra": "iterations: 1396495\ncpu: 0.5039101464738506 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< std::vector< int > >/1024",
+            "value": 0.8768571473322091,
+            "unit": "us/iter",
+            "extra": "iterations: 798074\ncpu: 0.876841871806374 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< std::vector< int > >/4096",
+            "value": 7.327018589152391,
+            "unit": "us/iter",
+            "extra": "iterations: 95432\ncpu: 7.32690816497611 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< std::vector< int > >/16384",
+            "value": 31.795810162858626,
+            "unit": "us/iter",
+            "extra": "iterations: 21982\ncpu: 31.79607406059503 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< std::vector< int > >/65536",
+            "value": 307.01595952782924,
+            "unit": "us/iter",
+            "extra": "iterations: 2372\ncpu: 306.90712478920733 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< std::vector< int > >/131072",
+            "value": 634.5502452142111,
+            "unit": "us/iter",
+            "extra": "iterations: 1097\ncpu: 634.5061075660898 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< uti::vector< int > >/512",
+            "value": 0.5422759184742474,
+            "unit": "us/iter",
+            "extra": "iterations: 1290537\ncpu: 0.5422350540898873 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< uti::vector< int > >/1024",
+            "value": 0.9591136817167925,
+            "unit": "us/iter",
+            "extra": "iterations: 733636\ncpu: 0.9590760268034827 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< uti::vector< int > >/4096",
+            "value": 3.3652995675154536,
+            "unit": "us/iter",
+            "extra": "iterations: 208100\ncpu: 3.3650216242191267 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< uti::vector< int > >/16384",
+            "value": 12.912444542870194,
+            "unit": "us/iter",
+            "extra": "iterations: 54186\ncpu: 12.912296534160127 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< uti::vector< int > >/65536",
+            "value": 51.03221157481656,
+            "unit": "us/iter",
+            "extra": "iterations: 13754\ncpu: 51.03265231932535 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back< uti::vector< int > >/131072",
+            "value": 101.90604552128852,
+            "unit": "us/iter",
+            "extra": "iterations: 6810\ncpu: 101.90468428781205 us\nthreads: 1"
           }
         ]
       }
