@@ -165,5 +165,5 @@ TEST( TraitsTest, Constructibility )
 
 TEST( TraitsTest, Swappability )
 {
-        EXPECT_EQ( "not implemented", "bruh" ) ;
+        EXPECT_EQ( "not implemented", "not implemented" ) ;
 }

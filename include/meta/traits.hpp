@@ -8,6 +8,10 @@
 
 #include <util/config.hpp>
 
+#ifdef UTI_HAS_STL
+#include <type_traits>
+#endif
+
 
 #ifndef UTI_MOVE
 #define UTI_MOVE(...) \
@@ -1054,13 +1058,13 @@ using _is_trivially_destructible_impl = integral_constant< __is_trivially_destru
 
 #elif __has_builtin( __has_trivial_destructor )
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-builtins"
+UTI_DIAGS_PUSH()
+UTI_DIAGS_CLANG_DISABLE( -Wdeprecated-builtins )
 
 template< typename T >
-using _is_trivially_destructible_impl = integral_constant< __has_trivial_destructor( T ) > ;
+using _is_trivially_destructible_impl = integral_constant< is_destructible_v< T > && __has_trivial_destructor( T ) > ;
 
-#pragma GCC diagnostic pop
+UTI_DIAGS_POP()
 
 #elif defined( UTI_HAS_STL )
 
