@@ -14,7 +14,7 @@ namespace uti::bench
 
 
 template< typename T >
-static void bm_push_back ( benchmark::State & state )
+static void bm_push_back_trivial ( benchmark::State & state )
 {
         for( auto _ : state )
         {
@@ -46,7 +46,7 @@ static void bm_push_back_nontrivial ( benchmark::State & state )
 }
 
 template< typename T >
-static void bm_push_back_reserved ( benchmark::State & state )
+static void bm_push_back_reserved_trivial ( benchmark::State & state )
 {
         for( auto _ : state )
         {
