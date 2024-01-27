@@ -12,6 +12,10 @@
 using namespace uti::bench ;
 
 
+BENCHMARK( bm_push_back< std::vector< int > > )->RangeMultiplier( 8 )->Range( 512, 512 << 12 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_push_back< uti::vector< int > > )->RangeMultiplier( 8 )->Range( 512, 512 << 12 )->Unit( benchmark::kMicrosecond );
+
+/*
 BENCHMARK( bm_push_back< std::vector< int > > )->RangeMultiplier( 2 )->Range( 256, 256 << 16 )->Unit( benchmark::kMicrosecond );
 BENCHMARK( bm_push_back< uti::vector< int > > )->RangeMultiplier( 2 )->Range( 256, 256 << 16 )->Unit( benchmark::kMicrosecond );
 
@@ -23,3 +27,4 @@ BENCHMARK( bm_push_back_reserved< uti::vector< int > > )->RangeMultiplier( 2 )->
 
 BENCHMARK( bm_push_back_reserved_nontrivial< std::vector< std::string > > )->RangeMultiplier( 2 )->Range( 256, 256 << 12 )->Unit( benchmark::kMicrosecond );
 BENCHMARK( bm_push_back_reserved_nontrivial< uti::vector< std::string > > )->RangeMultiplier( 2 )->Range( 256, 256 << 12 )->Unit( benchmark::kMicrosecond );
+*/
