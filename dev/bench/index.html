@@ -132,23 +132,36 @@
           function collectBenches( entries )
           {
             const map = new Map();
+            let latestDate = new Date("1997-01-01T12:00:00+01:00");
+            for( const entry of entries )
+            {
+              let date = new Date( entry.commit.timestamp );
+              if( date > latestDate )
+              {
+                latestDate = date;
+              }
+            }
             for( const entry of entries )
             {
               const { commit, date, tool, benches } = entry;
-              for( const bench of benches )
+              const tstamp = new Date( commit.timestamp );
+              if( tstamp === latestDate )
               {
-                const result = { commit, date, tool, bench };
-
-                const bm_name = result.bench.name.split( '<' )[ 0 ];
-                const arr = map.get( bm_name );
-
-                if( arr === undefined )
+                for( const bench of benches )
                 {
-                  map.set( bm_name, [result] );
-                }
-                else
-                {
-                  arr.push( result );
+                const result: types.SingleBenchmark = { commit, date, tool, bench };
+
+                  const bm_name = result.bench.name.split( '<' )[ 0 ];
+                  const arr = map.get( bm_name );
+        
+                  if( arr === undefined )
+                  {
+                    map.set( bm_name, [result] );
+                  }
+                  else
+                  {
+                    arr.push( result );
+                  }
                 }
               }
             }
