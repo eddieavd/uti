@@ -193,6 +193,7 @@ public:
 
         ssize_type reserve ( ssize_type const _capacity_ ) ;
 
+        bool try_realloc_inplace ( ssize_type const _capacity_ ) noexcept ;
         bool can_realloc_inplace ( ssize_type const _capacity_ ) noexcept ;
 
         void deallocate () noexcept ;
@@ -279,6 +280,18 @@ _vectorlike_buffer< T >::reserve ( ssize_type const _capacity_ )
                 capacity_ = _capacity_;
         }
         return capacity_;
+}
+
+template< typename T >
+bool
+_vectorlike_buffer< T >::try_realloc_inplace ( ssize_type const _capacity_ ) noexcept
+{
+        if( _alloc_traits::try_realloc_inplace( { buffer_, capacity_ }, _capacity_ ) )
+        {
+                capacity_ = _capacity_;
+                return true;
+        }
+        return false;
 }
 
 template< typename T >

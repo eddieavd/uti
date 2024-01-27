@@ -30,6 +30,7 @@ public:
         using difference_type = typename      _base::difference_type ;
 
         using  allocator_type = typename _buff_base:: allocator_type ;
+        using   _alloc_traits = typename _buff_base::  _alloc_traits ;
 
         using         pointer = typename      _base::        pointer ;
         using   const_pointer = typename      _base::  const_pointer ;
@@ -344,14 +345,17 @@ vector< T >::reserve ( ssize_type const _capacity_ )
         }
         else
         {
-                ssize_type size = _view_base::size();
-                _buff_base buff( _capacity_ );
+                if( !_alloc_traits::try_realloc_inplace( { _buff_base::begin(), _buff_base::capacity() }, _capacity_ ) )
+                {
+                        ssize_type size = _view_base::size();
+                        _buff_base buff( _capacity_ );
 
-                _copy_buffer( buff );
-                _swap_buffer( buff );
+                        _copy_buffer( buff );
+                        _swap_buffer( buff );
 
-                _view_base::_begin() = _buff_base::begin();
-                _view_base::  _end() = _buff_base::begin() + size;
+                        _view_base::_begin() = _buff_base::begin();
+                        _view_base::  _end() = _buff_base::begin() + size;
+                }
         }
         return _buff_base::capacity();
 }
