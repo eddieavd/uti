@@ -12,7 +12,7 @@
 #include <meta/uti_traits.hpp>
 #include <container/allocator.hpp>
 
-#define UTI_STATIC_MEM_SIZE 1024 << 4
+#define UTI_STATIC_MEM_SIZE 16 * 1024 * 1024
 
 
 namespace uti
