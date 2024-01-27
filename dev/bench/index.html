@@ -125,6 +125,7 @@
           customSmallerIsBetter: '#ff3838',
           _: '#333333'
         };
+        const colors = [ "#3496e4", "#fd5b7b", "#45b7b7", "#ff9642", "#8d5afb", "#fec855", "#c2c4c8" ];
 
         function init() {
           function collectBenches( entries )
@@ -198,6 +199,7 @@
                 arr.push( entry );
               }
             }
+            const col_idx = 0;
             const chartsets = [];
             for( const entry of instantiations )
             {
@@ -210,9 +212,11 @@
               const cset = {
                 label: entry[1][0].bench.name.split( '/' )[ 0 ],
                 data: values,
-                borderWidth: 1
+                borderWidth: 1,
+                borderColor: colors[ col_idx ],
               };
               chartsets.push( cset );
+              col_idx = ( col_idx + 1 ) % colors.length;
             }
             const chartdata = {
               labels: Array.from( labels ),
