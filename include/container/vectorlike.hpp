@@ -12,6 +12,8 @@
 #include <meta/uti_traits.hpp>
 #include <container/allocator.hpp>
 
+#define UTI_STATIC_MEM_SIZE 1024 << 4
+
 
 namespace uti
 {
@@ -167,7 +169,7 @@ public:
         using      ssize_type = typename _base::     ssize_type ;
         using difference_type = typename _base::difference_type ;
 
-        using allocator_type = static_bump_allocator< value_type, 1024 > ;
+        using allocator_type = static_bump_allocator< value_type, UTI_STATIC_MEM_SIZE > ;
         using  _alloc_traits = allocator_traits< allocator_type > ;
 
         using         pointer = typename _base::        pointer ;

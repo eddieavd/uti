@@ -345,7 +345,7 @@ vector< T >::reserve ( ssize_type const _capacity_ )
         }
         else
         {
-                if( !_alloc_traits::try_realloc_inplace( { _buff_base::begin(), _buff_base::capacity() }, _capacity_ ) )
+                if( !_buff_base::try_realloc_inplace( _capacity_ ) )
                 {
                         ssize_type size = _view_base::size();
                         _buff_base buff( _capacity_ );
