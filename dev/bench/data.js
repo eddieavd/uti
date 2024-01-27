@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706356357128,
+  "lastUpdate": 1706356409291,
   "repoUrl": "https://github.com/eddieavd/uti",
   "entries": {
     "uti benchmark": [
@@ -6408,6 +6408,966 @@ window.BENCHMARK_DATA = {
             "value": 26529.070333333915,
             "unit": "us/iter",
             "extra": "iterations: 27\ncpu: 26524.76666666656 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49100975+eddieavd@users.noreply.github.com",
+            "name": "eddieavd",
+            "username": "eddieavd"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a2963c2a87ed65e5dfffe0200ceac8e152edf751",
+          "message": "remove unnecessary workflow file (#8)",
+          "timestamp": "2024-01-27T12:49:21+01:00",
+          "tree_id": "a1b73975229688d27c0a45f2e792fa3adc4a5755",
+          "url": "https://github.com/eddieavd/uti/commit/a2963c2a87ed65e5dfffe0200ceac8e152edf751"
+        },
+        "date": 1706356408772,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/1024",
+            "value": 0.9292991351624375,
+            "unit": "us/iter",
+            "extra": "iterations: 756327\ncpu: 0.9292411880046595 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/2048",
+            "value": 2.9899500163567536,
+            "unit": "us/iter",
+            "extra": "iterations: 235377\ncpu: 2.989872842291302 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/4096",
+            "value": 7.005203228841198,
+            "unit": "us/iter",
+            "extra": "iterations: 99912\ncpu: 7.004645087677154 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/8192",
+            "value": 15.163695122479748,
+            "unit": "us/iter",
+            "extra": "iterations: 46130\ncpu: 15.162614350747887 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/16384",
+            "value": 31.09917772838301,
+            "unit": "us/iter",
+            "extra": "iterations: 22495\ncpu: 31.097377194932193 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/32768",
+            "value": 128.26436091324246,
+            "unit": "us/iter",
+            "extra": "iterations: 5475\ncpu: 127.66931506849309 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/65536",
+            "value": 301.17034521253635,
+            "unit": "us/iter",
+            "extra": "iterations: 2329\ncpu: 300.12314297981976 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/131072",
+            "value": 642.7017234432262,
+            "unit": "us/iter",
+            "extra": "iterations: 1092\ncpu: 641.5891025641025 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/262144",
+            "value": 1416.853693548374,
+            "unit": "us/iter",
+            "extra": "iterations: 496\ncpu: 1415.8747983870965 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/524288",
+            "value": 2997.825225531869,
+            "unit": "us/iter",
+            "extra": "iterations: 235\ncpu: 2997.1008510638294 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/1048576",
+            "value": 5105.9732992701065,
+            "unit": "us/iter",
+            "extra": "iterations: 137\ncpu: 5105.791970802913 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/2097152",
+            "value": 8937.39940000008,
+            "unit": "us/iter",
+            "extra": "iterations: 75\ncpu: 8937.341333333345 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< std::vector< int > >/4194304",
+            "value": 15907.532295454597,
+            "unit": "us/iter",
+            "extra": "iterations: 44\ncpu: 15905.713636363636 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/1024",
+            "value": 0.8602805033749464,
+            "unit": "us/iter",
+            "extra": "iterations: 813787\ncpu: 0.8602156338206437 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/2048",
+            "value": 1.5820361080044372,
+            "unit": "us/iter",
+            "extra": "iterations: 444389\ncpu: 1.581907292934796 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/4096",
+            "value": 3.0019825945436605,
+            "unit": "us/iter",
+            "extra": "iterations: 233490\ncpu: 3.001788941710562 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/8192",
+            "value": 5.825834902991722,
+            "unit": "us/iter",
+            "extra": "iterations: 120196\ncpu: 5.8254326267097065 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/16384",
+            "value": 11.44036120641763,
+            "unit": "us/iter",
+            "extra": "iterations: 61206\ncpu: 11.44005162892527 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/32768",
+            "value": 22.620216321118377,
+            "unit": "us/iter",
+            "extra": "iterations: 30917\ncpu: 22.620076333408797 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/65536",
+            "value": 45.20508668471355,
+            "unit": "us/iter",
+            "extra": "iterations: 15516\ncpu: 45.20436968290802 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/131072",
+            "value": 90.26021559278644,
+            "unit": "us/iter",
+            "extra": "iterations: 7760\ncpu: 90.25947164948451 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/262144",
+            "value": 180.2539226006146,
+            "unit": "us/iter",
+            "extra": "iterations: 3876\ncpu: 180.2476006191944 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/524288",
+            "value": 360.3655012866678,
+            "unit": "us/iter",
+            "extra": "iterations: 1943\ncpu: 360.3581060216162 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/1048576",
+            "value": 719.6808755144231,
+            "unit": "us/iter",
+            "extra": "iterations: 972\ncpu: 719.6388888888887 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/2097152",
+            "value": 1466.8014804123673,
+            "unit": "us/iter",
+            "extra": "iterations: 485\ncpu: 1466.6915463917505 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_trivial< uti::vector< int > >/4194304",
+            "value": 2895.995305785169,
+            "unit": "us/iter",
+            "extra": "iterations: 242\ncpu: 2895.713636363645 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/1024",
+            "value": 7.141145096721002,
+            "unit": "us/iter",
+            "extra": "iterations: 98169\ncpu: 7.140660493638491 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/2048",
+            "value": 12.940274811778867,
+            "unit": "us/iter",
+            "extra": "iterations: 52465\ncpu: 12.938984084627833 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/4096",
+            "value": 26.401650233856508,
+            "unit": "us/iter",
+            "extra": "iterations: 26512\ncpu: 26.399856668678417 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/8192",
+            "value": 52.757571493109566,
+            "unit": "us/iter",
+            "extra": "iterations: 13281\ncpu: 52.75714931104588 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/16384",
+            "value": 100.42495284409026,
+            "unit": "us/iter",
+            "extra": "iterations: 6786\ncpu: 100.41587091069835 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/32768",
+            "value": 210.28750466445882,
+            "unit": "us/iter",
+            "extra": "iterations: 3323\ncpu: 210.27739993981348 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/65536",
+            "value": 399.7551351190509,
+            "unit": "us/iter",
+            "extra": "iterations: 1680\ncpu: 399.73392857142824 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/131072",
+            "value": 808.4582771804124,
+            "unit": "us/iter",
+            "extra": "iterations: 837\ncpu: 808.4160095579431 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/262144",
+            "value": 1674.2780191387708,
+            "unit": "us/iter",
+            "extra": "iterations: 418\ncpu: 1674.0796650717684 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/524288",
+            "value": 9075.150576923108,
+            "unit": "us/iter",
+            "extra": "iterations: 78\ncpu: 9074.124358974335 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/1048576",
+            "value": 16028.666272727063,
+            "unit": "us/iter",
+            "extra": "iterations: 44\ncpu: 16025.324999999959 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/2097152",
+            "value": 33606.311904761584,
+            "unit": "us/iter",
+            "extra": "iterations: 21\ncpu: 33602.58095238085 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< std::vector< std::string > >/4194304",
+            "value": 75260.41188888636,
+            "unit": "us/iter",
+            "extra": "iterations: 9\ncpu: 75256.91111111143 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/1024",
+            "value": 4.095468000396933,
+            "unit": "us/iter",
+            "extra": "iterations: 171299\ncpu: 4.095195535292099 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/2048",
+            "value": 7.901637975337132,
+            "unit": "us/iter",
+            "extra": "iterations: 89121\ncpu: 7.901451958573163 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/4096",
+            "value": 15.683833530606787,
+            "unit": "us/iter",
+            "extra": "iterations: 44777\ncpu: 15.682638408111313 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/8192",
+            "value": 31.27823183498908,
+            "unit": "us/iter",
+            "extra": "iterations: 22447\ncpu: 31.277890141221437 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/16384",
+            "value": 62.33369751208222,
+            "unit": "us/iter",
+            "extra": "iterations: 11174\ncpu: 62.32881689636649 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/32768",
+            "value": 125.0626421428588,
+            "unit": "us/iter",
+            "extra": "iterations: 5600\ncpu: 125.05519642857114 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/65536",
+            "value": 249.79797468805938,
+            "unit": "us/iter",
+            "extra": "iterations: 2805\ncpu: 249.7749019607838 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/131072",
+            "value": 486.30733449234293,
+            "unit": "us/iter",
+            "extra": "iterations: 1438\ncpu: 486.2826842837284 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/262144",
+            "value": 998.761540656222,
+            "unit": "us/iter",
+            "extra": "iterations: 701\ncpu: 998.665477888725 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/524288",
+            "value": 7977.740022471891,
+            "unit": "us/iter",
+            "extra": "iterations: 89\ncpu: 7975.820224719111 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/1048576",
+            "value": 13913.476137255273,
+            "unit": "us/iter",
+            "extra": "iterations: 51\ncpu: 13910.133333333464 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/2097152",
+            "value": 25940.458499999426,
+            "unit": "us/iter",
+            "extra": "iterations: 26\ncpu: 25937.850000000177 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_nontrivial< uti::vector< std::string > >/4194304",
+            "value": 50140.28489999873,
+            "unit": "us/iter",
+            "extra": "iterations: 10\ncpu: 50139.9499999998 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/1024",
+            "value": 0.684148694943521,
+            "unit": "us/iter",
+            "extra": "iterations: 1072444\ncpu: 0.684085229625045 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/2048",
+            "value": 1.2850258171692013,
+            "unit": "us/iter",
+            "extra": "iterations: 542972\ncpu: 1.2849406599235311 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/4096",
+            "value": 2.5530090504829794,
+            "unit": "us/iter",
+            "extra": "iterations: 274350\ncpu: 2.552883542919636 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/8192",
+            "value": 5.10109436304933,
+            "unit": "us/iter",
+            "extra": "iterations: 136918\ncpu: 5.100969923603905 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/16384",
+            "value": 10.32638896459787,
+            "unit": "us/iter",
+            "extra": "iterations: 67510\ncpu: 10.326277588505434 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/32768",
+            "value": 20.65332434268785,
+            "unit": "us/iter",
+            "extra": "iterations: 33850\ncpu: 20.651902511078237 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/65536",
+            "value": 41.310513778250886,
+            "unit": "us/iter",
+            "extra": "iterations: 16947\ncpu: 41.309883755236775 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/131072",
+            "value": 82.79294711880625,
+            "unit": "us/iter",
+            "extra": "iterations: 8434\ncpu: 82.78725397201764 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/262144",
+            "value": 165.96162588904656,
+            "unit": "us/iter",
+            "extra": "iterations: 4218\ncpu: 165.9496443812238 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/524288",
+            "value": 332.0888966334698,
+            "unit": "us/iter",
+            "extra": "iterations: 2109\ncpu: 332.05239449976403 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/1048576",
+            "value": 663.3806846590749,
+            "unit": "us/iter",
+            "extra": "iterations: 1056\ncpu: 663.3186553030326 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/2097152",
+            "value": 1327.7041780303282,
+            "unit": "us/iter",
+            "extra": "iterations: 528\ncpu: 1327.5863636363567 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< std::vector< int > >/4194304",
+            "value": 2654.4497424242936,
+            "unit": "us/iter",
+            "extra": "iterations: 264\ncpu: 2654.3037878787936 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/1024",
+            "value": 0.7255473108428959,
+            "unit": "us/iter",
+            "extra": "iterations: 973688\ncpu: 0.7254950251004417 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/2048",
+            "value": 1.4507045451230394,
+            "unit": "us/iter",
+            "extra": "iterations: 479921\ncpu: 1.4506660471202557 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/4096",
+            "value": 2.799978059791776,
+            "unit": "us/iter",
+            "extra": "iterations: 249633\ncpu: 2.7999210841515323 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/8192",
+            "value": 5.5592778799624325,
+            "unit": "us/iter",
+            "extra": "iterations: 126677\ncpu: 5.558998081735405 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/16384",
+            "value": 11.109251250535793,
+            "unit": "us/iter",
+            "extra": "iterations: 62973\ncpu: 11.108440125133034 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/32768",
+            "value": 22.186278628968473,
+            "unit": "us/iter",
+            "extra": "iterations: 31655\ncpu: 22.184767019428296 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/65536",
+            "value": 44.284578238603984,
+            "unit": "us/iter",
+            "extra": "iterations: 15817\ncpu: 44.2827843459571 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/131072",
+            "value": 88.93589434486147,
+            "unit": "us/iter",
+            "extra": "iterations: 7922\ncpu: 88.93034587225414 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/262144",
+            "value": 177.33336504313004,
+            "unit": "us/iter",
+            "extra": "iterations: 3942\ncpu: 177.32217148655562 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/524288",
+            "value": 354.78641801619085,
+            "unit": "us/iter",
+            "extra": "iterations: 1976\ncpu: 354.7597672064806 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/1048576",
+            "value": 708.1030051072672,
+            "unit": "us/iter",
+            "extra": "iterations: 979\ncpu: 708.0539325842669 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/2097152",
+            "value": 1420.5602093496034,
+            "unit": "us/iter",
+            "extra": "iterations: 492\ncpu: 1420.4672764227462 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_trivial< uti::vector< int > >/4194304",
+            "value": 2847.3364979757516,
+            "unit": "us/iter",
+            "extra": "iterations: 247\ncpu: 2847.08542510121 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/1024",
+            "value": 1.7200652891506454,
+            "unit": "us/iter",
+            "extra": "iterations: 407158\ncpu: 1.72004971043183 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/2048",
+            "value": 3.553567528277843,
+            "unit": "us/iter",
+            "extra": "iterations: 200864\ncpu: 3.5533724310977206 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/4096",
+            "value": 6.9428986656871645,
+            "unit": "us/iter",
+            "extra": "iterations: 100726\ncpu: 6.942598733196951 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/8192",
+            "value": 13.868363475880757,
+            "unit": "us/iter",
+            "extra": "iterations: 50416\ncpu: 13.867720564899843 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/16384",
+            "value": 27.87641953610708,
+            "unit": "us/iter",
+            "extra": "iterations: 25092\ncpu: 27.874442053244216 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/32768",
+            "value": 56.4729392986698,
+            "unit": "us/iter",
+            "extra": "iterations: 12405\ncpu: 56.46844014510275 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/65536",
+            "value": 112.51789825068228,
+            "unit": "us/iter",
+            "extra": "iterations: 6231\ncpu: 112.51343283582109 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/131072",
+            "value": 224.43402374077334,
+            "unit": "us/iter",
+            "extra": "iterations: 3117\ncpu: 224.4097208854635 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/262144",
+            "value": 459.3176609157312,
+            "unit": "us/iter",
+            "extra": "iterations: 1507\ncpu: 459.26994027869966 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/524288",
+            "value": 895.6665044929309,
+            "unit": "us/iter",
+            "extra": "iterations: 779\ncpu: 895.5771501925452 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/1048576",
+            "value": 4373.100375722493,
+            "unit": "us/iter",
+            "extra": "iterations: 173\ncpu: 4372.330057803486 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/2097152",
+            "value": 10038.371450704031,
+            "unit": "us/iter",
+            "extra": "iterations: 71\ncpu: 10034.628169014157 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< std::vector< std::string > >/4194304",
+            "value": 21731.52068750017,
+            "unit": "us/iter",
+            "extra": "iterations: 32\ncpu: 21728.76874999963 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/1024",
+            "value": 2.0856157958781747,
+            "unit": "us/iter",
+            "extra": "iterations: 336113\ncpu: 2.0853483798603127 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/2048",
+            "value": 4.1364399976548505,
+            "unit": "us/iter",
+            "extra": "iterations: 170560\ncpu: 4.136150914634165 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/4096",
+            "value": 8.17232178431697,
+            "unit": "us/iter",
+            "extra": "iterations: 85635\ncpu: 8.1716471069073 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/8192",
+            "value": 16.294230792505182,
+            "unit": "us/iter",
+            "extra": "iterations: 42965\ncpu: 16.293841498894473 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/16384",
+            "value": 32.67629432375604,
+            "unit": "us/iter",
+            "extra": "iterations: 21405\ncpu: 32.675001167951216 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/32768",
+            "value": 66.02229015593515,
+            "unit": "us/iter",
+            "extra": "iterations: 10453\ncpu: 66.01877929780909 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/65536",
+            "value": 132.32107111783438,
+            "unit": "us/iter",
+            "extra": "iterations: 5287\ncpu: 132.3200870058615 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/131072",
+            "value": 265.71442754716844,
+            "unit": "us/iter",
+            "extra": "iterations: 2650\ncpu: 265.701773584907 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/262144",
+            "value": 535.5401930769141,
+            "unit": "us/iter",
+            "extra": "iterations: 1300\ncpu: 535.5203846153792 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/524288",
+            "value": 1229.1537150635222,
+            "unit": "us/iter",
+            "extra": "iterations: 551\ncpu: 1229.0989110707799 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/1048576",
+            "value": 5506.482139344277,
+            "unit": "us/iter",
+            "extra": "iterations: 122\ncpu: 5506.172131147503 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/2097152",
+            "value": 11127.974918033451,
+            "unit": "us/iter",
+            "extra": "iterations: 61\ncpu: 11126.778688524471 us\nthreads: 1"
+          },
+          {
+            "name": "bm_push_back_reserved_nontrivial< uti::vector< std::string > >/4194304",
+            "value": 23051.91958620769,
+            "unit": "us/iter",
+            "extra": "iterations: 29\ncpu: 23043.25517241362 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/1024",
+            "value": 1.380566856831955,
+            "unit": "us/iter",
+            "extra": "iterations: 507278\ncpu: 1.3805148261899745 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/2048",
+            "value": 2.723333782048811,
+            "unit": "us/iter",
+            "extra": "iterations: 257030\ncpu: 2.7231622767770443 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/4096",
+            "value": 5.389292788805326,
+            "unit": "us/iter",
+            "extra": "iterations: 128772\ncpu: 5.388807349423795 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/8192",
+            "value": 10.837904923415236,
+            "unit": "us/iter",
+            "extra": "iterations: 64569\ncpu: 10.83705028728953 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/16384",
+            "value": 21.425428645769795,
+            "unit": "us/iter",
+            "extra": "iterations: 32668\ncpu: 21.42382759887363 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/32768",
+            "value": 43.64579320025169,
+            "unit": "us/iter",
+            "extra": "iterations: 16030\ncpu: 43.64230193387428 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/65536",
+            "value": 86.62410721343929,
+            "unit": "us/iter",
+            "extra": "iterations: 8096\ncpu: 86.6192811264819 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/131072",
+            "value": 107.68564705882338,
+            "unit": "us/iter",
+            "extra": "iterations: 6511\ncpu: 107.67958838887871 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/262144",
+            "value": 219.75340250392094,
+            "unit": "us/iter",
+            "extra": "iterations: 3195\ncpu: 219.75089201877924 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/524288",
+            "value": 464.9207729083663,
+            "unit": "us/iter",
+            "extra": "iterations: 1506\ncpu: 464.880013280218 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/1048576",
+            "value": 1044.5891059701476,
+            "unit": "us/iter",
+            "extra": "iterations: 670\ncpu: 1044.5540298507428 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/2097152",
+            "value": 2187.214631250001,
+            "unit": "us/iter",
+            "extra": "iterations: 320\ncpu: 2187.0715624999984 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< std::vector< int > >/4194304",
+            "value": 4535.802385714354,
+            "unit": "us/iter",
+            "extra": "iterations: 140\ncpu: 4535.449285714321 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/1024",
+            "value": 0.09938122771283556,
+            "unit": "us/iter",
+            "extra": "iterations: 7050020\ncpu: 0.09937353369210218 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/2048",
+            "value": 0.17790890116405603,
+            "unit": "us/iter",
+            "extra": "iterations: 3933508\ncpu: 0.17789443926388337 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/4096",
+            "value": 0.337616368213066,
+            "unit": "us/iter",
+            "extra": "iterations: 2056266\ncpu: 0.33760977422181687 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/8192",
+            "value": 0.6773263968503587,
+            "unit": "us/iter",
+            "extra": "iterations: 1032752\ncpu: 0.6773096542054584 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/16384",
+            "value": 1.3939653807520733,
+            "unit": "us/iter",
+            "extra": "iterations: 502755\ncpu: 1.3939328301061176 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/32768",
+            "value": 2.751855556212596,
+            "unit": "us/iter",
+            "extra": "iterations: 253635\ncpu: 2.751827232046044 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/65536",
+            "value": 6.467490830697571,
+            "unit": "us/iter",
+            "extra": "iterations: 106224\ncpu: 6.467091241150733 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/131072",
+            "value": 17.244710814155216,
+            "unit": "us/iter",
+            "extra": "iterations: 40410\ncpu: 17.24451868349442 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/262144",
+            "value": 35.144285951746525,
+            "unit": "us/iter",
+            "extra": "iterations: 19853\ncpu: 35.142537651739815 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/524288",
+            "value": 69.88734116118849,
+            "unit": "us/iter",
+            "extra": "iterations: 10007\ncpu: 69.8858698910769 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/1048576",
+            "value": 139.38002186444083,
+            "unit": "us/iter",
+            "extra": "iterations: 5031\ncpu: 139.37262969588295 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/2097152",
+            "value": 281.77032931241195,
+            "unit": "us/iter",
+            "extra": "iterations: 2487\ncpu: 281.7650583031777 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_trivial< uti::vector< int > >/4194304",
+            "value": 724.5143946236919,
+            "unit": "us/iter",
+            "extra": "iterations: 930\ncpu: 724.4817204301027 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/1024",
+            "value": 1.9576722495656191,
+            "unit": "us/iter",
+            "extra": "iterations: 357998\ncpu: 1.9576156850038298 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/2048",
+            "value": 3.9270275761891407,
+            "unit": "us/iter",
+            "extra": "iterations: 178306\ncpu: 3.9268196246901406 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/4096",
+            "value": 7.894025590196569,
+            "unit": "us/iter",
+            "extra": "iterations: 88784\ncpu: 7.893706073166445 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/8192",
+            "value": 15.51620505312557,
+            "unit": "us/iter",
+            "extra": "iterations: 45081\ncpu: 15.515827066835422 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/16384",
+            "value": 31.2510373911096,
+            "unit": "us/iter",
+            "extra": "iterations: 22385\ncpu: 31.250194326557526 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/32768",
+            "value": 62.76713336913697,
+            "unit": "us/iter",
+            "extra": "iterations: 11172\ncpu: 62.76476906552168 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/65536",
+            "value": 125.0807579153284,
+            "unit": "us/iter",
+            "extra": "iterations: 5622\ncpu: 125.0706688011405 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/131072",
+            "value": 250.03358354114408,
+            "unit": "us/iter",
+            "extra": "iterations: 2807\ncpu: 250.02091200570035 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/262144",
+            "value": 510.4756846322,
+            "unit": "us/iter",
+            "extra": "iterations: 1373\ncpu: 510.425564457396 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/524288",
+            "value": 1255.1151728395046,
+            "unit": "us/iter",
+            "extra": "iterations: 567\ncpu: 1254.9777777777929 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/1048576",
+            "value": 6248.74118749982,
+            "unit": "us/iter",
+            "extra": "iterations: 112\ncpu: 6248.3857142857805 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/2097152",
+            "value": 12230.457614035466,
+            "unit": "us/iter",
+            "extra": "iterations: 57\ncpu: 12229.714035087654 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< std::vector< std::string > >/4194304",
+            "value": 25793.468423076913,
+            "unit": "us/iter",
+            "extra": "iterations: 26\ncpu: 25791.21153846131 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/1024",
+            "value": 1.9733669870711756,
+            "unit": "us/iter",
+            "extra": "iterations: 355176\ncpu: 1.9732312994121857 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/2048",
+            "value": 4.0689214812405226,
+            "unit": "us/iter",
+            "extra": "iterations: 172099\ncpu: 4.06864130529518 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/4096",
+            "value": 7.847136295601333,
+            "unit": "us/iter",
+            "extra": "iterations: 89526\ncpu: 7.846907043764116 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/8192",
+            "value": 16.54928260612307,
+            "unit": "us/iter",
+            "extra": "iterations: 42239\ncpu: 16.548845853357893 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/16384",
+            "value": 32.34417577131299,
+            "unit": "us/iter",
+            "extra": "iterations: 21619\ncpu: 32.34262454322575 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/32768",
+            "value": 65.65040026234428,
+            "unit": "us/iter",
+            "extra": "iterations: 10673\ncpu: 65.64685655392152 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/65536",
+            "value": 127.50912659613323,
+            "unit": "us/iter",
+            "extra": "iterations: 5482\ncpu: 127.50195184238852 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/131072",
+            "value": 262.03989936637873,
+            "unit": "us/iter",
+            "extra": "iterations: 2683\ncpu: 262.027394707421 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/262144",
+            "value": 521.0549604477951,
+            "unit": "us/iter",
+            "extra": "iterations: 1340\ncpu: 521.0188059701533 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/524288",
+            "value": 1319.6422471910084,
+            "unit": "us/iter",
+            "extra": "iterations: 534\ncpu: 1319.5228464419654 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/1048576",
+            "value": 6580.5250357143,
+            "unit": "us/iter",
+            "extra": "iterations: 112\ncpu: 6580.110714285833 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/2097152",
+            "value": 13468.655313725802,
+            "unit": "us/iter",
+            "extra": "iterations: 51\ncpu: 13467.592156863073 us\nthreads: 1"
+          },
+          {
+            "name": "bm_copy_container_nontrivial< uti::vector< std::string > >/4194304",
+            "value": 26283.039538460922,
+            "unit": "us/iter",
+            "extra": "iterations: 26\ncpu: 26282.126923077314 us\nthreads: 1"
           }
         ]
       }
