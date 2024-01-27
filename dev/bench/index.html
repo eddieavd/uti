@@ -242,19 +242,19 @@
               const data = getChartData( bm[ 1 ] );
               const options = {
                 scales: {
-                  x: [
+                  xAxes: [
                     {
+                      type: 'logarithmic',
                       scaleLabel: {
                         display: true,
                         labelString: 'benchmark',
                       },
                     }
                   ],
-                  y: [
+                  yAxes: [
                     {
                       scaleLabel: {
                         display: true,
-                        type: 'logarithmic',
                         labelString: bm[ 1 ].length > 0 ? bm[ 1 ][0].bench.unit : '',
                       },
                       ticks: {
