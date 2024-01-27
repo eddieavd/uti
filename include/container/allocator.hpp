@@ -131,6 +131,8 @@ public:
         using      ssize_type = ssize_t    ;
         using difference_type = ssize_type ;
 
+        using      block_type = block< value_type > ;
+
         using         pointer = value_type       * ;
         using   const_pointer = value_type const * ;
         using       reference = value_type       & ;
@@ -139,19 +141,26 @@ public:
         using        iterator =       pointer ;
         using  const_iterator = const_pointer ;
 
-        static pointer allocate ( ssize_type const _capacity_ )
+        static block_type allocate ( ssize_type const _capacity_ )
         {
-                return alloc_typed_buffer< T >( _capacity_ );
+                return { alloc_typed_buffer< T >( _capacity_ ), _capacity_ };
         }
-        static pointer reallocate ( pointer const _ptr_, ssize_type const _new_capacity_ )
+        static block_type reallocate ( block_type const & _block_, ssize_type const _new_capacity_ )
         {
-                return realloc_typed_buffer( _ptr_, _new_capacity_ );
+                return { realloc_typed_buffer( _block_.ptr, _new_capacity_ ), _new_capacity_ };
         }
-        static void deallocate ( pointer const _ptr_ ) noexcept
+        static void deallocate ( block_type const & _block_ ) noexcept
         {
-                dealloc_typed_buffer( _ptr_ );
+                dealloc_typed_buffer( _block_.ptr );
         }
-
+        static bool can_realloc_inplace ( block_type const &, ssize_type const ) noexcept
+        {
+                return false;
+        }
+        static bool try_realloc_inplace ( block_type const &, ssize_type const ) noexcept
+        {
+                return false;
+        }
         template< typename... Args >
         static void construct ( pointer const _ptr_, Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > )
         {

@@ -158,7 +158,7 @@ _vectorlike_view< T >::operator= ( _vectorlike_view && _other_ ) noexcept
 }
 
 
-template< typename T >
+template< typename T, typename Alloc >
 class _vectorlike_buffer
 {
         using _self = _vectorlike_buffer    ;
@@ -169,7 +169,7 @@ public:
         using      ssize_type = typename _base::     ssize_type ;
         using difference_type = typename _base::difference_type ;
 
-        using allocator_type = static_bump_allocator< value_type, UTI_STATIC_MEM_SIZE > ;
+        using allocator_type = Alloc ;
         using  _alloc_traits = allocator_traits< allocator_type > ;
 
         using         pointer = typename _base::        pointer ;
@@ -218,40 +218,40 @@ protected:
 };
 
 
-template< typename T >
-_vectorlike_buffer< T >::_vectorlike_buffer ( ssize_type const _capacity_ )
+template< typename T, typename Alloc >
+_vectorlike_buffer< T, Alloc >::_vectorlike_buffer ( ssize_type const _capacity_ )
 {
         buffer_ = _alloc_traits::allocate( _capacity_ ).ptr;
 
         if( buffer_ ) capacity_ = _capacity_;
 }
 
-template< typename T >
-_vectorlike_buffer< T >::_vectorlike_buffer ( _vectorlike_buffer const & _other_ )
+template< typename T, typename Alloc >
+_vectorlike_buffer< T, Alloc >::_vectorlike_buffer ( _vectorlike_buffer const & _other_ )
 {
         reserve( _other_.capacity_ );
 }
 
-template< typename T >
-_vectorlike_buffer< T >::_vectorlike_buffer ( _vectorlike_buffer && _other_ ) noexcept
+template< typename T, typename Alloc >
+_vectorlike_buffer< T, Alloc >::_vectorlike_buffer ( _vectorlike_buffer && _other_ ) noexcept
         : buffer_( _other_.buffer_ ), capacity_( _other_.capacity_ )
 {
         _other_.buffer_   = nullptr ;
         _other_.capacity_ =       0 ;
 }
 
-template< typename T >
-_vectorlike_buffer< T > &
-_vectorlike_buffer< T >::operator= ( _vectorlike_buffer const & _other_ )
+template< typename T, typename Alloc >
+_vectorlike_buffer< T, Alloc > &
+_vectorlike_buffer< T, Alloc >::operator= ( _vectorlike_buffer const & _other_ )
 {
         reserve( _other_.capacity_ );
 
         return *this;
 }
 
-template< typename T >
-_vectorlike_buffer< T > &
-_vectorlike_buffer< T >::operator= ( _vectorlike_buffer && _other_ ) noexcept
+template< typename T, typename Alloc >
+_vectorlike_buffer< T, Alloc > &
+_vectorlike_buffer< T, Alloc >::operator= ( _vectorlike_buffer && _other_ ) noexcept
 {
         buffer_   = _other_.buffer_   ;
         capacity_ = _other_.capacity_ ;
@@ -262,15 +262,15 @@ _vectorlike_buffer< T >::operator= ( _vectorlike_buffer && _other_ ) noexcept
         return *this;
 }
 
-template< typename T >
-_vectorlike_buffer< T >::~_vectorlike_buffer () noexcept
+template< typename T, typename Alloc >
+_vectorlike_buffer< T, Alloc >::~_vectorlike_buffer () noexcept
 {
         deallocate();
 }
 
-template< typename T >
-_vectorlike_buffer< T >::ssize_type
-_vectorlike_buffer< T >::reserve ( ssize_type const _capacity_ )
+template< typename T, typename Alloc >
+_vectorlike_buffer< T, Alloc >::ssize_type
+_vectorlike_buffer< T, Alloc >::reserve ( ssize_type const _capacity_ )
 {
         if( _capacity_ <= capacity_ ) return capacity_;
 
@@ -284,9 +284,9 @@ _vectorlike_buffer< T >::reserve ( ssize_type const _capacity_ )
         return capacity_;
 }
 
-template< typename T >
+template< typename T, typename Alloc >
 bool
-_vectorlike_buffer< T >::try_realloc_inplace ( ssize_type const _capacity_ ) noexcept
+_vectorlike_buffer< T, Alloc >::try_realloc_inplace ( ssize_type const _capacity_ ) noexcept
 {
         if( _alloc_traits::try_realloc_inplace( { buffer_, capacity_ }, _capacity_ ) )
         {
@@ -296,16 +296,16 @@ _vectorlike_buffer< T >::try_realloc_inplace ( ssize_type const _capacity_ ) noe
         return false;
 }
 
-template< typename T >
+template< typename T, typename Alloc >
 bool
-_vectorlike_buffer< T >::can_realloc_inplace ( ssize_type const _capacity_ ) noexcept
+_vectorlike_buffer< T, Alloc >::can_realloc_inplace ( ssize_type const _capacity_ ) noexcept
 {
         return _alloc_traits::can_realloc_inplace( { buffer_, capacity_ }, _capacity_ );
 }
 
-template< typename T >
+template< typename T, typename Alloc >
 void
-_vectorlike_buffer< T >::deallocate () noexcept
+_vectorlike_buffer< T, Alloc >::deallocate () noexcept
 {
         if( buffer_ ) _alloc_traits::deallocate( { buffer_, capacity_ } );
 }
