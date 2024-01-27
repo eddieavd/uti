@@ -125,7 +125,8 @@
           customSmallerIsBetter: '#ff3838',
           _: '#333333'
         };
-        const colors = [ "#3496e4", "#fd5b7b", "#45b7b7", "#ff9642", "#8d5afb", "#fec855", "#c2c4c8" ];
+        const colors    = [ "#3496e4", "#fd5b7b", "#45b7b7", "#ff9642", "#8d5afb", "#fec855", "#c2c4c8" ];
+        const colors_bg = [ "#3496e460", "#fd5b7b60", "#45b7b760", "#ff964260", "#8d5afb60", "#fec85560", "#c2c4c860" ];
 
         function init() {
           function collectBenches( entries )
@@ -214,6 +215,7 @@
                 data: values,
                 borderWidth: 1,
                 borderColor: colors[ col_idx ],
+                backgroundColor: colors_bg[ col_idx ]
               };
               chartsets.push( cset );
               col_idx = ( col_idx + 1 ) % colors.length;
