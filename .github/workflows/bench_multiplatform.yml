@@ -1,0 +1,155 @@
+name: benchmark
+
+on: push
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  benchmark:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "benchmark release",
+            os: ubuntu-latest,
+            build_type: "Release",
+            is_debug_build: "OFF",
+            is_release_build: "ON",
+            cc: "clang-18",
+            cxx: "clang++-18",
+            clang_version: 18,
+            installed_clang_version: 14,
+            has_stl: "OFF"
+          }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install llvm + clang
+
+        run: |
+          sudo apt-get remove clang-${{ matrix.config.installed_clang_version }} \
+            lldb-${{ matrix.config.installed_clang_version }} \
+            lld-${{ matrix.config.installed_clang_version }} \
+            clangd-${{ matrix.config.installed_clang_version }} \
+            clang-tidy-${{ matrix.config.installed_clang_version }} \
+            clang-format-${{ matrix.config.installed_clang_version }} \
+            clang-tools-${{ matrix.config.installed_clang_version }} \
+            llvm-${{ matrix.config.installed_clang_version }}-dev \
+            lld-${{ matrix.config.installed_clang_version }} \
+            lldb-${{ matrix.config.installed_clang_version }} \
+            llvm-${{ matrix.config.installed_clang_version }}-tools \
+            libomp-${{ matrix.config.installed_clang_version }}-dev \
+            libc++-${{ matrix.config.installed_clang_version }}-dev \
+            libc++abi-${{ matrix.config.installed_clang_version }}-dev \
+            libclang-common-${{ matrix.config.installed_clang_version }}-dev \
+            libclang-${{ matrix.config.installed_clang_version }}-dev \
+            libclang-cpp${{ matrix.config.installed_clang_version }}-dev \
+            libunwind-${{ matrix.config.installed_clang_version }}-dev
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh ${{ matrix.config.clang_version }} all
+
+      - name: download ninja
+
+        id: ninja
+        shell: cmake -P {0}
+        run: |
+          set(ninja_version "1.11.1")
+
+          if ("${{ runner.os }}" STREQUAL "Linux")
+            set(ninja_suffix "linux.zip")
+          elseif ("${{ runner.os }}" STREQUAL "macOS")
+            set(ninja_suffix "mac.zip")
+          endif()
+
+          set(ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}")
+          file(DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS)
+          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ninja.zip)
+
+          execute_process(
+            COMMAND chmod +x ninja
+          )
+
+      - name: install benchmark library
+
+        run: |
+          mkdir bench/lib
+          cd bench/lib
+          git clone https://github.com/google/benchmark.git
+          cd benchmark
+          mkdir build
+          cd build
+          cmake .. -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILID_TYPE=Release
+          sudo cmake --build . --config Release --target install
+
+      - name: configure
+
+        shell: cmake -P {0}
+        run: |
+          set( ENV{CC}  ${{ matrix.config.cc }} )
+          set( ENV{CXX} ${{ matrix.config.cxx }} )
+
+          set( HAS_LLVM ON )
+
+          set( ENV{LLVM_DIR}  "/usr/lib/llvm-${{ matrix.config.clang_version }}/lib/cmake/llvm" )
+          set( ENV{Clang_DIR} "/usr/lib/llvm-${{ matrix.config.clang_version }}/lib/cmake/clang" )
+
+          file( TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/ninja" ninja_program )
+
+          execute_process(
+            COMMAND cmake
+              -S .
+              -B out
+              -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+              -D CMAKE_EXPORT_COMPILE_COMMANDS=ON
+              -G Ninja
+              -D CMAKE_MAKE_PROGRAM=${ninja_program}
+              -D UTI_DEBUG=${{ matrix.config.is_debug_build }}
+              -D UTI_RELEASE=${{ matrix.config.is_release_build }}
+              -D UTI_HAS_STL=${{ matrix.config.has_stl }}
+              -D UTI_BENCH=ON
+            RESULT_VARIABLE result
+          )
+          if( NOT result EQUAL 0 )
+            message( FATAL_ERROR "configure failed!" )
+          endif()
+
+      - name: build
+        shell: cmake -P {0}
+        run: |
+          set( ENV{NINJA_STATUS} "[%f/%t %o/sec] " )
+
+          execute_process(
+            COMMAND cmake --build out -j 10
+            RESULT_VARIABLE result
+          )
+          if( NOT result EQUAL 0 )
+            message( FATAL_ERROR "build failed!" )
+          endif()
+
+      - name: run benchmarks
+
+        run: |
+          ./out/bench/gbench_uti --benchmark_format=json > benchmark.json
+
+      - name: store benchmark results
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: uti benchmark
+          tool: 'googlecpp'
+          output-file-path: benchmark.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          alert-threshold: '5%'
+          comment-on-alert: true
+          fail-on-alert: false
+          alert-comment-cc-users: '@eddieavd'
+
+      - name: push benchmark results
+
+        run: git push 'https://eddieavd:${{ secrets.GITHUB_TOKEN }}@github.com/eddieavd/uti.git' gh-pages
