@@ -204,15 +204,19 @@
             const chartsets = [];
             for( const entry of instantiations )
             {
-              const values = [];
+              const points = [];
               for( const bm of entry[1] )
               {
-                values.push( bm.bench.value );
+                const point = {
+                  x: Number( bm.bench.name.split( '/' )[ 1 ] ),
+                  y: bm.bench.value
+                };
+                points.push( point );
                 labels.add( bm.bench.name.split( '/' )[ 1 ] );
               }
               const cset = {
                 label: entry[1][0].bench.name.split( '/' )[ 0 ],
-                data: values,
+                data: points,
                 borderWidth: 1,
                 borderColor: colors[ col_idx ],
                 backgroundColor: colors_bg[ col_idx ]
