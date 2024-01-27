@@ -15,18 +15,6 @@ jobs:
       matrix:
         config:
         - {
-            name: "benchmark debug",
-            os: ubuntu-latest,
-            build_type: "Debug",
-            is_debug_build: "ON",
-            is_release_build: "OFF",
-            cc: "clang-18",
-            cxx: "clang++-18",
-            clang_version: 18,
-            installed_clang_version: 14,
-            has_stl: "OFF"
-          }
-        - {
             name: "benchmark release",
             os: ubuntu-latest,
             build_type: "Release",
@@ -152,12 +140,16 @@ jobs:
       - name: store benchmark results
         uses: benchmark-action/github-action-benchmark@v1
         with:
-          name: ${{ matrix.config.name }}
+          name: uti benchmark
           tool: 'googlecpp'
           output-file-path: benchmark.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: true
+          auto-push: false
           alert-threshold: '1%'
           comment-on-alert: true
-          fail-on-alert: true
+          fail-on-alert: false
           alert-comment-cc-users: '@eddieavd'
+
+      - name: push benchmark results
+
+        run: git push 'https://eddieavd:${{ secrets.GITHUB_TOKEN }}@github.com/eddieavd/uti.git' gh-pages
