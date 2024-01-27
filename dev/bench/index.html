@@ -181,11 +181,11 @@
         {
           function getChartData( benchmarks )
           {
-            const bmname: string = benchmarks[ 0 ].bench.name.split( '/' )[ 0 ];
+            const bmname = benchmarks[ 0 ].bench.name.split( '/' )[ 0 ];
             const valuesmap = new Map();
 
-            const values: number[] = [];
-            const labels: string[] = [];
+            const values = [];
+            const labels = [];
 
             for( const bm of benchmarks )
             {
