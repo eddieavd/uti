@@ -91,20 +91,29 @@ public:
         {
                 return allocator_type::reallocate( _block_, _count_ );
         }
-        template< typename A = Alloc,
-                  typename = enable_if_t< is_detected_v< has_inplace_realloc, allocator_type, value_type > > >
+
         UTI_NODISCARD inline constexpr static
-        bool can_realloc_inplace ( block_type const & _block_, ssize_type _count_ ) noexcept
+        bool can_realloc_inplace ( block_type const & _block_, ssize_type _count_ ) noexcept requires( is_detected_v< has_inplace_realloc, allocator_type, value_type > )
         {
                 return allocator_type::can_realloc_inplace( _block_, _count_ );
         }
-        template< typename A = Alloc,
-                  typename = enable_if_t< is_detected_v< has_inplace_realloc, allocator_type, value_type > > >
         UTI_NODISCARD inline constexpr static
-        bool try_realloc_inplace ( block_type const & _block_, ssize_type _count_ ) noexcept
+        bool can_realloc_inplace ( block_type const &, ssize_type ) noexcept requires( !is_detected_v< has_inplace_realloc, allocator_type, value_type > )
+        {
+                return false;
+        }
+
+        UTI_NODISCARD inline constexpr static
+        bool try_realloc_inplace ( block_type const & _block_, ssize_type _count_ ) noexcept requires( is_detected_v< has_inplace_realloc, allocator_type, value_type > )
         {
                 return allocator_type::try_realloc_inplace( _block_, _count_ );
         }
+        UTI_NODISCARD inline constexpr static
+        bool try_realloc_inplace ( block_type const &, ssize_type ) noexcept requires( !is_detected_v< has_inplace_realloc, allocator_type, value_type > )
+        {
+                return false;
+        }
+
         inline constexpr static
         void deallocate ( block_type const & _block_ ) noexcept
         {
@@ -152,14 +161,6 @@ public:
         static void deallocate ( block_type const & _block_ ) noexcept
         {
                 dealloc_typed_buffer( _block_.ptr );
-        }
-        static bool can_realloc_inplace ( block_type const &, ssize_type const ) noexcept
-        {
-                return false;
-        }
-        static bool try_realloc_inplace ( block_type const &, ssize_type const ) noexcept
-        {
-                return false;
         }
         template< typename... Args >
         static void construct ( pointer const _ptr_, Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > )

@@ -333,6 +333,10 @@ vector< T, Alloc >::reserve ( ssize_type const _capacity_ )
 
                 return _buff_base::capacity();
         }
+        if( _buff_base::try_realloc_inplace( _capacity_ ) )
+        {
+                return _buff_base::capacity();
+        }
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
                 ssize_type begin_pos = _view_base::begin() - _buff_base::begin();
@@ -345,17 +349,14 @@ vector< T, Alloc >::reserve ( ssize_type const _capacity_ )
         }
         else
         {
-                if( !_buff_base::try_realloc_inplace( _capacity_ ) )
-                {
-                        ssize_type size = _view_base::size();
-                        _buff_base buff( _capacity_ );
+                ssize_type size = _view_base::size();
+                _buff_base buff( _capacity_ );
 
-                        _copy_buffer( buff );
-                        _swap_buffer( buff );
+                _copy_buffer( buff );
+                _swap_buffer( buff );
 
-                        _view_base::_begin() = _buff_base::begin();
-                        _view_base::  _end() = _buff_base::begin() + size;
-                }
+                _view_base::_begin() = _buff_base::begin();
+                _view_base::  _end() = _buff_base::begin() + size;
         }
         return _buff_base::capacity();
 }
