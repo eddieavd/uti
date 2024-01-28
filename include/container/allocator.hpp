@@ -11,6 +11,9 @@
 #include <meta/uti_traits.hpp>
 #include <algo/copy.hpp>
 
+#ifndef UTI_STATIC_MEM_SIZE
+#define UTI_STATIC_MEM_SIZE 8 * 1024 * 1024
+#endif
 
 #if    defined( UTI_MALLOC ) &&  defined( UTI_REALLOC ) &&  defined( UTI_FREE )
 #elif !defined( UTI_MALLOC ) && !defined( UTI_REALLOC ) && !defined( UTI_FREE )
