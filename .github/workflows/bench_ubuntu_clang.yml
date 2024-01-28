@@ -84,7 +84,7 @@ jobs:
           cd benchmark
           mkdir build
           cd build
-          cmake .. -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILID_TYPE=Release
+          cmake .. -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=Release
           sudo cmake --build . --config Release --target install
 
       - name: configure
