@@ -38,9 +38,9 @@ struct string_view
         using       iterator =       pointer ;
         using const_iterator = const_pointer ;
 
-        constexpr string_view (                                     ) noexcept ;
-        constexpr string_view ( pointer _c_str_                     ) noexcept ;
-        constexpr string_view ( pointer  _data_, ssize_type _count_ ) noexcept ;
+                 constexpr string_view (                                     ) noexcept ;
+        explicit constexpr string_view ( pointer _c_str_                     ) noexcept ;
+                 constexpr string_view ( pointer  _data_, ssize_type _count_ ) noexcept ;
 
         constexpr string_view ( string_view const &  _other_ ) noexcept = default ;
         constexpr string_view ( string_view       && _other_ ) noexcept           ;
