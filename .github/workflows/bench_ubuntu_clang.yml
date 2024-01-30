@@ -120,6 +120,7 @@ jobs:
           endif()
 
       - name: build
+
         shell: cmake -P {0}
         run: |
           set( ENV{NINJA_STATUS} "[%f/%t %o/sec] " )
@@ -138,6 +139,7 @@ jobs:
           ./out/bench/gbench_uti --benchmark_format=json > benchmark.json
 
       - name: store benchmark results
+
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: uti benchmark
