@@ -7,7 +7,6 @@
 #pragma once
 
 #include <util/config.hpp>
-#include <meta/traits.hpp>
 #include <meta/uti_traits.hpp>
 #include <algo/copy.hpp>
 

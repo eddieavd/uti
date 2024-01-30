@@ -6,10 +6,9 @@
 
 #pragma once
 
-#include <meta/traits.hpp>
-#include <algo/copy.hpp>
 #include <algo/swap.hpp>
-#include <container/vectorlike.hpp>
+#include <mem/view.hpp>
+#include <mem/buffer.hpp>
 
 
 namespace uti
@@ -17,12 +16,12 @@ namespace uti
 
 
 template< typename T, typename Alloc = static_bump_allocator< T, UTI_STATIC_MEM_SIZE > >
-class vector : public _vectorlike_buffer< T, Alloc >, public _vectorlike_view< T >
+class vector : public buffer< T, Alloc >, public view< T >
 {
-        using      _self =  vector                        ;
-        using      _base = _vectorlike_base  < T        > ;
-        using _buff_base = _vectorlike_buffer< T, Alloc > ;
-        using _view_base = _vectorlike_view  < T        > ;
+        using      _self =  vector                     ;
+        using      _base = _container_base< T        > ;
+        using _buff_base =  buffer        < T, Alloc > ;
+        using _view_base =  view          < T        > ;
 public:
         using      value_type = typename      _base::     value_type ;
         using       size_type = typename      _base::      size_type ;
