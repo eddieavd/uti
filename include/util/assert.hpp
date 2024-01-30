@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifndef UTI_DOXYGEN_SKIP
+
 #include <util/config.hpp>
 
 
@@ -46,3 +48,5 @@
         } while( 0 );                                                 \
         UTI_DIAGS_POP()
 #endif
+
+#endif // UTI_DOXYGEN_SKIP

@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifndef UTI_DOXYGEN_SKIP
+
 #include <meta/traits.hpp>
 #include <meta/invoke.hpp>
 
@@ -111,3 +113,5 @@ using unwrap_ref_decay_t = typename unwrap_ref_decay< T >::type ;
 
 
 } // namespace uti
+
+#endif // UTI_DOXYGEN_SKIP

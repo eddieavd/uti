@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifndef UTI_DOXYGEN_SKIP
+
 
 #define UTI_STRINGIZE( x ) #x
 
@@ -197,3 +199,5 @@ Defaults can be provided by defining 'UTI_TRUE_IF_MISSING' or 'UTI_FALSE_IF_MISS
 #ifndef UTI_DEFAULT_FOR_MISSING
 #define UTI_DEFAULT_FOR_MISSING
 #endif
+
+#endif // UTI_DOXYGEN_SKIP

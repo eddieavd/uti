@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifndef UTI_DOXYGEN_SKIP
+
 #include <meta/traits.hpp>
 
 
@@ -52,3 +54,5 @@ using index_sequence_for = make_index_sequence< sizeof...( Ts ) > ;
 
 
 } // namespace uti
+
+#endif // UTI_DOXYGEN_SKIP
