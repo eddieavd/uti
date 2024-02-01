@@ -651,17 +651,27 @@ template< typename Integer >
 [[ nodiscard ]] constexpr Integer
 string_view< CharType >::parse_int () const noexcept
 {
-        Integer num { 0 } ;
-        for( auto const & digit : *this )
+        auto digits = trimmed();
+
+        if( digits.empty() ) return 0;
+
+        int        sign { 1 } ;
+        ssize_type  pos { 0 } ;
+
+        if( digits.front() == '+' || digits.front() == '-' )
         {
-                if( '0' <= digit && digit <= '9' )
-                {
-                        num *= 10;
-                        num += digit - 48;
-                }
-                else break;
+                sign = ( digits.front() == '-' ) ? -1 : 1 ;
+                ++pos;
         }
-        return num;
+        Integer val { 0 } ;
+        for( ; pos < digits.len(); ++pos )
+        {
+                CharType chr = digits.at( pos );
+                if( chr < '0' || chr > '9' ) break;
+
+                val = val * 10 + ( chr - '0' );
+        }
+        return sign * val;
 }
 
 template< typename CharType >
