@@ -15,7 +15,7 @@ namespace uti
 {
 
 
-template< typename T, typename Alloc = static_bump_allocator< T, UTI_STATIC_MEM_SIZE > >
+template< typename T, typename Alloc = allocator< T > >
 class vector : public buffer< T, Alloc >, public view< T >
 {
         using      _self =  vector                     ;

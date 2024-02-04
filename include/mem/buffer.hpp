@@ -14,7 +14,7 @@ namespace uti
 {
 
 
-template< typename T, typename Alloc >
+template< typename T, typename Alloc = allocator< T > >
 class buffer
 {
         using _self =  buffer              ;
