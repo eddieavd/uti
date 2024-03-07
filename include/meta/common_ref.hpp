@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifndef UTI_DOXYGEN_SKIP
+
 #include <meta/traits.hpp>
 #include <meta/common_type.hpp>
 
@@ -181,3 +183,5 @@ struct common_reference {} ;
 
 
 } // namespace uti
+
+#endif // UTI_DOXYGEN_SKIP

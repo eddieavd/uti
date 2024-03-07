@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifndef UTI_DOXYGEN_SKIP
+
 #include <meta/traits.hpp>
 
 
@@ -70,3 +72,5 @@ using common_type_t = typename common_type< Ts... >::type ;
 
 
 } // namespace uti
+
+#endif

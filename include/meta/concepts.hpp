@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include <meta/traits.hpp>
 #include <meta/common_type.hpp>
 #include <meta/common_ref.hpp>
 #include <meta/invoke.hpp>

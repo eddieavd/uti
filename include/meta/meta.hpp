@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifndef UTI_DOXYGEN_SKIP
+
 #include <meta/traits.hpp>
 
 
@@ -171,3 +173,5 @@ static_assert( is_same_v< double, at_t< 2, type_list< int, float, double > > > )
 
 
 } // namespace uti
+
+#endif // UTI_DOXYGEN_SKIP

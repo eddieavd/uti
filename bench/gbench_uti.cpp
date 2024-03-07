@@ -12,20 +12,36 @@
 using namespace uti::bench ;
 
 
-BENCHMARK( bm_push_back_trivial< std::vector< int > > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 12 )->Unit( benchmark::kMicrosecond );
-BENCHMARK( bm_push_back_trivial< uti::vector< int > > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 12 )->Unit( benchmark::kMicrosecond );
+using stdvecint = std::vector<         int > ;
+using stdvecstr = std::vector< std::string > ;
 
-BENCHMARK( bm_push_back_nontrivial< std::vector< std::string > > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 12 )->Unit( benchmark::kMicrosecond );
-BENCHMARK( bm_push_back_nontrivial< uti::vector< std::string > > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 12 )->Unit( benchmark::kMicrosecond );
+using utivecint = uti::vector<         int, uti::allocator<         int > > ;
+using utivecstr = uti::vector< std::string, uti::allocator< std::string > > ;
 
-BENCHMARK( bm_push_back_reserved_trivial< std::vector< int > > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 12 )->Unit( benchmark::kMicrosecond );
-BENCHMARK( bm_push_back_reserved_trivial< uti::vector< int > > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 12 )->Unit( benchmark::kMicrosecond );
+using utivecintstat = uti::vector<         int, uti::static_bump_allocator<         int, UTI_STATIC_MEM_SIZE > > ;
+using utivecstrstat = uti::vector< std::string, uti::static_bump_allocator< std::string, UTI_STATIC_MEM_SIZE > > ;
 
-BENCHMARK( bm_push_back_reserved_nontrivial< std::vector< std::string > > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 12 )->Unit( benchmark::kMicrosecond );
-BENCHMARK( bm_push_back_reserved_nontrivial< uti::vector< std::string > > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 12 )->Unit( benchmark::kMicrosecond );
 
-BENCHMARK( bm_copy_container_trivial< std::vector< int > > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 12 )->Unit( benchmark::kMicrosecond );
-BENCHMARK( bm_copy_container_trivial< uti::vector< int > > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 12 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_push_back_trivial< stdvecint     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_push_back_trivial< utivecint     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_push_back_trivial< utivecintstat > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
 
-BENCHMARK( bm_copy_container_nontrivial< std::vector< std::string > > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 12 )->Unit( benchmark::kMicrosecond );
-BENCHMARK( bm_copy_container_nontrivial< uti::vector< std::string > > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 12 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_push_back_nontrivial< stdvecstr     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_push_back_nontrivial< utivecstr     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_push_back_nontrivial< utivecstrstat > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+
+BENCHMARK( bm_push_back_reserved_trivial< stdvecint     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_push_back_reserved_trivial< utivecint     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_push_back_reserved_trivial< utivecintstat > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+
+BENCHMARK( bm_push_back_reserved_nontrivial< stdvecstr     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_push_back_reserved_nontrivial< utivecstr     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_push_back_reserved_nontrivial< utivecstrstat > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+
+BENCHMARK( bm_copy_container_trivial< stdvecint     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_copy_container_trivial< utivecint     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_copy_container_trivial< utivecintstat > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+
+BENCHMARK( bm_copy_container_nontrivial< stdvecstr     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_copy_container_nontrivial< utivecstr     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_copy_container_nontrivial< utivecstrstat > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );

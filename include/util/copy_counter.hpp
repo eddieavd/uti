@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifndef UTI_DOXYGEN_SKIP
+
 #include <meta/traits.hpp>
 
 #include <ostream>
@@ -63,3 +65,5 @@ struct copy_counter
 
 
 } // namespace uti::test
+
+#endif // UTI_DOXYGEN_SKIP

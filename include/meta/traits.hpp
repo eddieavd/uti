@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifndef UTI_DOXYGEN_SKIP
+
 #include <util/config.hpp>
 
 #ifdef UTI_HAS_STL
@@ -1260,3 +1262,5 @@ template< typename T > inline constexpr bool is_nothrow_swappable_v = is_nothrow
 
 
 } // namespace uti
+
+#endif // UTI_DOXYGEN_SKIP
