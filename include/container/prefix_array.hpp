@@ -99,57 +99,6 @@ public:
                                  - _base::at( _x1_ - 1 ).range( _y1_, _z1_, _y2_, _z2_ ) ;
         }
 
-        /*
-        template< typename... Idxs >
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) range_impl ( ssize_type _x1_, ssize_type _x2_, Idxs... _idxs_ ) const noexcept
-                requires( sizeof...( _idxs_ ) % 2 == 0 && is_n_dim_container_v< _self, ( sizeof...( _idxs_ ) / 2 ) + 1 > )
-        {
-                if constexpr( sizeof...( _idxs_ ) == 0 )
-                {
-                        return range( _x1_, _x2_ ) ;
-                }
-                else
-                {
-                        return _x1_ == 0 ? _base::at( _x2_     ).range_impl( _idxs_... )
-                                         : _base::at( _x2_     ).range_impl( _idxs_... )
-                                         - _base::at( _x1_ - 1 ).range_impl( _idxs_... ) ;
-                }
-        }
-
-        template< typename... Idxs >
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) range ( Idxs... _idxs_ ) const noexcept
-                requires( sizeof...( _idxs_ ) % 2 == 0 && is_n_dim_container_v< _self, sizeof...( _idxs_ ) / 2 > )
-        {
-
-        }
-        */
-
-        /*
-        template< typename... Idxs >
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) range ( ssize_type _x1_, Idxs... _idxs_ ) const noexcept
-                requires( ( sizeof...( _idxs_ ) + 1 ) % 2 == 0 &&
-                          is_n_dim_container_v< _self, ( sizeof...( _idxs_ ) + 1 ) / 2 > )
-        {
-                ( void ) _x1_ ;
-        }
-
-        template< typename... Idxs >
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) range_impl ( Idxs... _idxs_ ) const noexcept
-                requires( sizeof...( _idxs_ ) % 2 == 0 )
-        {
-                constexpr array lhs_coords = meta::split_array_range< ssize_type,                     0, sizeof...( Idxs ) / 2 >( _idxs_... ) ;
-                constexpr array rhs_coords = meta::split_array_range< ssize_type, sizeof...( Idxs ) / 2, sizeof...( Idxs )     >( _idxs_... ) ;
-
-                return lhs_coords[ 0 ] == 0 ? _base::at( rhs_coords[ 0 ]     ).range< sizeof...( Idxs ) / 2 >( lhs_coords, rhs_coords )
-                                            : _base::at( rhs_coords[ 0 ]     ).range< sizeof...( Idxs ) / 2 >( lhs_coords, rhs_coords )
-                                            - _base::at( lhs_coords[ 0 ] - 1 ).range< sizeof...( Idxs ) / 2 >( lhs_coords, rhs_coords ) ;
-        }
-        */
-
         void push_back ( value_type const &  _val_ ) ;
         void push_back ( value_type       && _val_ ) ;
 
