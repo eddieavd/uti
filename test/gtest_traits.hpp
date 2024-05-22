@@ -35,3 +35,10 @@ struct noexcopynoexassign
         noexcopynoexassign             ( noexcopynoexassign && ) noexcept ;
         noexcopynoexassign & operator= ( noexcopynoexassign && ) noexcept ;
 };
+
+class A     {} ;
+class B : A {} ;
+class C : B {} ;
+class D     {} ;
+union E     {} ;
+using I = int  ;
