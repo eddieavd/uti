@@ -59,12 +59,15 @@ public:
         UTI_NODISCARD ssize_type       & capacity ()       noexcept { return capacity_ ; }
         UTI_NODISCARD ssize_type const & capacity () const noexcept { return capacity_ ; }
 
-              pointer  begin ()       noexcept { return buffer_             ; }
-        const_pointer  begin () const noexcept { return buffer_             ; }
-        const_pointer cbegin () const noexcept { return buffer_             ; }
-              pointer    end ()       noexcept { return buffer_ + capacity_ ; }
-        const_pointer    end () const noexcept { return buffer_ + capacity_ ; }
-        const_pointer   cend () const noexcept { return buffer_ + capacity_ ; }
+              iterator  begin ()       noexcept { return buffer_             ; }
+        const_iterator  begin () const noexcept { return buffer_             ; }
+        const_iterator cbegin () const noexcept { return buffer_             ; }
+              iterator    end ()       noexcept { return buffer_ + capacity_ ; }
+        const_iterator    end () const noexcept { return buffer_ + capacity_ ; }
+        const_iterator   cend () const noexcept { return buffer_ + capacity_ ; }
+
+              pointer data ()       noexcept { return buffer_ ; }
+        const_pointer data () const noexcept { return buffer_ ; }
 
         pointer       & _begin ()       noexcept { return buffer_ ; }
         pointer const & _begin () const noexcept { return buffer_ ; }

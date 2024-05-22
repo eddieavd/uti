@@ -68,7 +68,7 @@ template< typename T > using is_3d_container = integral_constant< is_2d_containe
 template< typename T > inline constexpr bool is_3d_container_v = is_3d_container< T >::value ;
 
 template< typename T > using is_2d_range_container = integral_constant< is_range_container_v< T > && is_range_container_v< typename T::value_type > > ;
-template< typename T > inline constexpr bool is_2d_range_container_v = is_2d_range_container< T >::value_type ;
+template< typename T > inline constexpr bool is_2d_range_container_v = is_2d_range_container< T >::value ;
 
 template< typename T > using is_3d_range_container = integral_constant< is_2d_range_container_v< T > && is_2d_range_container_v< typename T::value_type > > ;
 template< typename T > inline constexpr bool is_3d_range_container_v = is_3d_range_container< T >::value ;
