@@ -49,6 +49,8 @@ public:
         vector & operator= ( vector const &  _other_ )          ;
         vector & operator= ( vector       && _other_ ) noexcept ;
 
+        constexpr bool operator== ( vector const & _other_ ) const noexcept ;
+
         ~vector () noexcept ;
 
         void push_back ( value_type const &  _val_ ) ;
@@ -223,6 +225,24 @@ vector< T, Alloc >::operator= ( vector && _other_ ) noexcept
         _other_.capacity_ = 0 ;
 
         return *this;
+}
+
+template< typename T, typename Alloc >
+constexpr bool
+vector< T, Alloc >::operator== ( vector const & _other_ ) const noexcept
+{
+        if( _buff_base::data() == _other_.data() && _view_base::size() == _other_.size() )
+        {
+                return true;
+        }
+        for( ssize_type i = 0; i < _view_base::size(); ++i )
+        {
+                if( _view_base::at( i ) != _other_.at( i ) )
+                {
+                        return false;
+                }
+        }
+        return true;
 }
 
 template< typename T, typename Alloc >
