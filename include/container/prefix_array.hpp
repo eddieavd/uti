@@ -11,16 +11,20 @@
 #include <meta/sequence.hpp>
 #include <meta/pack.hpp>
 
+#include <functional>
+
 
 namespace uti
 {
 
 
-template< typename T, typename Alloc = static_bump_allocator< T, UTI_STATIC_MEM_SIZE > >
+template< typename T, typename Alloc = allocator< T > >
 class prefix_array : public vector< T, Alloc >
 {
         using _self = prefix_array       ;
         using _base = vector< T, Alloc > ;
+
+        friend class prefix_array< _self > ;
 public:
         using      value_type = typename _base::     value_type ;
         using       size_type = typename _base::      size_type ;
@@ -76,27 +80,31 @@ public:
                 return element_at( _x_ ).element_at( _idxs_... ) ;
         }
 
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr value_type range (                                            ) const noexcept ;
         UTI_NODISCARD UTI_DEEP_INLINE constexpr value_type range ( ssize_type const _x_, ssize_type const _y_ ) const noexcept ;
-
+private:
+        template< typename... Idxs >
         UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) range ( ssize_type const _x1_, ssize_type const _y1_,
-                                 ssize_type const _x2_, ssize_type const _y2_ ) const noexcept
-                requires( is_2d_range_container_v< _self > )
+        decltype( auto ) _range ( ssize_type const _x1_, ssize_type const _x2_, Idxs... _idxs_ ) const noexcept
+                requires( sizeof...( _idxs_ ) % 2 == 0 && is_n_dim_container_v< _self, ( sizeof...( _idxs_ ) / 2 ) + 1 > )
         {
-                return _x1_ == 0 ? _base::at( _x2_     ).range( _y1_, _y2_ )
-                                 : _base::at( _x2_     ).range( _y1_, _y2_ )
-                                 - _base::at( _x1_ - 1 ).range( _y1_, _y2_ ) ;
+                if constexpr( sizeof...( _idxs_ ) == 0 )
+                {
+                        return range( _x1_, _x2_ ) ;
+                }
+                else
+                {
+                        return _x1_ == 0 ? _base::at( _x2_     )._range( _idxs_... )
+                                         : _base::at( _x2_     )._range( _idxs_... )
+                                         - _base::at( _x1_ - 1 )._range( _idxs_... ) ;
+                }
         }
-
+public:
+        template< typename... Idxs >
         UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) range ( ssize_type const _x1_, ssize_type const _y1_, ssize_type const _z1_,
-                                 ssize_type const _x2_, ssize_type const _y2_, ssize_type const _z2_ ) const noexcept
-                requires( is_3d_range_container_v< _self > )
+        decltype( auto ) range ( Idxs... _idxs_ ) const noexcept
+                requires( sizeof...( _idxs_ ) % 2 == 0 && is_n_dim_container_v< _self, sizeof...( _idxs_ ) / 2 > )
         {
-                return _x1_ == 0 ? _base::at( _x2_     ).range( _y1_, _z1_, _y2_, _z2_ )
-                                 : _base::at( _x2_     ).range( _y1_, _z1_, _y2_, _z2_ )
-                                 - _base::at( _x1_ - 1 ).range( _y1_, _z1_, _y2_, _z2_ ) ;
+                return _range( _idxs_... ) ;
         }
 
         void push_back ( value_type const &  _val_ ) ;
@@ -122,7 +130,7 @@ private:
 };
 
 
-template< typename T, typename Alloc = static_bump_allocator< T, UTI_STATIC_MEM_SIZE > >
+template< typename T, typename Alloc = allocator< T > >
 prefix_array ( prefix_array< T, Alloc >::ssize_type const, T const & ) -> prefix_array< T, Alloc > ;
 
 
@@ -195,21 +203,14 @@ prefix_array< T, Alloc >::element_at ( ssize_type const _index_ ) const noexcept
 template< typename T, typename Alloc >
 UTI_NODISCARD constexpr
 prefix_array< T, Alloc >::value_type
-prefix_array< T, Alloc >::range () const noexcept
-{
-        return range( 0, _base::size() );
-}
-
-template< typename T, typename Alloc >
-UTI_NODISCARD constexpr
-prefix_array< T, Alloc >::value_type
 prefix_array< T, Alloc >::range ( ssize_type const _x_, ssize_type const _y_ ) const noexcept
 {
         UTI_ASSERT( !_base::empty() && 0 <= _x_ && _x_ <= _y_ && _y_ < _base::size(),
                         "uti::prefix_array::range: index out of range" );
 
-        return _x_ == 0 ? _base::at( _y_ )
-                        : _base::at( _y_ ) - _base::at( _x_ - 1 ) ;
+        return _x_ == 0 ? _base::at( _y_     )
+                        : _base::at( _y_     )
+                        - _base::at( _x_ - 1 ) ;
 }
 
 template< typename T, typename Alloc >
