@@ -22,23 +22,26 @@ if( UTI_HAS_STL )
         add_compile_definitions( UTI_HAS_STL )
         if( UTI_USE_LIBCXX )
                 add_compile_definitions( UTI_USE_LIBCXX )
+                add_compile_options( -stdlib=libc++ )
+                link_directories( /usr/lib/llvm-18/lib )
         else()
                 add_compile_definitions( UTI_USE_LIBSTDCXX )
         endif()
+endif()
+
+if( UTI_USE_LIBCXX )
+
+elseif( UTI_HAS_STL )
+
 endif()
 
 add_executable( uti main.cpp )
 
 target_include_directories( uti PUBLIC include )
 
-#if( UTI_USE_LIBCXX )
-#        add_compile_options( -stdlib=libc++ )
-#        link_directories( /usr/lib/llvm-18/lib )
-#
-#        target_link_libraries( uti c++ c++abi )
-#elseif( UTI_HAS_STL )
-#
-#endif()
+if( UTI_USE_LIBCXX )
+        target_link_libraries( uti c++ c++abi )
+endif()
 
 if( UTI_TEST )
         add_subdirectory( test )
