@@ -6,12 +6,11 @@
 
 #pragma once
 
+#include <mem/allocator.hpp>
 #include <container/vector.hpp>
 #include <container/array.hpp>
 #include <meta/sequence.hpp>
-#include <meta/pack.hpp>
-
-#include <functional>
+#include <meta/concepts.hpp>
 
 
 namespace uti
@@ -57,12 +56,14 @@ public:
         prefix_array & operator+= ( prefix_array const & _other_ ) noexcept ;
         prefix_array & operator-= ( prefix_array const & _other_ ) noexcept ;
 
-        friend prefix_array operator+ ( prefix_array _lhs_, prefix_array const & _rhs_ ) noexcept
+        prefix_array operator- () noexcept ;
+
+        friend prefix_array operator+ ( prefix_array & _lhs_, prefix_array const & _rhs_ ) noexcept
         {
                 _lhs_ += _rhs_ ;
                 return   _lhs_ ;
         }
-        friend prefix_array operator- ( prefix_array _lhs_, prefix_array const & _rhs_ ) noexcept
+        friend prefix_array operator- ( prefix_array & _lhs_, prefix_array const & _rhs_ ) noexcept
         {
                 _lhs_ -= _rhs_ ;
                 return   _lhs_ ;
@@ -70,41 +71,53 @@ public:
 
         ~prefix_array () noexcept = default ;
 
-        UTI_NODISCARD constexpr value_type element_at ( ssize_type const _index_ ) const noexcept ;
-
-        template< typename... Idxs >
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) element_at ( ssize_type const _x_, Idxs... _idxs_ ) const noexcept
+        UTI_NODISCARD constexpr
+        decltype( auto ) element_at ( ssize_type const _x_, auto... _idxs_ ) const noexcept
                 requires( is_n_dim_container_v< _self, sizeof...( _idxs_ ) + 1 > )
-        {
-                return element_at( _x_ ).element_at( _idxs_... ) ;
-        }
-
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr value_type range ( ssize_type const _x_, ssize_type const _y_ ) const noexcept ;
-private:
-        template< typename... Idxs >
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) _range ( ssize_type const _x1_, ssize_type const _x2_, Idxs... _idxs_ ) const noexcept
-                requires( sizeof...( _idxs_ ) % 2 == 0 && is_n_dim_container_v< _self, ( sizeof...( _idxs_ ) / 2 ) + 1 > )
         {
                 if constexpr( sizeof...( _idxs_ ) == 0 )
                 {
-                        return range( _x1_, _x2_ ) ;
+                        return _x_ == 0 ? _base::at( _x_     )
+                                        : _base::at( _x_     )
+                                        - _base::at( _x_ - 1 ) ;
                 }
                 else
                 {
-                        return _x1_ == 0 ? _base::at( _x2_     )._range( _idxs_... )
-                                         : _base::at( _x2_     )._range( _idxs_... )
-                                         - _base::at( _x1_ - 1 )._range( _idxs_... ) ;
+                        return _x_ == 0 ? _base::at( _x_     ).element_at( _idxs_... )
+                                        : _base::at( _x_     ).element_at( _idxs_... )
+                                        - _base::at( _x_ - 1 ).element_at( _idxs_... ) ;
                 }
         }
-public:
-        template< typename... Idxs >
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) range ( Idxs... _idxs_ ) const noexcept
-                requires( sizeof...( _idxs_ ) % 2 == 0 && is_n_dim_container_v< _self, sizeof...( _idxs_ ) / 2 > )
+
+        UTI_NODISCARD constexpr
+        decltype( auto ) range ( auto&&... _coords_ ) const noexcept
+                requires( sizeof...( _coords_ ) % 2 == 0 &&
+                          is_n_dim_container_v< _self, sizeof...( _coords_ ) / 2 > )
         {
-                return _range( _idxs_... ) ;
+                constexpr auto Dim = sizeof...( _coords_ ) / 2 ;
+
+                if constexpr( Dim == 1 )
+                {
+                        return [ & ]( ssize_type const _x1_, ssize_type const _x2_ )
+                        {
+                                return _x1_ == 0 ? _base::at( _x2_     )
+                                                 : _base::at( _x2_     )
+                                                 - _base::at( _x1_ - 1 ) ;
+                        }( _coords_... ) ;
+                }
+                else
+                {
+                        return [ & ]< ssize_type... Idxs >( uti::index_sequence< Idxs... > )
+                        {
+                                return [ & ]( ssize_type const _x1_, index< Idxs >&&... lhs ,
+                                              ssize_type const _x2_, index< Idxs >&&... rhs )
+                                {
+                                        return _x1_ == 0 ? _base::at( _x2_     ).range( lhs..., rhs... )
+                                                         : _base::at( _x2_     ).range( lhs..., rhs... )
+                                                         - _base::at( _x1_ - 1 ).range( lhs..., rhs... ) ;
+                                }( _coords_... ) ;
+                        }( uti::make_index_sequence< Dim - 1 >{} ) ;
+                }
         }
 
         void push_back ( value_type const &  _val_ ) ;
@@ -193,37 +206,27 @@ prefix_array< T, Alloc >::operator-= ( prefix_array const & _other_ ) noexcept
 }
 
 template< typename T, typename Alloc >
-UTI_NODISCARD constexpr
-prefix_array< T, Alloc >::value_type
-prefix_array< T, Alloc >::element_at ( ssize_type const _index_ ) const noexcept
+prefix_array< T, Alloc >
+prefix_array< T, Alloc >::operator- () noexcept
 {
-        return range( _index_, _index_ ) ;
-}
+        auto prefix = *this ;
 
-template< typename T, typename Alloc >
-UTI_NODISCARD constexpr
-prefix_array< T, Alloc >::value_type
-prefix_array< T, Alloc >::range ( ssize_type const _x_, ssize_type const _y_ ) const noexcept
-{
-        UTI_ASSERT( !_base::empty() && 0 <= _x_ && _x_ <= _y_ && _y_ < _base::size(),
-                        "uti::prefix_array::range: index out of range" );
-
-        return _x_ == 0 ? _base::at( _y_     )
-                        : _base::at( _y_     )
-                        - _base::at( _x_ - 1 ) ;
+        for( auto & val : prefix )
+        {
+                val = -val ;
+        }
+        return prefix ;
 }
 
 template< typename T, typename Alloc >
 void
 prefix_array< T, Alloc >::push_back ( value_type const & _val_ )
 {
-        if( _base::empty() )
+        _base::emplace_back( _val_ ) ;
+
+        if( _base::size() > 1 )
         {
-                _base::emplace_back( _val_ );
-        }
-        else
-        {
-                _base::emplace_back( _val_ + _base::back() );
+                _base::back() += _base::at( _base::size() - 2 ) ;
         }
 }
 
@@ -231,13 +234,11 @@ template< typename T, typename Alloc >
 void
 prefix_array< T, Alloc >::push_back ( value_type && _val_ )
 {
-        if( _base::empty() )
+        _base::emplace_back( UTI_MOVE( _val_ ) ) ;
+
+        if( _base::size() > 1 )
         {
-                _base::emplace_back( UTI_MOVE( _val_ ) );
-        }
-        else
-        {
-                _base::emplace_back( _val_ + _base::back() );
+                _base::back() += _base::at( _base::size() - 2 ) ;
         }
 }
 
@@ -246,13 +247,11 @@ template< typename... Args >
 void
 prefix_array< T, Alloc >::emplace_back ( Args&&... _args_ )
 {
-        if( _base::empty() )
+        _base::emplace_back( UTI_FWD( _args_ )... ) ;
+
+        if( _base::size() > 1 )
         {
-                _base::emplace_back( UTI_FWD( _args_ )... );
-        }
-        else
-        {
-                _base::emplace_back( value_type( _args_... ) + _base::back() );
+                _base::back() += _base::at( _base::size() - 2 ) ;
         }
 }
 
@@ -262,10 +261,7 @@ prefix_array< T, Alloc >::pop_front () noexcept
 {
         UTI_ASSERT( !_base::empty(), "uti::prefix_array::pop_front: called on empty prefix_array" );
 
-        for( ssize_type i = 1; i < _base::size(); ++i )
-        {
-                _base::at( i ) -= _base::front();
-        }
+        _update_range( -_base::front(), 1, _base::size() ) ;
         _base::pop_front();
 }
 
