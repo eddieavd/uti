@@ -25,8 +25,8 @@ public:
         using      ssize_type = typename _base::     ssize_type ;
         using difference_type = typename _base::difference_type ;
 
-        using allocator_type = Alloc ;
-        using  _alloc_traits = allocator_traits< allocator_type > ;
+        using  allocator_type = Alloc ;
+        using   _alloc_traits = allocator_traits< allocator_type > ;
 
         using         pointer = typename _base::        pointer ;
         using   const_pointer = typename _base::  const_pointer ;

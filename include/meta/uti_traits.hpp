@@ -8,6 +8,11 @@
 
 #include <meta/traits.hpp>
 
+#define UTI_SHADOW_IMPL( name, temp_args, specialization ) \
+        template< temp_args > \
+                requires true \
+        name< specialization >
+
 
 namespace uti
 {

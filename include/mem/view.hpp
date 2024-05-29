@@ -49,7 +49,6 @@ public:
         constexpr void pop_back  () noexcept { --end_   ; }
         constexpr void pop_front () noexcept { ++begin_ ; }
 
-#if UTI_STD_VER >= 23
         template< typename Self >
         UTI_NODISCARD constexpr
         auto & operator[] ( this Self && self, ssize_type const _index_ ) noexcept
@@ -68,50 +67,11 @@ public:
 
         template< typename Self, typename... Idxs >
         UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) at ( this Self && self, ssize_type const _x_, Idxs... _idxs_ )
-               noexcept requires( is_n_dim_container_v< _self, sizeof...( _idxs_ ) + 1 > )
+        decltype( auto ) at ( this Self && self, ssize_type const _x_, Idxs... _idxs_ ) noexcept
+                requires( is_n_dim_container_v< _self, sizeof...( _idxs_ ) + 1 > )
         {
                 return UTI_FWD( self ).at( _x_ ).at( _idxs_... );
         }
-#else
-        UTI_NODISCARD constexpr value_type & operator[] ( ssize_type const _index_ ) noexcept
-        {
-                return _base::begin_[ _index_ ];
-        }
-        UTI_NODISCARD constexpr
-        value_type const & operator[] ( ssize_type const _index_ ) const noexcept
-        {
-                return _base::begin_[ _index_ ];
-        }
-
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        value_type & at ( ssize_type const _index_ ) noexcept
-        {
-                UTI_ASSERT( 0 <= _index_ && _index_ < _base::size(), "uti::view::at: index out of range" );
-                return _base::begin_[ _index_ ];
-        }
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        value_type const & at ( ssize_type const _index_ ) const noexcept
-        {
-                UTI_ASSERT( 0 <= _index_ && _index_ < _base::size(), "uti::view::at: index out of range" );
-                return _base::begin_[ _index_ ];
-        }
-
-        template< typename... Idxs >
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) at ( ssize_type const _x_, Idxs... _idxs_ )
-                noexcept requires( is_n_dim_container_v< _self, sizeof...( _idxs_ ) + 1 > )
-        {
-                return at( _x_ ).at( _idxs_... );
-        }
-        template< typename... Idxs >
-        UTI_NODISCARD UTI_DEEP_INLINE constexpr
-        decltype( auto ) at ( ssize_type const _x_, Idxs... _idxs_ ) const
-                noexcept requires( is_n_dim_container_v< _self, sizeof...( _idxs_ ) + 1 > )
-        {
-                return at( _x_ ).at( _idxs_... );
-        }
-#endif
 
         UTI_NODISCARD constexpr ssize_type  size () const noexcept { return static_cast< ssize_type >( end_ - begin_ ); }
         UTI_NODISCARD constexpr       bool empty () const noexcept { return end_ == begin_; }
