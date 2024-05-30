@@ -167,3 +167,17 @@ TEST( TraitsTest, Swappability )
 {
         EXPECT_EQ( "not implemented", "not implemented" ) ;
 }
+
+TEST( TraitsTest, TypeStuff )
+{
+        static_assert
+        (
+                uti::is_base_of_v<A, A> == true &&
+                uti::is_base_of_v<A, B> == true &&
+                uti::is_base_of_v<A, C> == true &&
+                uti::is_base_of_v<A, D> != true &&
+                uti::is_base_of_v<B, A> != true &&
+                uti::is_base_of_v<E, E> != true &&
+                uti::is_base_of_v<I, I> != true
+        );
+}

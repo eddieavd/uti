@@ -16,6 +16,22 @@ namespace uti
 {
 
 
+template< typename, ssize_t > concept any = true ;
+// template< ssize_t > struct any { any( auto ){} } ;
+
+
+template< ssize_t > struct index
+{
+        ssize_t idx ;
+
+        template< ssize_t Idx_ >
+        constexpr index ( index< Idx_ > _other_ ) : idx( _other_.idx  ) {}
+        constexpr index ( ssize_t         _idx_ ) : idx(        _idx_ ) {}
+
+        constexpr operator ssize_t () const noexcept { return idx ; }
+};
+
+
 template< typename T, typename U >
 concept same_as = is_same_v< T, U > && is_same_v< U, T > ;
 

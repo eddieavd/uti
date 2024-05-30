@@ -89,7 +89,10 @@ UTI_NORETURN inline void unreachable ()
 template< typename T, typename U = T&& > U _declval (  int ) ;
 template< typename T                   > T _declval ( long ) ;
 
-template< typename T > auto declval () noexcept -> decltype( _declval< T >( 0 ) ) ;
+template< typename T > auto declval () noexcept -> decltype( _declval< T >( 0 ) )
+{
+        static_assert( false, "uti::declval: not allowed in evaluated contexts" ) ;
+}
 
 using nullptr_t = decltype( nullptr ) ;
 using ptrdiff_t = decltype( uti::declval< int * >() - uti::declval< int * >() ) ;
@@ -786,9 +789,9 @@ inline constexpr bool is_base_of_v = is_base_of< Base, Derived >::value ;
 
 template< typename T >
 struct is_object : integral_constant< is_scalar_v< T >
-                                   || is_array_v< T >
-                                   || is_union_v< T >
-                                   || is_class_v< T > > {} ;
+                                   || is_array_v < T >
+                                   || is_union_v < T >
+                                   || is_class_v < T > > {} ;
 
 template< typename T >
 inline constexpr bool is_object_v = is_object< T >::value ;

@@ -11,7 +11,7 @@
 #include <meta/traits.hpp>
 
 
-namespace uti
+namespace uti::meta
 {
 
 
@@ -172,6 +172,6 @@ static_assert( is_same_v<  float, at_t< 1, type_list< int, float, double > > > )
 static_assert( is_same_v< double, at_t< 2, type_list< int, float, double > > > ) ;
 
 
-} // namespace uti
+} // namespace uti::meta
 
 #endif // UTI_DOXYGEN_SKIP

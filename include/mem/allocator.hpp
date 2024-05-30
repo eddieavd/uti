@@ -10,6 +10,8 @@
 #include <meta/uti_traits.hpp>
 #include <algo/copy.hpp>
 
+#include <new>
+
 #ifndef UTI_STATIC_MEM_SIZE
 #define UTI_STATIC_MEM_SIZE 8 * 1024 * 1024
 #endif
