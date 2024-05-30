@@ -261,7 +261,7 @@ prefix_array< T, Alloc >::pop_front () noexcept
 {
         UTI_ASSERT( !_base::empty(), "uti::prefix_array::pop_front: called on empty prefix_array" );
 
-        _update_range( -_base::front(), 1, _base::size() ) ;
+        _update_range( -_base::front(), 1, _base::size() - 1 ) ;
         _base::pop_front();
 }
 
@@ -295,10 +295,13 @@ prefix_array< T, Alloc >::insert ( value_type const & _val_, ssize_type const _p
 {
         UTI_ASSERT( 0 <= _position_ && _position_ <= _base::size(), "uti::prefix_array::insert: index out of range" );
 
-        if( _position_ == _base::size() ) push_back( _val_ ) ;
-
+        if( _position_ == _base::size() )
+        {
+                push_back( _val_ ) ;
+                return ;
+        }
         _base::insert( _val_, _position_ );
-        _update_range( _val_, _position_ + 1, _base::size() );
+        _update_range( _val_, _position_ + 1, _base::size() - 1 );
 
         if( _position_ > 0 )
         {
@@ -312,10 +315,13 @@ prefix_array< T, Alloc >::insert ( value_type && _val_, ssize_type const _positi
 {
         UTI_ASSERT( 0 <= _position_ && _position_ <= _base::size(), "uti::prefix_array::insert: index out of range" );
 
-        if( _position_ == _base::size() ) push_back( _val_ ) ;
-
+        if( _position_ == _base::size() )
+        {
+                push_back( _val_ ) ;
+                return ;
+        }
         _base::insert( _val_, _position_ );
-        _update_range( _val_, _position_ + 1, _base::size() );
+        _update_range( _val_, _position_ + 1, _base::size() - 1 );
 
         if( _position_ > 0 )
         {
