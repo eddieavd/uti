@@ -6,6 +6,8 @@
 
 #include <container/prefix_array.hpp>
 
+#include <cstdio>
+
 
 int main ()
 {
