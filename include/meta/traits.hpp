@@ -58,7 +58,7 @@ constexpr u16_t u16_t_max { 0x000000000000FFFF } ;
 constexpr u32_t u32_t_max { 0x00000000FFFFFFFF } ;
 constexpr u64_t u64_t_max { 0xFFFFFFFFFFFFFFFF } ;
 
-constexpr  i8_t  i8_t_max { 0x00000000000000FF } ;
+constexpr  i8_t  i8_t_max { 0x000000000000007F } ;
 constexpr i16_t i16_t_max { 0x0000000000007FFF } ;
 constexpr i32_t i32_t_max { 0x000000007FFFFFFF } ;
 constexpr i64_t i64_t_max { 0x7FFFFFFFFFFFFFFF } ;
