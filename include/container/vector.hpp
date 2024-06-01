@@ -68,13 +68,13 @@ public:
         ssize_type reserve (                             ) ;
         ssize_type reserve ( ssize_type const _capacity_ ) ;
 
-        ssize_type shrink ( ssize_type const _capacity_ ) ;
+        void shrink ( ssize_type const _capacity_ ) ;
 
         void shrink_to_fit (                         )          ;
         void shrink_size   ( ssize_type const _size_ ) noexcept ;
 
-        void insert ( value_type const &  _val_, ssize_type const _position_ ) ;
-        void insert ( value_type       && _val_, ssize_type const _position_ ) ;
+        void insert ( ssize_type const _position_, value_type const &  _val_ ) ;
+        void insert ( ssize_type const _position_, value_type       && _val_ ) ;
 
         void erase        ( ssize_type const _position_ ) noexcept( is_nothrow_move_assignable_v< value_type > ) ;
         void erase_stable ( ssize_type const _position_ ) noexcept( is_nothrow_move_assignable_v< value_type > ) ;
@@ -112,7 +112,7 @@ vector< T, Alloc >::_copy_buffer ( _buff_base & _buff_ ) noexcept( is_nothrow_co
         {
                 for( ssize_type i = 0; i < _view_base::size(); ++i )
                 {
-                        _alloc_traits::construct( _buff_.begin() + i, _view_base::at( i ) );
+                        _alloc_traits::construct( _buff_.begin() + i, UTI_MOVE( _view_base::at( i ) ) );
                         _alloc_traits::destroy( _view_base::begin() + i );
                 }
         }
@@ -122,8 +122,8 @@ template< typename T, typename Alloc >
 void
 vector< T, Alloc >::_swap_buffer ( _buff_base & _buff_ ) noexcept
 {
-        ::uti::swap( _buff_base::  _begin(), _buff_.  _begin() );
-        ::uti::swap( _buff_base::capacity(), _buff_.capacity() );
+        using uti::swap ;
+        swap( _buff_, *this ) ;
 }
 
 template< typename T, typename Alloc >
@@ -152,17 +152,15 @@ vector< T, Alloc >::vector ( vector const & _other_ )
                 if constexpr( is_trivially_copy_assignable_v< value_type > )
                 {
                         ::uti::copy( _other_.begin(), _other_.end(), _view_base::begin() );
+                        _view_base::_end() = _view_base::begin() + _other_.size();
                 }
                 else
                 {
-                        reserve( _other_.size() );
-
                         for( auto const & val : _other_ )
                         {
                                 _emplace( val );
                         }
                 }
-                _view_base::_end() = _view_base::begin() + _other_.size();
         }
 }
 
@@ -255,16 +253,14 @@ template< typename T, typename Alloc >
 void
 vector< T, Alloc >::push_back ( value_type const & _val_ )
 {
-        reserve();
-        _emplace( _val_ );
+        emplace_back( _val_ ) ;
 }
 
 template< typename T, typename Alloc >
 void
 vector< T, Alloc >::push_back ( value_type && _val_ )
 {
-        reserve();
-        _emplace( UTI_MOVE( _val_ ) );
+        emplace_back( UTI_MOVE( _val_ ) ) ;
 }
 
 template< typename T, typename Alloc >
@@ -381,20 +377,18 @@ vector< T, Alloc >::reserve ( ssize_type const _capacity_ )
 }
 
 template< typename T, typename Alloc >
-vector< T, Alloc >::ssize_type
+void
 vector< T, Alloc >::shrink ( ssize_type const _capacity_ )
 {
         shrink_size( _capacity_ );
         shrink_to_fit();
-
-        return _buff_base::capacity();
 }
 
 template< typename T, typename Alloc >
 void
 vector< T, Alloc >::shrink_to_fit ()
 {
-        if( _view_base::size() == _buff_base::capacity() ) return;
+        if( _view_base::size() >= _buff_base::capacity() ) return;
 
         _buff_base buff( _view_base::size() );
 
@@ -423,7 +417,7 @@ vector< T, Alloc >::shrink_size ( ssize_type const _size_ ) noexcept
 
 template< typename T, typename Alloc >
 void
-vector< T, Alloc >::insert ( value_type const & _val_, ssize_type const _position_ )
+vector< T, Alloc >::insert ( ssize_type const _position_, value_type const & _val_ )
 {
         UTI_ASSERT( 0 <= _position_ && _position_ <= _view_base::size(), "uti::vector::insert: index out of range" );
 
@@ -445,7 +439,7 @@ vector< T, Alloc >::insert ( value_type const & _val_, ssize_type const _positio
 
 template< typename T, typename Alloc >
 void
-vector< T, Alloc >::insert ( value_type && _val_, ssize_type const _position_ )
+vector< T, Alloc >::insert ( ssize_type const _position_, value_type && _val_ )
 {
         UTI_ASSERT( 0 <= _position_ && _position_ <= _view_base::size(), "uti::vector::insert: index out of range" );
 

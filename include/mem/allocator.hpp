@@ -67,6 +67,9 @@ template< typename T > using has_block_type = T::block_type ;
 template< typename Alloc, typename T >
 using has_inplace_realloc = decltype( Alloc::can_realloc_inplace( uti::declval< block_t< T > >(), uti::declval< ssize_t >() ) ) ;
 
+template< typename Alloc, typename T >
+using has_max_size = decltype( Alloc::max_size() ) ;
+
 
 template< typename Alloc, typename = void >
 class allocator_traits
@@ -88,57 +91,78 @@ public:
         using        iterator = detected_or_t<       pointer,       has_iterator, allocator_type > ;
         using  const_iterator = detected_or_t< const_pointer, has_const_iterator, allocator_type > ;
 
-        UTI_NODISCARD inline constexpr static
+        UTI_NODISCARD constexpr static
         block_type allocate ( ssize_type _count_ )
         {
                 pointer allocation = allocator_type::allocate( _count_ );
 
-                return allocation != nullptr ? block_type{ allocation, _count_ } : block_type{ allocation, 0 } ;
+                return allocation != nullptr ? block_type{ allocation, _count_ }
+                                             : block_type{    nullptr,       0 } ;
         }
-        inline constexpr static
+        constexpr static
         block_type reallocate ( block_type const & _block_, ssize_type _count_ )
         {
                 pointer reallocation = allocator_type::reallocate( _block_.ptr, _count_ ) ;
 
-                return reallocation != nullptr ? block_type{ reallocation, _count_ } : block_type{ reallocation, 0 } ;
+                return reallocation != nullptr ? block_type{ reallocation, _count_ }
+                                               : block_type{      nullptr,       0 } ;
         }
 
-        UTI_NODISCARD inline constexpr static
-        bool can_realloc_inplace ( block_type const & _block_, ssize_type _count_ ) noexcept requires( is_detected_v< has_inplace_realloc, allocator_type, value_type > )
+        UTI_NODISCARD constexpr static
+        bool can_realloc_inplace ( block_type const & _block_, ssize_type _count_ ) noexcept
+                requires( is_detected_v< has_inplace_realloc, allocator_type, value_type > )
         {
                 return allocator_type::can_realloc_inplace( _block_.ptr, _count_ );
         }
-        UTI_NODISCARD inline constexpr static
-        bool can_realloc_inplace ( block_type const &, ssize_type ) noexcept requires( !is_detected_v< has_inplace_realloc, allocator_type, value_type > )
+        UTI_NODISCARD constexpr static
+        bool can_realloc_inplace ( block_type const &, ssize_type ) noexcept
+                requires( !is_detected_v< has_inplace_realloc, allocator_type, value_type > )
         {
                 return false;
         }
 
-        UTI_NODISCARD inline constexpr static
-        block_type try_realloc_inplace ( block_type const & _block_, ssize_type _count_ ) noexcept requires( is_detected_v< has_inplace_realloc, allocator_type, value_type > )
+        UTI_NODISCARD constexpr static
+        block_type try_realloc_inplace ( block_type const & _block_, ssize_type _count_ ) noexcept
+                requires( is_detected_v< has_inplace_realloc, allocator_type, value_type > )
         {
                 pointer reallocation = allocator_type::try_realloc_inplace( _block_, _count_ );
 
-                return reallocation != nullptr ? block_type{ reallocation, _count_ } : block_type{ reallocation, 0 } ;
+                return reallocation != nullptr ? block_type{ reallocation, _count_ }
+                                               : block_type{      nullptr,       0 } ;
         }
-        UTI_NODISCARD inline constexpr static
-        block_type try_realloc_inplace ( block_type const &, ssize_type ) noexcept requires( !is_detected_v< has_inplace_realloc, allocator_type, value_type > )
+        UTI_NODISCARD constexpr static
+        block_type try_realloc_inplace ( block_type const &, ssize_type ) noexcept
+                requires( !is_detected_v< has_inplace_realloc, allocator_type, value_type > )
         {
                 return { nullptr, 0 } ;
         }
 
-        inline constexpr static
+        constexpr static
         void deallocate ( block_type const & _block_ ) noexcept
         {
                 allocator_type::deallocate( _block_.ptr );
         }
 
+        UTI_NODISCARD constexpr static
+        ssize_type max_size () noexcept
+                requires( is_detected_v< has_max_size, allocator_type, value_type > )
+        {
+                return allocator_type::max_size() ;
+        }
+        UTI_NODISCARD constexpr static
+        ssize_type max_size () noexcept
+                requires( !is_detected_v< has_max_size, allocator_type, value_type > )
+        {
+                return i64_t_max ;
+        }
+
         template< typename... Args >
-        static void construct ( pointer const _ptr_, Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > )
+        static constexpr void construct ( pointer const _ptr_, Args&&... _args_ )
+                noexcept( is_nothrow_constructible_v< value_type, Args... > )
         {
                 allocator_type::construct( _ptr_, UTI_FWD( _args_ )... );
         }
-        static void destroy ( pointer const _ptr_ ) noexcept
+        static constexpr void destroy ( pointer const _ptr_ ) noexcept
         {
                 allocator_type::destroy( _ptr_ );
         }
@@ -164,51 +188,69 @@ public:
         using        iterator = detected_or_t<       pointer,       has_iterator, allocator_type > ;
         using  const_iterator = detected_or_t< const_pointer, has_const_iterator, allocator_type > ;
 
-        UTI_NODISCARD inline constexpr static
+        UTI_NODISCARD constexpr static
         block_type allocate ( ssize_type _count_ )
         {
                 return allocator_type::allocate( _count_ );
         }
-        inline constexpr static
+        constexpr static
         block_type reallocate ( block_type const & _block_, ssize_type _count_ )
         {
                 return allocator_type::reallocate( _block_, _count_ );
         }
 
-        UTI_NODISCARD inline constexpr static
-        bool can_realloc_inplace ( block_type const & _block_, ssize_type _count_ ) noexcept requires( is_detected_v< has_inplace_realloc, allocator_type, value_type > )
+        UTI_NODISCARD constexpr static
+        bool can_realloc_inplace ( block_type const & _block_, ssize_type _count_ ) noexcept
+                requires( is_detected_v< has_inplace_realloc, allocator_type, value_type > )
         {
                 return allocator_type::can_realloc_inplace( _block_, _count_ );
         }
-        UTI_NODISCARD inline constexpr static
-        bool can_realloc_inplace ( block_type const &, ssize_type ) noexcept requires( !is_detected_v< has_inplace_realloc, allocator_type, value_type > )
+        UTI_NODISCARD constexpr static
+        bool can_realloc_inplace ( block_type const &, ssize_type ) noexcept
+                requires( !is_detected_v< has_inplace_realloc, allocator_type, value_type > )
         {
                 return false;
         }
 
-        UTI_NODISCARD inline constexpr static
-        block_type try_realloc_inplace ( block_type const & _block_, ssize_type _count_ ) noexcept requires( is_detected_v< has_inplace_realloc, allocator_type, value_type > )
+        UTI_NODISCARD constexpr static
+        block_type try_realloc_inplace ( block_type const & _block_, ssize_type _count_ ) noexcept
+                requires( is_detected_v< has_inplace_realloc, allocator_type, value_type > )
         {
                 return allocator_type::try_realloc_inplace( _block_, _count_ );
         }
-        UTI_NODISCARD inline constexpr static
-        block_type try_realloc_inplace ( block_type const &, ssize_type ) noexcept requires( !is_detected_v< has_inplace_realloc, allocator_type, value_type > )
+        UTI_NODISCARD constexpr static
+        block_type try_realloc_inplace ( block_type const &, ssize_type ) noexcept
+                requires( !is_detected_v< has_inplace_realloc, allocator_type, value_type > )
         {
                 return { nullptr, 0 } ;
         }
 
-        inline constexpr static
+        constexpr static
         void deallocate ( block_type const & _block_ ) noexcept
         {
                 allocator_type::deallocate( _block_ );
         }
 
+        UTI_NODISCARD constexpr static
+        ssize_type max_size () noexcept
+                requires( is_detected_v< has_max_size, allocator_type, value_type > )
+        {
+                return allocator_type::max_size() ;
+        }
+        UTI_NODISCARD constexpr static
+        ssize_type max_size () noexcept
+                requires( !is_detected_v< has_max_size, allocator_type, value_type > )
+        {
+                return i64_t_max ;
+        }
+
         template< typename... Args >
-        static void construct ( pointer const _ptr_, Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > )
+        static constexpr void construct ( pointer const _ptr_, Args&&... _args_ )
+                noexcept( is_nothrow_constructible_v< value_type, Args... > )
         {
                 allocator_type::construct( _ptr_, UTI_FWD( _args_ )... );
         }
-        static void destroy ( pointer const _ptr_ ) noexcept
+        static constexpr void destroy ( pointer const _ptr_ ) noexcept
         {
                 allocator_type::destroy( _ptr_ );
         }

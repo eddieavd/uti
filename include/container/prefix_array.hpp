@@ -22,8 +22,6 @@ class prefix_array : public vector< T, Alloc >
 {
         using _self = prefix_array       ;
         using _base = vector< T, Alloc > ;
-
-        friend class prefix_array< _self > ;
 public:
         using      value_type = typename _base::     value_type ;
         using       size_type = typename _base::      size_type ;
@@ -58,12 +56,12 @@ public:
 
         prefix_array operator- () noexcept ;
 
-        friend prefix_array operator+ ( prefix_array & _lhs_, prefix_array const & _rhs_ ) noexcept
+        friend prefix_array & operator+ ( prefix_array & _lhs_, prefix_array const & _rhs_ ) noexcept
         {
                 _lhs_ += _rhs_ ;
                 return   _lhs_ ;
         }
-        friend prefix_array operator- ( prefix_array & _lhs_, prefix_array const & _rhs_ ) noexcept
+        friend prefix_array & operator- ( prefix_array & _lhs_, prefix_array const & _rhs_ ) noexcept
         {
                 _lhs_ -= _rhs_ ;
                 return   _lhs_ ;
@@ -112,9 +110,9 @@ public:
                                 return [ & ]( ssize_type const _x1_, index< Idxs >&&... lhs ,
                                               ssize_type const _x2_, index< Idxs >&&... rhs )
                                 {
-                                        return _x1_ == 0 ? _base::at( _x2_     ).range( lhs..., rhs... )
-                                                         : _base::at( _x2_     ).range( lhs..., rhs... )
-                                                         - _base::at( _x1_ - 1 ).range( lhs..., rhs... ) ;
+                                        return _x1_ == 0 ? _base::at( _x2_     ).range( UTI_FWD( lhs )..., UTI_FWD( rhs )... )
+                                                         : _base::at( _x2_     ).range( UTI_FWD( lhs )..., UTI_FWD( rhs )... )
+                                                         - _base::at( _x1_ - 1 ).range( UTI_FWD( lhs )..., UTI_FWD( rhs )... ) ;
                                 }( _coords_... ) ;
                         }( uti::make_index_sequence< Dim - 1 >{} ) ;
                 }
@@ -123,15 +121,14 @@ public:
         void push_back ( value_type const &  _val_ ) ;
         void push_back ( value_type       && _val_ ) ;
 
-        template< typename... Args >
-        void emplace_back ( Args&&... _args_ ) ;
+        void emplace_back ( auto&&... _args_ ) ;
 
                             void pop_front     () noexcept ;
         UTI_NODISCARD value_type pop_front_val () noexcept ;
         UTI_NODISCARD value_type pop_back_val  () noexcept ;
 
-        void insert ( value_type const &  _val_, ssize_type const _position_ ) ;
-        void insert ( value_type       && _val_, ssize_type const _position_ ) ;
+        void insert ( ssize_type const _position_, value_type const &  _val_ ) ;
+        void insert ( ssize_type const _position_, value_type       && _val_ ) ;
 
         void erase        ( ssize_type const _position_ ) noexcept( is_nothrow_move_assignable_v< value_type > ) ;
         void erase_stable ( ssize_type const _position_ ) noexcept( is_nothrow_move_assignable_v< value_type > )
@@ -139,7 +136,7 @@ public:
                 erase( _position_ ) ;
         }
 private:
-        void _update_range ( value_type const & _diff_, ssize_type const _x_, ssize_type const _y_ ) noexcept ;
+        void _update_range ( ssize_type const _x_, ssize_type const _y_, value_type const & _diff_ ) noexcept ;
 };
 
 
@@ -243,9 +240,8 @@ prefix_array< T, Alloc >::push_back ( value_type && _val_ )
 }
 
 template< typename T, typename Alloc >
-template< typename... Args >
 void
-prefix_array< T, Alloc >::emplace_back ( Args&&... _args_ )
+prefix_array< T, Alloc >::emplace_back ( auto&&... _args_ )
 {
         _base::emplace_back( UTI_FWD( _args_ )... ) ;
 
@@ -261,7 +257,7 @@ prefix_array< T, Alloc >::pop_front () noexcept
 {
         UTI_ASSERT( !_base::empty(), "uti::prefix_array::pop_front: called on empty prefix_array" );
 
-        _update_range( -_base::front(), 1, _base::size() - 1 ) ;
+        _update_range( 1, _base::size() - 1, -_base::front() ) ;
         _base::pop_front();
 }
 
@@ -291,7 +287,7 @@ prefix_array< T, Alloc >::pop_back_val () noexcept
 
 template< typename T, typename Alloc >
 void
-prefix_array< T, Alloc >::insert ( value_type const & _val_, ssize_type const _position_ )
+prefix_array< T, Alloc >::insert ( ssize_type const _position_, value_type const & _val_ )
 {
         UTI_ASSERT( 0 <= _position_ && _position_ <= _base::size(), "uti::prefix_array::insert: index out of range" );
 
@@ -300,8 +296,8 @@ prefix_array< T, Alloc >::insert ( value_type const & _val_, ssize_type const _p
                 push_back( _val_ ) ;
                 return ;
         }
-        _base::insert( _val_, _position_ );
-        _update_range( _val_, _position_ + 1, _base::size() - 1 );
+        _base::insert( _position_, _val_ );
+        _update_range( _position_ + 1, _base::size() - 1, _val_ );
 
         if( _position_ > 0 )
         {
@@ -311,7 +307,7 @@ prefix_array< T, Alloc >::insert ( value_type const & _val_, ssize_type const _p
 
 template< typename T, typename Alloc >
 void
-prefix_array< T, Alloc >::insert ( value_type && _val_, ssize_type const _position_ )
+prefix_array< T, Alloc >::insert ( ssize_type const _position_, value_type && _val_ )
 {
         UTI_ASSERT( 0 <= _position_ && _position_ <= _base::size(), "uti::prefix_array::insert: index out of range" );
 
@@ -320,8 +316,8 @@ prefix_array< T, Alloc >::insert ( value_type && _val_, ssize_type const _positi
                 push_back( _val_ ) ;
                 return ;
         }
-        _base::insert( _val_, _position_ );
-        _update_range( _val_, _position_ + 1, _base::size() - 1 );
+        _base::insert( _position_, _val_ ) ;
+        _update_range( _position_ + 1, _base::size() - 1, _val_ );
 
         if( _position_ > 0 )
         {
@@ -337,13 +333,13 @@ prefix_array< T, Alloc >::erase ( ssize_type const _position_ ) noexcept( is_not
 
         value_type const & to_erase = _base::at( _position_ );
 
-        _update_range( -( to_erase ), _position_, _base::size() - 1 );
+        _update_range( _position_, _base::size() - 1, -( to_erase ) );
         _base::erase_stable( _position_ );
 }
 
 template< typename T, typename Alloc >
 void
-prefix_array< T, Alloc >::_update_range ( value_type const & _diff_, ssize_type const _x_, ssize_type const _y_ ) noexcept
+prefix_array< T, Alloc >::_update_range ( ssize_type const _x_, ssize_type const _y_, value_type const & _diff_ ) noexcept
 {
         for( ssize_type i = _x_; i <= _y_; ++i )
         {

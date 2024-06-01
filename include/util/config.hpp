@@ -9,6 +9,9 @@
 #ifndef UTI_DOXYGEN_SKIP
 
 
+#define UTI_NOEXCEPT_UNLESS_BADALLOC noexcept
+
+
 #define UTI_STRINGIZE( x ) #x
 
 // shamelessly stolen from

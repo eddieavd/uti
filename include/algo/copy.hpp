@@ -37,10 +37,10 @@ void copy ( InVal * begin, InVal * end, OutVal * dest )
                 ssize_t const n = static_cast< ssize_t >( end - begin );
                 if( n > 0 )
                 {
-#if __has_builtin( __builtin_memmove )
-                        __builtin_memmove( dest, begin, n * sizeof( OutVal ) );
+#if __has_builtin( __builtin_memcpy )
+                        __builtin_memcpy( dest, begin, n * sizeof( OutVal ) );
 #elif defined( UTI_HAS_STL )
-                        std::memmove( dest, begin, n * sizeof( OutVal ) );
+                        std::memcpy( dest, begin, n * sizeof( OutVal ) );
 #else
                         _copy_impl( begin, end, dest );
 #endif
