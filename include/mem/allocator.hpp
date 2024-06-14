@@ -139,17 +139,6 @@ public:
         {
                 return i64_t_max ;
         }
-
-        template< typename... Args >
-        static constexpr void construct ( pointer const _ptr_, Args&&... _args_ )
-                noexcept( is_nothrow_constructible_v< value_type, Args... > )
-        {
-                allocator_type::construct( _ptr_, UTI_FWD( _args_ )... );
-        }
-        static constexpr void destroy ( pointer const _ptr_ ) noexcept
-        {
-                allocator_type::destroy( _ptr_ );
-        }
 };
 
 template< typename Alloc >
@@ -214,17 +203,6 @@ public:
         {
                 return i64_t_max ;
         }
-
-        template< typename... Args >
-        static constexpr void construct ( pointer const _ptr_, Args&&... _args_ )
-                noexcept( is_nothrow_constructible_v< value_type, Args... > )
-        {
-                allocator_type::construct( _ptr_, UTI_FWD( _args_ )... );
-        }
-        static constexpr void destroy ( pointer const _ptr_ ) noexcept
-        {
-                allocator_type::destroy( _ptr_ );
-        }
 };
 
 
@@ -260,15 +238,6 @@ public:
         static constexpr void deallocate ( block_type const & _block_ ) noexcept
         {
                 dealloc_typed_buffer( _block_.ptr );
-        }
-        template< typename... Args >
-        static constexpr void construct ( pointer const _ptr_, Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > )
-        {
-                ::new ( ( void * ) _ptr_ ) value_type( UTI_FWD( _args_ )... ) ;
-        }
-        static constexpr void destroy ( pointer const _ptr_ ) noexcept
-        {
-                _ptr_->~value_type();
         }
 };
 
@@ -328,15 +297,6 @@ public:
                         end = _block_.ptr;
                 }
         }
-        template< typename... Args >
-        static constexpr void construct ( pointer const _ptr_, Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > )
-        {
-                ::new ( ( void * ) _ptr_ ) value_type( UTI_FWD( _args_ )... ) ;
-        }
-        static constexpr void destroy ( pointer const _ptr_ ) noexcept
-        {
-                _ptr_->~value_type();
-        }
 private:
         inline static T   mem [ memsize ] ;
         inline static T * end { mem     } ;
@@ -349,6 +309,13 @@ private:
         {
                 end += _new_capacity_ - _block_.size ;
         }
+};
+
+
+template< typename T, ssize_t MemSize >
+class static_freelist_allocator
+{
+
 };
 
 

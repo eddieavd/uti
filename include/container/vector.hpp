@@ -122,8 +122,8 @@ vector< T, Alloc >::_copy_buffer ( _buff_base & _buff_ ) noexcept( is_nothrow_co
         {
                 for( ssize_type i = 0; i < _view_base::size(); ++i )
                 {
-                        _alloc_traits::construct( _buff_.begin() + i, UTI_MOVE( _view_base::at( i ) ) );
-                        _alloc_traits::destroy( _view_base::begin() + i );
+                        ::uti::construct( _buff_.begin() + i, UTI_MOVE( _view_base::at( i ) ) );
+                        ::uti::destroy( _view_base::begin() + i );
                 }
         }
 }
@@ -324,7 +324,7 @@ template< typename... Args >
 constexpr void
 vector< T, Alloc >::_emplace ( Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > )
 {
-        _alloc_traits::construct( _view_base::end(), UTI_FWD( _args_ )... );
+        ::uti::construct( _view_base::end(), UTI_FWD( _args_ )... );
         _view_base::_size()++ ;
 }
 
@@ -336,7 +336,7 @@ vector< T, Alloc >::pop_back () noexcept
 
         if constexpr( !is_trivially_destructible_v< value_type > )
         {
-                _alloc_traits::destroy( _view_base::end() - 1 );
+                ::uti::destroy( _view_base::end() - 1 );
         }
         _view_base::pop_back();
 }
@@ -349,7 +349,7 @@ vector< T, Alloc >::pop_front () noexcept
 
         if constexpr( !is_trivially_destructible_v< value_type > )
         {
-                _alloc_traits::destroy( _view_base::begin() );
+                ::uti::destroy( _view_base::begin() );
         }
         _view_base::pop_front();
 }
@@ -458,7 +458,7 @@ vector< T, Alloc >::shrink_size ( ssize_type const _size_ ) noexcept
         {
                 for( ssize_type i = _size_; i < _view_base::size(); ++i )
                 {
-                        _alloc_traits::destroy( _view_base::begin() + i );
+                        ::uti::destroy( _view_base::begin() + i );
                 }
         }
         _view_base::_size() = _size_;
@@ -483,7 +483,7 @@ vector< T, Alloc >::insert ( ssize_type const _position_, value_type const & _va
         }
         else
         {
-                _alloc_traits::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) );
+                ::uti::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) );
                 for( ssize_type i = _view_base::size() - 1; i > _position_; --i )
                 {
                         _view_base::at( i ) = UTI_MOVE( _view_base::at( i - 1 ) );
@@ -512,7 +512,7 @@ vector< T, Alloc >::insert ( ssize_type const _position_, value_type && _val_ )
         }
         else
         {
-                _alloc_traits::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) );
+                ::uti::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) );
                 for( ssize_type i = _view_base::size() - 1; i > _position_; --i )
                 {
                         _view_base::at( i ) = UTI_MOVE( _view_base::at( i - 1 ) );
@@ -554,7 +554,7 @@ vector< T, Alloc >::clear () noexcept
         {
                 for( ssize_type i = 0; i < _view_base::size(); ++i )
                 {
-                        _alloc_traits::destroy( _view_base::begin() + i );
+                        ::uti::destroy( _view_base::begin() + i );
                 }
         }
         _view_base::_begin() = _buff_base::begin();

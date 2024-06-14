@@ -200,7 +200,7 @@ segment_tree< T, Compare, Alloc >::segment_tree ( segment_tree const & _other_ )
                              static_cast< _buff_base >( _other_ ).  end(),
                                                       _buff_base::begin()
                 ) ;
-                _view_base::_end() = _view_base::begin() + _other_.size() ;
+                _view_base::_size() = _other_.size() ;
         }
         else
         {
@@ -293,7 +293,7 @@ segment_tree< T, Compare, Alloc >::insert ( ssize_type const _position_, value_t
         }
         else
         {
-                _alloc_traits::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) ) ;
+                ::uti::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) ) ;
 
                 for( ssize_type i = size() - 1; i > _position_; ++i )
                 {
@@ -317,7 +317,7 @@ segment_tree< T, Compare, Alloc >::insert ( ssize_type const _position_, value_t
         }
         else
         {
-                _alloc_traits::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) ) ;
+                ::uti::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) ) ;
 
                 for( ssize_type i = size() - 1; i > _position_; ++i )
                 {
@@ -373,14 +373,15 @@ segment_tree< T, Compare, Alloc >::reserve ( ssize_type const _capacity_ ) UTI_N
         if( _buff_base::capacity() == 0 )
         {
                 _buff_base::reserve( 2 * new_cap ) ;
-                _view_base::_begin() = _view_base::_end() = _buff_base::begin() + new_cap ;
+                _view_base::_begin() = _buff_base::begin() + new_cap ;
+                _view_base::_size() = 0 ;
                 _init_tree() ;
 
                 return new_cap ;
         }
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                if( _buff_base::try_realloc_inplace( 2 * new_cap ) )
+                if( _buff_base::realloc_inplace( 2 * new_cap ) )
                 {
                         _rebalance_tree( size(), old_cap ) ;
                         _rebuild_tree() ;
@@ -391,7 +392,7 @@ segment_tree< T, Compare, Alloc >::reserve ( ssize_type const _capacity_ ) UTI_N
                 _buff_base::reserve( 2 * new_cap ) ;
 
                 _view_base::_begin() = _buff_base:: begin() + old_cap ;
-                _view_base::  _end() = _view_base::_begin() +      sz ;
+                _view_base:: _size() = sz ;
 
                 _rebalance_tree( sz, old_cap ) ;
                 _rebuild_tree() ;
@@ -407,7 +408,7 @@ segment_tree< T, Compare, Alloc >::reserve ( ssize_type const _capacity_ ) UTI_N
                 _swap_buffer( buff ) ;
 
                 _view_base::_begin() = _buff_base:: begin() + new_cap ;
-                _view_base::  _end() = _view_base::_begin() +      sz ;
+                _view_base:: _size() = sz ;
                 _init_tree() ;
                 _rebuild_tree() ;
         }
@@ -440,7 +441,7 @@ segment_tree< T, Compare, Alloc >::shrink_to_fit () noexcept
         auto sz = size() ;
 
         _view_base::_begin() = _buff_base:: begin() + new_cap ;
-        _view_base::  _end() = _view_base::_begin() +      sz ;
+        _view_base:: _size() = sz ;
 
         _init_tree() ;
         _rebuild_tree() ;
@@ -456,10 +457,10 @@ segment_tree< T, Compare, Alloc >::shrink_size ( ssize_type const _size_ ) noexc
         {
                 for( ssize_type i = _size_; i < size(); ++i )
                 {
-                        _alloc_traits::destroy( _view_base::begin() + i ) ;
+                        ::uti::destroy( _view_base::begin() + i ) ;
                 }
         }
-        _view_base::_end() = _view_base::_begin() + _size_ ;
+        _view_base::_size() = _size_ ;
         _rebuild_tree() ;
 }
 
@@ -478,10 +479,11 @@ segment_tree< T, Compare, Alloc >::clear () noexcept
         {
                 for( auto it = _view_base::begin(); it != _view_base::end(); ++it )
                 {
-                        _alloc_traits::destroy( it ) ;
+                        ::uti::destroy( it ) ;
                 }
         }
-        _view_base::_begin() = _view_base::_end() = _buff_base::begin() + capacity() ;
+        _view_base::_begin() = _buff_base::begin() + capacity() ;
+        _view_base:: _size() = 0 ;
 }
 
 template< typename T, auto Compare, typename Alloc >
@@ -496,7 +498,8 @@ template< typename T, auto Compare, typename Alloc >
 constexpr void
 segment_tree< T, Compare, Alloc >::_emplace ( auto&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, decltype( _args_ )... > )
 {
-        _alloc_traits::construct( _view_base::_end()++, UTI_FWD( _args_ )... ) ;
+        ::uti::construct( _view_base::end(), UTI_FWD( _args_ )... ) ;
+        _view_base::_size()++ ;
 }
 
 template< typename T, auto Compare, typename Alloc >
@@ -622,7 +625,7 @@ segment_tree< T, Compare, Alloc >::_init_tree () noexcept
         {
                 for( auto it = _buff_base::begin(); it != _view_base::begin(); ++it )
                 {
-                        _alloc_traits::construct( it ) ;
+                        ::uti::construct( it ) ;
                 }
         }
 }
@@ -635,7 +638,7 @@ segment_tree< T, Compare, Alloc >::_clear_tree () noexcept
         {
                 for( auto it = _buff_base::begin(); it != _view_base::begin(); ++it )
                 {
-                        _alloc_traits::destroy( it ) ;
+                        ::uti::destroy( it ) ;
                 }
         }
 }
@@ -675,7 +678,7 @@ segment_tree< T, Compare, Alloc >::_rebalance_tree ( ssize_type const _size_, [[
         ::uti::memmove( _view_base::begin(), _view_base::begin() + _size_, _buff_base::begin() + new_cap ) ;
 
         _view_base::_begin() = _buff_base:: begin() + new_cap ;
-        _view_base::  _end() = _view_base::_begin() +  _size_ ;
+        _view_base:: _size() = _size_ ;
 }
 
 template< typename T, auto Compare, typename Alloc >
@@ -693,8 +696,8 @@ segment_tree< T, Compare, Alloc >::_rebalance_into ( _buff_base & _buff_ )
         {
                 for( ssize_type i = 0; i < size(); ++i )
                 {
-                        _alloc_traits::construct( _buff_.begin() + new_cap + i, UTI_MOVE( _view_base::at( i ) ) ) ;
-                        _alloc_traits::destroy( _view_base::begin() + i ) ;
+                        ::uti::construct( _buff_.begin() + new_cap + i, UTI_MOVE( _view_base::at( i ) ) ) ;
+                        ::uti::destroy( _view_base::begin() + i ) ;
                 }
         }
 }
