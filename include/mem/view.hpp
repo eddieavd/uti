@@ -7,8 +7,8 @@
 #pragma once
 
 #include <util/assert.hpp>
-#include <mem/container_base.hpp>
-#include <meta/uti_traits.hpp>
+#include <container/container_base.hpp>
+#include <container/traits.hpp>
 
 
 namespace uti
@@ -38,6 +38,9 @@ public:
 
         constexpr view ( pointer const _begin_, pointer const _end_ ) noexcept
                 : begin_( _begin_ ), end_( _end_ ) {}
+
+        constexpr view ( pointer const _begin_, ssize_type const _end_ ) noexcept
+                : begin_( _begin_ ), end_( _begin_ + _end_ ) {}
 
         constexpr view             ( view const &  _other_ ) noexcept = default ;
         constexpr view             ( view       && _other_ ) noexcept           ;

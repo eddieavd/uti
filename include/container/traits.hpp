@@ -1,12 +1,12 @@
 //
 //
 //      uti
-//      uti_traits.hpp
+//      container/traits.hpp
 //
 
 #pragma once
 
-#include <meta/traits.hpp>
+#include <type/traits.hpp>
 
 #define UTI_SHADOW_IMPL( name, temp_args, specialization ) \
         template< temp_args > \

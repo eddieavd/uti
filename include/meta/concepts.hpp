@@ -6,9 +6,10 @@
 
 #pragma once
 
-#include <meta/common_type.hpp>
-#include <meta/common_ref.hpp>
-#include <meta/invoke.hpp>
+#include <type/traits.hpp>
+#include <type/common_type.hpp>
+#include <type/common_ref.hpp>
+#include <type/invoke.hpp>
 #include <algo/swap.hpp>
 
 

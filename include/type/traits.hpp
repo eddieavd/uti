@@ -758,6 +758,231 @@ using is_signed = _is_signed_impl< T > ;
 template< typename T >
 inline constexpr bool is_signed_v = is_signed< T >::value ;
 
+
+template< typename Unqualified, bool IsConst, bool IsVolatile >
+struct _cv_selector ;
+
+template< typename Unqualified >
+struct _cv_selector< Unqualified, false, false > : type_identity< Unqualified > {} ;
+
+template< typename Unqualified >
+struct _cv_selector< Unqualified, false, true > : type_identity< Unqualified volatile > {} ;
+
+template< typename Unqualified >
+struct _cv_selector< Unqualified, true, false > : type_identity< Unqualified const > {} ;
+
+template< typename Unqualified >
+struct _cv_selector< Unqualified, true, true > : type_identity< Unqualified const volatile > {} ;
+
+template< typename Qualified, typename Unqualified,
+          bool IsConst = is_const_v< Qualified > ,
+          bool IsVolatile = is_volatile_v< Qualified > >
+class _match_cv_qualifiers
+{
+        using _match = _cv_selector< Unqualified, IsConst, IsVolatile > ;
+public:
+        using _type = typename _match::type ;
+} ;
+
+
+template< typename T >
+struct _make_unsigned : type_identity< T > {} ;
+
+template<>
+struct _make_unsigned< char > : type_identity< unsigned char > {} ;
+
+template<>
+struct _make_unsigned< signed char > : type_identity< unsigned char > {} ;
+
+template<>
+struct _make_unsigned< short > : type_identity< unsigned short > {} ;
+
+template<>
+struct _make_unsigned< int > : type_identity< unsigned int > {} ;
+
+template<>
+struct _make_unsigned< long > : type_identity< unsigned long > {} ;
+
+template<>
+struct _make_unsigned< long long > : type_identity< unsigned long long > {} ;
+
+#ifdef __GLIBCXX_TYPE_INT_N_0
+template<>
+struct _make_unsigned< __GLIBCXX_TYPE_INT_N_0 > : type_identity< unsigned __GLIBCXX_TYPE_INT_N_0 > {} ;
+#endif
+
+#ifdef __GLIBCXX_TYPE_INT_N_1
+template<>
+struct _make_unsigned< __GLIBCXX_TYPE_INT_N_1 > : type_identity< unsigned __GLIBCXX_TYPE_INT_N_1 > {} ;
+#endif
+
+#ifdef __GLIBCXX_TYPE_INT_N_2
+template<>
+struct _make_unsigned< __GLIBCXX_TYPE_INT_N_2 > : type_identity< unsigned __GLIBCXX_TYPE_INT_N_2 > {} ;
+#endif
+
+#ifdef __GLIBCXX_TYPE_INT_N_3
+template<>
+struct _make_unsigned< __GLIBCXX_TYPE_INT_N_3 > : type_identity< unsigned __GLIBCXX_TYPE_INT_N_3 > {} ;
+#endif
+
+template< typename T,
+          bool IsInt = is_integral_v< T >,
+          bool IsEnum = is_enum_v< T > >
+class _make_unsigned_selector ;
+
+template< typename T >
+class _make_unsigned_selector< T, true, false >
+{
+        using _unsigned_type = typename _make_unsigned< remove_cv_t< T > >::type ;
+public:
+        using _type = typename _match_cv_qualifiers< T, _unsigned_type >::_type ;
+} ;
+
+class _make_unsigned_selector_base
+{
+protected:
+        template< typename... > struct _list {} ;
+
+        template< typename T, typename... Us >
+        struct _list< T, Us... > : _list< Us... >
+        { static constexpr size_t _size = sizeof( T ) ; } ;
+
+        template< size_t Sz, typename T, bool = ( Sz <= T::_size ) >
+        struct _select ;
+
+        template< size_t Sz, typename Uint, typename... Uints >
+        struct _select< Sz, _list< Uint, Uints... >, true >
+        { using _type = Uint ; } ;
+
+        template< size_t Sz, typename Uint, typename... Uints >
+        struct _select< Sz, _list< Uint, Uints... >, false >
+                : _select< Sz, _list< Uints... > >
+        {} ;
+} ;
+
+template< typename T >
+class _make_unsigned_selector< T, false, true >
+        : _make_unsigned_selector_base
+{
+        using Uints = _list< unsigned      char ,
+                             unsigned     short ,
+                             unsigned       int ,
+                             unsigned      long ,
+                             unsigned long long
+        > ;
+        using _unsigned_type = typename _select< sizeof( T ), Uints >::_type ;
+public:
+        using _type = typename _match_cv_qualifiers< T, _unsigned_type >::_type ;
+} ;
+
+template<>
+struct _make_unsigned< wchar_t > : type_identity< _make_unsigned_selector< wchar_t, false, true >::_type > {} ;
+
+#ifdef _GLIBCXX_USE_CHAR8_T
+template<>
+struct _make_unsigned< char8_t > : type_identity< _make_unsigned_selector< char8_t, false, true >::_type > {} ;
+#endif
+
+template<>
+struct _make_unsigned< char16_t > : type_identity< _make_unsigned_selector< char16_t, false, true >::_type > {} ;
+
+template<>
+struct _make_unsigned< char32_t > : type_identity< _make_unsigned_selector< char32_t, false, true >::_type > {} ;
+
+template< typename T >
+struct make_unsigned : type_identity< typename _make_unsigned_selector< T >::_type > {} ;
+
+template<>
+struct make_unsigned< bool > ;
+
+
+template< typename T >
+struct _make_signed : type_identity< T > {} ;
+
+template<>
+struct _make_signed< char > : type_identity< signed char > {} ;
+
+template<>
+struct _make_signed< unsigned char > : type_identity< signed char > {} ;
+
+template<>
+struct _make_signed< unsigned short > : type_identity< signed short > {} ;
+
+template<>
+struct _make_signed< unsigned int > : type_identity< signed int > {} ;
+
+template<>
+struct _make_signed< unsigned long > : type_identity< signed long > {} ;
+
+template<>
+struct _make_signed< unsigned long long > : type_identity< signed long long > {} ;
+
+#ifdef __GLIBCXX_TYPE_INT_N_0
+template<>
+struct _make_signed< unsigned __GLIBCXX_TYPE_INT_N_0 > : type_identity< signed __GLIBCXX_TYPE_INT_N_0 > {} ;
+#endif
+
+#ifdef __GLIBCXX_TYPE_INT_N_1
+template<>
+struct _make_signed< unsigned __GLIBCXX_TYPE_INT_N_1 > : type_identity< signed __GLIBCXX_TYPE_INT_N_1 > {} ;
+#endif
+
+#ifdef __GLIBCXX_TYPE_INT_N_2
+template<>
+struct _make_signed< unsigned __GLIBCXX_TYPE_INT_N_2 > : type_identity< signed __GLIBCXX_TYPE_INT_N_2 > {} ;
+#endif
+
+#ifdef __GLIBCXX_TYPE_INT_N_3
+template<>
+struct _make_signed< unsigned __GLIBCXX_TYPE_INT_N_3 > : type_identity< signed __GLIBCXX_TYPE_INT_N_3 > {} ;
+#endif
+
+template< typename T,
+          bool IsInt = is_integral_v< T >,
+          bool IsEnum = is_enum_v< T > >
+class _make_signed_selector ;
+
+template< typename T >
+class _make_signed_selector< T, true, false >
+{
+        using _signed_type = typename _make_signed< remove_cv_t< T > >::type ;
+public:
+        using _type = typename _match_cv_qualifiers< T, _signed_type >::_type ;
+} ;
+
+template< typename T >
+class _make_signed_selector< T, false, true >
+{
+        using _unsigned_type = typename _make_unsigned_selector< T >::_type ;
+public:
+        using _type = typename _make_signed_selector< _unsigned_type >::_type ;
+} ;
+
+template<>
+struct _make_signed< wchar_t > : type_identity< typename _make_signed_selector< wchar_t, false, true >::_type > {} ;
+
+#ifdef _GLIBCXX_USE_CHAR8_T
+//template<>
+//struct _make_signed< char8_t > : type_identity< typename _make_signed_selector< char8_t, false, true >::_type > {} ;
+#endif
+
+template<>
+struct _make_signed< char16_t > : type_identity< typename _make_signed_selector< char16_t, false, true >::_type > {} ;
+
+template<>
+struct _make_signed< char32_t > : type_identity< typename _make_signed_selector< char32_t, false, true >::_type > {} ;
+
+template< typename T >
+struct make_signed : type_identity< typename _make_signed_selector< T >::_type > {} ;
+
+template<>
+struct make_signed< bool > ;
+
+template< typename T > using make_signed_t   = typename make_signed  < T >::type ;
+template< typename T > using make_unsigned_t = typename make_unsigned< T >::type ;
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename T >

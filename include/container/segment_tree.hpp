@@ -9,7 +9,7 @@
 #include <util/assert.hpp>
 #include <algo/mem.hpp>
 #include <meta/concepts.hpp>
-#include <meta/sequence.hpp>
+#include <type/sequence.hpp>
 #include <mem/view.hpp>
 #include <mem/buffer.hpp>
 #include <mem/allocator.hpp>

@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <meta/traits.hpp>
-#include <meta/ref_wrap.hpp>
-#include <meta/sequence.hpp>
+#include <type/traits.hpp>
+#include <type/ref_wrap.hpp>
+#include <type/sequence.hpp>
 #include <meta/meta.hpp>
 
 

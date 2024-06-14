@@ -7,8 +7,11 @@
 #pragma once
 
 #include <algo/swap.hpp>
+#include <algo/mem.hpp>
 #include <mem/view.hpp>
 #include <mem/buffer.hpp>
+#include <meta/concepts.hpp>
+#include <type/iterator.hpp>
 
 
 namespace uti
@@ -18,6 +21,7 @@ namespace uti
 template< typename T, typename Alloc = allocator< T > >
 class vector : public buffer< T, Alloc >, public view< T >
 {
+protected:
         using      _self =  vector                     ;
         using      _base = _container_base< T        > ;
         using _buff_base =  buffer        < T, Alloc > ;
@@ -44,6 +48,11 @@ public:
 
         vector ( ssize_type const _count_, value_type const & _val_ ) ;
 
+        constexpr vector ( _buff_base && _buffer_, ssize_type const _size_ ) noexcept ;
+
+        template< random_access_iterator Iter >
+        vector ( Iter begin, Iter const & end ) ;
+
         vector             ( vector const &  _other_ )          ;
         vector             ( vector       && _other_ ) noexcept ;
         vector & operator= ( vector const &  _other_ )          ;
@@ -65,8 +74,8 @@ public:
         UTI_NODISCARD value_type pop_back_val  () noexcept ;
         UTI_NODISCARD value_type pop_front_val () noexcept ;
 
-        ssize_type reserve (                             ) ;
-        ssize_type reserve ( ssize_type const _capacity_ ) ;
+        void reserve (                             ) ;
+        void reserve ( ssize_type const _capacity_ ) ;
 
         void shrink ( ssize_type const _capacity_ ) ;
 
@@ -88,7 +97,7 @@ public:
         UTI_NODISCARD       iterator  end ()       noexcept { return _view_base:: end(); }
         UTI_NODISCARD const_iterator  end () const noexcept { return _view_base:: end(); }
         UTI_NODISCARD const_iterator cend () const noexcept { return _view_base::cend(); }
-private:
+protected:
         template< typename... Args >
         void _emplace ( Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > ) ;
 
@@ -134,7 +143,12 @@ template< typename T, typename Alloc >
 vector< T, Alloc >::vector ( ssize_type const _count_, value_type const & _val_ )
         : _buff_base( _count_ ), _view_base( _buff_base::begin(), _buff_base::begin() )
 {
-        if( _view_base::begin() != nullptr )
+        if constexpr( is_trivially_copy_constructible_v< value_type > )
+        {
+                ::uti::memset( _buff_base::begin(), _buff_base::end(), _val_ ) ;
+                _view_base::_end() = _buff_base::end() ;
+        }
+        else
         {
                 for( ssize_type i = 0; i < _count_; ++i )
                 {
@@ -144,22 +158,63 @@ vector< T, Alloc >::vector ( ssize_type const _count_, value_type const & _val_ 
 }
 
 template< typename T, typename Alloc >
+constexpr
+vector< T, Alloc >::vector ( _buff_base && _buffer_, ssize_type const _size_ ) noexcept
+        : _buff_base( UTI_MOVE( _buffer_ ) ),
+          _view_base( _buff_base::begin(), _buff_base::begin() + _size_ )
+{}
+
+template< typename T, typename Alloc >
+template< random_access_iterator Iter >
+vector< T, Alloc >::vector ( Iter _begin_, Iter const & _end_ )
+        : _buff_base( _end_ - _begin_ ),
+          _view_base( _buff_base::begin(), _buff_base::end() )
+{
+        if constexpr( is_trivially_copy_constructible_v< value_type > )
+        {
+                uti::_memmove_impl( _begin_, _end_, _view_base::begin() ) ;
+        }
+        else
+        {
+                while( _begin_ != _end_ )
+                {
+                        _emplace( *_begin_++ ) ;
+                }
+        }
+}
+
+/*
+template< typename T, typename Alloc >
+template< typename Iter >
+vector< T, Alloc >::vector ( Iter _begin_, Iter const & _end_ )
+        : _buff_base( _end_ - _begin_ ), _view_base( _buff_base::begin(), _buff_base::begin() )
+{
+        if constexpr( is_trivially_copy_constructible_v< value_type > )
+        {
+                ::uti::memmove( _begin_, _end_, _buff_base::begin() ) ;
+                _view_base::_end() += _end_ - _begin_ ;
+        }
+        else
+        {
+//              UTI_CEXPR_ASSERT( false, "uti::vector::ctor: unimplemented" ) ;
+        }
+}
+*/
+
+template< typename T, typename Alloc >
 vector< T, Alloc >::vector ( vector const & _other_ )
         : _buff_base( _other_.size() ), _view_base( _buff_base::begin(), _buff_base::begin() )
 {
-        if( _view_base::begin() != nullptr )
+        if constexpr( is_trivially_copy_assignable_v< value_type > )
         {
-                if constexpr( is_trivially_copy_assignable_v< value_type > )
+                ::uti::copy( _other_.begin(), _other_.end(), _view_base::begin() );
+                _view_base::_end() = _view_base::begin() + _other_.size();
+        }
+        else
+        {
+                for( auto const & val : _other_ )
                 {
-                        ::uti::copy( _other_.begin(), _other_.end(), _view_base::begin() );
-                        _view_base::_end() = _view_base::begin() + _other_.size();
-                }
-                else
-                {
-                        for( auto const & val : _other_ )
-                        {
-                                _emplace( val );
-                        }
+                        _emplace( val );
                 }
         }
 }
@@ -325,32 +380,31 @@ vector< T, Alloc >::pop_front_val () noexcept
 }
 
 template< typename T, typename Alloc >
-vector< T, Alloc >::ssize_type
+void
 vector< T, Alloc >::reserve ()
 {
         if( _view_base::size() >= _buff_base::capacity() )
         {
-                return reserve( _buff_base::capacity() == 0 ? 1 : _buff_base::capacity() * 2 );
+                reserve( _buff_base::capacity() == 0 ? 4 : _buff_base::capacity() * 2 );
         }
-        return _buff_base::capacity();
 }
 
 template< typename T, typename Alloc >
-vector< T, Alloc >::ssize_type
+void
 vector< T, Alloc >::reserve ( ssize_type const _capacity_ )
 {
-        if( _capacity_ <= _buff_base::capacity() ) return _buff_base::capacity();
+        if( _capacity_ <= _buff_base::capacity() ) return ;
 
         if( _buff_base::capacity() == 0 )
         {
                 _buff_base::reserve( _capacity_ );
                 _view_base::_begin() = _view_base::_end() = _buff_base::begin();
 
-                return _buff_base::capacity();
+                return ;
         }
         if( _buff_base::try_realloc_inplace( _capacity_ ) )
         {
-                return _buff_base::capacity();
+                return ;
         }
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
@@ -373,7 +427,6 @@ vector< T, Alloc >::reserve ( ssize_type const _capacity_ )
                 _view_base::_begin() = _buff_base::begin();
                 _view_base::  _end() = _buff_base::begin() + size;
         }
-        return _buff_base::capacity();
 }
 
 template< typename T, typename Alloc >

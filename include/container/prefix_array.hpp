@@ -9,8 +9,9 @@
 #include <mem/allocator.hpp>
 #include <container/vector.hpp>
 #include <container/array.hpp>
-#include <meta/sequence.hpp>
+#include <type/sequence.hpp>
 #include <meta/concepts.hpp>
+#include <type/iterator.hpp>
 
 
 namespace uti
@@ -44,6 +45,9 @@ public:
 
         prefix_array ( ssize_type const _count_, value_type const & _val_ ) ;
 
+        template< random_access_iterator Iter >
+        prefix_array ( Iter _begin_, Iter const & _end_ ) ;
+
         prefix_array             ( prefix_array const &  _other_ )          = default ;
         prefix_array             ( prefix_array       && _other_ ) noexcept = default ;
         prefix_array & operator= ( prefix_array const &  _other_ )          = default ;
@@ -56,15 +60,17 @@ public:
 
         prefix_array operator- () noexcept ;
 
-        friend prefix_array & operator+ ( prefix_array & _lhs_, prefix_array const & _rhs_ ) noexcept
+        friend prefix_array operator+ ( prefix_array const & _lhs_, prefix_array const & _rhs_ ) noexcept
         {
-                _lhs_ += _rhs_ ;
-                return   _lhs_ ;
+                auto res = _lhs_ ;
+                res += _rhs_ ;
+                return res ;
         }
-        friend prefix_array & operator- ( prefix_array & _lhs_, prefix_array const & _rhs_ ) noexcept
+        friend prefix_array operator- ( prefix_array const & _lhs_, prefix_array const & _rhs_ ) noexcept
         {
-                _lhs_ -= _rhs_ ;
-                return   _lhs_ ;
+                auto res = _lhs_ ;
+                res -= _rhs_ ;
+                return res ;
         }
 
         ~prefix_array () noexcept = default ;
@@ -152,9 +158,26 @@ template< typename T, typename Alloc >
 prefix_array< T, Alloc >::prefix_array ( ssize_type const _capacity_, value_type const & _val_ )
         : _base( _capacity_ )
 {
-        for( ssize_type i = 0; i < _capacity_; ++i )
+        value_type last = _val_ ;
+
+        for( ssize_type i = 0; i < _base::capacity(); ++i )
         {
-                push_back( _val_ );
+                _base::_emplace( last ) ;
+                last += _val_ ;
+        }
+}
+
+template< typename T, typename Alloc >
+template< random_access_iterator Iter >
+prefix_array< T, Alloc >::prefix_array ( Iter _begin_, Iter const & _end_ )
+        : _base( _end_ - _begin_ )
+{
+        value_type last {} ;
+
+        while( _begin_ != _end_ )
+        {
+                last += *_begin_++ ;
+                _base::_emplace( last ) ;
         }
 }
 
@@ -219,35 +242,41 @@ template< typename T, typename Alloc >
 void
 prefix_array< T, Alloc >::push_back ( value_type const & _val_ )
 {
-        _base::emplace_back( _val_ ) ;
-
-        if( _base::size() > 1 )
-        {
-                _base::back() += _base::at( _base::size() - 2 ) ;
-        }
+        emplace_back( _val_ ) ;
 }
 
 template< typename T, typename Alloc >
 void
 prefix_array< T, Alloc >::push_back ( value_type && _val_ )
 {
-        _base::emplace_back( UTI_MOVE( _val_ ) ) ;
-
-        if( _base::size() > 1 )
-        {
-                _base::back() += _base::at( _base::size() - 2 ) ;
-        }
+        emplace_back( UTI_MOVE( _val_ ) ) ;
 }
 
 template< typename T, typename Alloc >
 void
 prefix_array< T, Alloc >::emplace_back ( auto&&... _args_ )
 {
-        _base::emplace_back( UTI_FWD( _args_ )... ) ;
-
-        if( _base::size() > 1 )
+/*
+        if constexpr( is_trivial_v< value_type > )
         {
-                _base::back() += _base::at( _base::size() - 2 ) ;
+                last_ += value_type{ _args_... } ;
+                _base::emplace_back( last_ ) ;
+
+//              _base::emplace_back( UTI_FWD( value_type( _args_... ) + static_cast< value_type >( ( _base::size() > 0 ) ) * _base::back() ) ) ;
+//              _base::emplace_back( value_type{ _args_... } + ( _base::size() > 0 ? _base::back() : value_type{} ) ) ;
+//              _base::emplace_back( value_type( _args_... ) + 1 ) ;
+        }
+        else
+*/
+        {
+                if( _base::empty() )
+                {
+                        _base::emplace_back( UTI_FWD( _args_)... ) ;
+                }
+                else
+                {
+                        _base::emplace_back( UTI_FWD( value_type( _args_... ) + _base::back() ) ) ;
+                }
         }
 }
 

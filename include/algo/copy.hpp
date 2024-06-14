@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <meta/traits.hpp>
+#include <type/traits.hpp>
 
 #if !__has_builtin( __builtin_memmove ) && defined( UTI_HAS_STL )
 #include <cstring>
