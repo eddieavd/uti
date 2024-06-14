@@ -1,7 +1,7 @@
 //
 //
 //      uti
-//      traits.hpp
+//      type/traits.hpp
 //
 
 #pragma once
@@ -35,13 +35,13 @@ namespace uti
 ///     typedefs
 ////////////////////////////////////////////////////////////////////////////////
 
-using  i8_t =           char ;
+using  i8_t =   signed  char ;
 using  u8_t = unsigned  char ;
-using i16_t =          short ;
+using i16_t =   signed short ;
 using u16_t = unsigned short ;
-using i32_t =            int ;
+using i32_t =   signed   int ;
 using u32_t = unsigned   int ;
-using i64_t =           long ;
+using i64_t =   signed  long ;
 using u64_t = unsigned  long ;
 
 static_assert( sizeof(  i8_t ) == 1 ) ;
@@ -140,7 +140,7 @@ using type_identity_t = typename type_identity< T >::type ;
 struct identity
 {
         template< typename T >
-        [[ nodiscard ]] constexpr T && operator() ( T && t ) const noexcept
+        UTI_NODISCARD constexpr T && operator() ( T && t ) const noexcept
         {
                 return UTI_FWD( t );
         }
@@ -170,7 +170,7 @@ struct integral_constant
         constexpr operator U< Val > () const noexcept {}
 
         ////////////////////////////////////////////////////////////////////////
-        // conversions to and from std::integral_constant                     //
+        // conversions to and from other integral_constants                   //
         //                                                                    //
         template< template< typename T1, T1 Val1 > typename U >               //
         constexpr integral_constant ( U< value_type, Val > ) noexcept {}      //
@@ -1401,17 +1401,15 @@ template< typename T, bool >
 struct _decay : remove_cv_t< T > {} ;
 
 template< typename T >
-struct _decay< T, true > : conditional
-                        <
+struct _decay< T, true > : conditional<
                                 is_array_v< T >,
                                 remove_extent_t< T >*,
-                                conditional_t
-                                <
+                                conditional_t<
                                         is_function_v< T >,
                                         add_pointer_t< T >,
                                         remove_cv_t< T >
                                 >
-                        > {} ;
+                           > {} ;
 
 template< typename T, bool B >
 using _decay_t = typename _decay< T, B >::type ;
@@ -1443,18 +1441,12 @@ template< typename... Ts > struct _is_tuple_like_impl< tuple< Ts... > > :  true_
 template< typename T > struct _is_tuple_like : public _is_tuple_like_impl< remove_cvref_t< T > >::type {} ;
 
 template< typename T >
-inline constexpr
-enable_if_t
-<
-        conjunction_v
-        <
-                is_not< _is_tuple_like< T > >,
-                is_move_constructible< T >,
-                is_move_assignable< T >
-        >
->
-swap ( T &, T & )
-        noexcept( is_nothrow_move_constructible_v< T > && is_nothrow_move_assignable_v< T > ) ;
+        requires is_not_v< _is_tuple_like< T > > &&
+                 is_move_constructible_v< T > &&
+                 is_move_assignable_v< T >
+constexpr void swap ( T & _lhs_, T & _rhs_ )
+        noexcept( is_nothrow_move_constructible_v< T > &&
+                  is_nothrow_move_assignable_v   < T >  ) ;
 
 template< typename T, ssize_t N >
 inline constexpr

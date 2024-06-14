@@ -27,6 +27,7 @@ public:
 
         using  allocator_type = Alloc ;
         using   _alloc_traits = allocator_traits< allocator_type > ;
+        using      block_type = typename _alloc_traits::block_type ;
 
         using         pointer = typename _base::        pointer ;
         using   const_pointer = typename _base::  const_pointer ;
@@ -36,11 +37,11 @@ public:
         using        iterator = typename _base::       iterator ;
         using  const_iterator = typename _base:: const_iterator ;
 
-        constexpr           buffer (                             )     noexcept       = default ;
-        constexpr explicit  buffer ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+        constexpr          buffer (                             )     noexcept       = default ;
+        constexpr explicit buffer ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
         constexpr buffer ( pointer const _ptr_, ssize_type const _cap_ ) noexcept
-                : buffer_( _ptr_ ), capacity_( _cap_ ) {}
+                : block_ { _ptr_, _cap_ } {}
 
         constexpr buffer             ( buffer const &  _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
         constexpr buffer & operator= ( buffer const &  _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
@@ -53,28 +54,26 @@ public:
 
         constexpr ssize_type reserve ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
-        constexpr bool try_realloc_inplace ( ssize_type const _capacity_ ) noexcept ;
-        constexpr bool can_realloc_inplace ( ssize_type const _capacity_ ) noexcept ;
+        constexpr bool realloc_inplace ( ssize_type const _capacity_ ) noexcept ;
 
         constexpr void deallocate () noexcept ;
 
-        UTI_NODISCARD constexpr ssize_type       & capacity ()       noexcept { return capacity_ ; }
-        UTI_NODISCARD constexpr ssize_type const & capacity () const noexcept { return capacity_ ; }
+        UTI_NODISCARD constexpr ssize_type capacity () const noexcept { return _capacity() ; }
 
-        constexpr       iterator  begin ()       noexcept { return buffer_             ; }
-        constexpr const_iterator  begin () const noexcept { return buffer_             ; }
-        constexpr const_iterator cbegin () const noexcept { return buffer_             ; }
-        constexpr       iterator    end ()       noexcept { return buffer_ + capacity_ ; }
-        constexpr const_iterator    end () const noexcept { return buffer_ + capacity_ ; }
-        constexpr const_iterator   cend () const noexcept { return buffer_ + capacity_ ; }
+        constexpr       iterator  begin ()       noexcept { return _buffer()               ; }
+        constexpr const_iterator  begin () const noexcept { return _buffer()               ; }
+        constexpr const_iterator cbegin () const noexcept { return _buffer()               ; }
+        constexpr       iterator    end ()       noexcept { return _buffer() + _capacity() ; }
+        constexpr const_iterator    end () const noexcept { return _buffer() + _capacity() ; }
+        constexpr const_iterator   cend () const noexcept { return _buffer() + _capacity() ; }
 
-        constexpr       pointer data ()       noexcept { return buffer_ ; }
-        constexpr const_pointer data () const noexcept { return buffer_ ; }
+        constexpr       pointer data ()       noexcept { return _buffer() ; }
+        constexpr const_pointer data () const noexcept { return _buffer() ; }
 
         constexpr ssize_type max_size () const noexcept { return _alloc_traits::max_size() ; }
 
-        constexpr pointer       & _begin ()       noexcept { return buffer_ ; }
-        constexpr pointer const & _begin () const noexcept { return buffer_ ; }
+        constexpr pointer       & _begin ()       noexcept { return _buffer() ; }
+        constexpr pointer const & _begin () const noexcept { return _buffer() ; }
 
         friend constexpr void swap ( buffer & lhs, buffer & rhs ) noexcept
         {
@@ -84,8 +83,13 @@ public:
                 rhs = UTI_MOVE( tmp ) ;
         }
 protected:
-        pointer      buffer_ { nullptr } ;
-        ssize_type capacity_ {       0 } ;
+        block_type block_ { nullptr, 0 } ;
+
+        pointer       & _buffer ()       noexcept { return block_.ptr ; }
+        pointer const & _buffer () const noexcept { return block_.ptr ; }
+
+        ssize_type       & _capacity ()       noexcept { return block_.size; }
+        ssize_type const & _capacity () const noexcept { return block_.size; }
 };
 
 
@@ -95,9 +99,7 @@ buffer< T, Alloc >::buffer ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_B
 {
         if( 0 <= _capacity_ && _capacity_ < max_size() )
         {
-                buffer_ = _alloc_traits::allocate( _capacity_ ).ptr;
-
-                if( buffer_ ) capacity_ = _capacity_;
+                block_ = _alloc_traits::allocate( _capacity_ ) ;
         }
 }
 
@@ -105,16 +107,16 @@ template< typename T, typename Alloc >
 constexpr
 buffer< T, Alloc >::buffer ( buffer const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
-        reserve( _other_.capacity_ );
+        reserve( _other_._capacity() );
 }
 
 template< typename T, typename Alloc >
 constexpr
 buffer< T, Alloc >::buffer ( buffer && _other_ ) noexcept
-        : buffer_( _other_.buffer_ ), capacity_( _other_.capacity_ )
+        : block_{ _other_._buffer(), _other_._capacity() }
 {
-        _other_.buffer_   = nullptr ;
-        _other_.capacity_ =       0 ;
+        _other_._buffer  () = nullptr ;
+        _other_._capacity() =       0 ;
 }
 
 template< typename T, typename Alloc >
@@ -122,7 +124,7 @@ constexpr
 buffer< T, Alloc > &
 buffer< T, Alloc >::operator= ( buffer const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
-        reserve( _other_.capacity_ );
+        reserve( _other_._capacity() );
 
         return *this;
 }
@@ -132,11 +134,11 @@ constexpr
 buffer< T, Alloc > &
 buffer< T, Alloc >::operator= ( buffer && _other_ ) noexcept
 {
-        buffer_   = _other_.buffer_   ;
-        capacity_ = _other_.capacity_ ;
+        _buffer  () = _other_._buffer  () ;
+        _capacity() = _other_._capacity() ;
 
-        _other_.buffer_   = nullptr ;
-        _other_.capacity_ =       0 ;
+        _other_._buffer  () = nullptr ;
+        _other_._capacity() =       0 ;
 
         return *this;
 }
@@ -147,8 +149,8 @@ buffer< T, Alloc >::operator== ( buffer const & _other_ ) const noexcept
 {
         if( this == &_other_ ) return true ;
 
-        return buffer_   == _other_.  buffer_ &&
-               capacity_ == _other_.capacity_  ;
+        return _buffer  () == _other_._buffer  () &&
+               _capacity() == _other_._capacity()  ;
 }
 
 template< typename T, typename Alloc >
@@ -163,42 +165,34 @@ constexpr
 buffer< T, Alloc >::ssize_type
 buffer< T, Alloc >::reserve ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
-        if( _capacity_ <= capacity_ ) return capacity_;
+        if( _capacity_ <= _capacity() ) return _capacity();
 
-        auto tmp = _alloc_traits::reallocate( { buffer_, capacity_ }, _capacity_ ).ptr;
+        block_type tmp = _alloc_traits::reallocate( block_, _capacity_ ) ;
 
-        if( tmp != nullptr )
+        if( tmp.ptr != nullptr )
         {
-                buffer_   = tmp;
-                capacity_ = _capacity_;
+                block_ = tmp ;
         }
-        return capacity_;
+        return _capacity();
 }
 
 template< typename T, typename Alloc >
 constexpr bool
-buffer< T, Alloc >::try_realloc_inplace ( ssize_type const _capacity_ ) noexcept
+buffer< T, Alloc >::realloc_inplace ( ssize_type const _capacity_ ) noexcept
 {
-        if( _alloc_traits::try_realloc_inplace( { buffer_, capacity_ }, _capacity_ ) )
+        if( _alloc_traits::realloc_inplace( block_, _capacity_ ) )
         {
-                capacity_ = _capacity_;
+                _capacity() = _capacity_;
                 return true;
         }
         return false;
 }
 
 template< typename T, typename Alloc >
-constexpr bool
-buffer< T, Alloc >::can_realloc_inplace ( ssize_type const _capacity_ ) noexcept
-{
-        return _alloc_traits::can_realloc_inplace( { buffer_, capacity_ }, _capacity_ );
-}
-
-template< typename T, typename Alloc >
 constexpr void
 buffer< T, Alloc >::deallocate () noexcept
 {
-        if( buffer_ ) _alloc_traits::deallocate( { buffer_, capacity_ } );
+        if( _buffer() ) _alloc_traits::deallocate( block_ );
 }
 
 

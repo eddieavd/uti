@@ -10,7 +10,7 @@
 #include <meta/concepts.hpp>
 
 
-namespace uti
+namespace uti::meta
 {
 
 

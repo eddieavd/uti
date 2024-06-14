@@ -20,10 +20,6 @@ namespace uti
 {
 
 
-UTI_DIAGS_PUSH()
-UTI_DIAGS_CLANG_DISABLE( -Wunused-parameter )
-
-
 namespace compare
 {
 
@@ -95,8 +91,8 @@ public:
                 {
                         return [ & ]< ssize_type... Idxs >( uti::index_sequence< Idxs... > )
                         {
-                                return [ & ]( ssize_type _x1_, index< Idxs >&&... lhs ,
-                                              ssize_type _x2_, index< Idxs >&&... rhs )
+                                return [ & ]( ssize_type _x1_, meta::index< Idxs >&&... lhs ,
+                                              ssize_type _x2_, meta::index< Idxs >&&... rhs )
                                 {
                                         return _range( _x1_, _x2_ ).range( UTI_FWD( lhs )..., UTI_FWD( rhs )... ) ;
                                 }( _coords_... ) ;
@@ -149,7 +145,7 @@ private:
         constexpr value_type _range ( ssize_type _x1_, ssize_type _x2_ ) const noexcept ;
 
         constexpr ssize_type _msb           ( ssize_type _num_ ) const noexcept ;
-        constexpr ssize_type _round_to_pow2 ( ssize_type _num_ ) const noexcept ;
+        constexpr ssize_type _ceil_pow2 ( ssize_type _num_ ) const noexcept ;
 
         constexpr void _init_tree    () noexcept ;
         constexpr void _clear_tree   () noexcept ;
@@ -167,7 +163,7 @@ private:
 template< typename T, auto Compare, typename Alloc >
 constexpr
 segment_tree< T, Compare, Alloc >::segment_tree ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
-        : _buff_base( 2 * _round_to_pow2( _capacity_ ) ),
+        : _buff_base( 2 * _ceil_pow2( _capacity_ ) ),
           _view_base( _buff_base::begin() + capacity() ,
                       _buff_base::begin() + capacity() )
 {
@@ -177,7 +173,7 @@ segment_tree< T, Compare, Alloc >::segment_tree ( ssize_type const _capacity_ ) 
 template< typename T, auto Compare, typename Alloc >
 constexpr
 segment_tree< T, Compare, Alloc >::segment_tree ( ssize_type const _count_, value_type const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
-        : _buff_base( 2 * _round_to_pow2( _count_ ) )  ,
+        : _buff_base( 2 * _ceil_pow2( _count_ ) )  ,
           _view_base( _buff_base::begin() + capacity() ,
                       _buff_base::begin() + capacity() )
 {
@@ -224,22 +220,15 @@ segment_tree< T, Compare, Alloc >::segment_tree ( segment_tree && _other_ ) noex
 template< typename T, auto Compare, typename Alloc >
 constexpr
 segment_tree< T, Compare, Alloc > &
-segment_tree< T, Compare, Alloc >::operator= ( segment_tree const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+segment_tree< T, Compare, Alloc >::operator= ( segment_tree const & ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
-        if( capacity() == _other_.capacity() )
-        {
 
-        }
-        clear() ;
-        _clear_tree() ;
-
-        reserve( _other_.capacity() ) ;
 }
 
 template< typename T, auto Compare, typename Alloc >
 constexpr
 segment_tree< T, Compare, Alloc > &
-segment_tree< T, Compare, Alloc >::operator= ( segment_tree && _other_ ) noexcept
+segment_tree< T, Compare, Alloc >::operator= ( segment_tree && ) noexcept
 {
 
 }
@@ -379,7 +368,7 @@ segment_tree< T, Compare, Alloc >::reserve ( ssize_type const _capacity_ ) UTI_N
 
         if( _capacity_ <= old_cap ) return old_cap ;
 
-        auto new_cap = _round_to_pow2( _capacity_ ) ;
+        auto new_cap = _ceil_pow2( _capacity_ ) ;
 
         if( _buff_base::capacity() == 0 )
         {
@@ -441,7 +430,7 @@ segment_tree< T, Compare, Alloc >::shrink_to_fit () noexcept
 
         if( 2 * size() >= cap ) return ;
 
-        auto new_cap = _round_to_pow2( cap / 2 ) ;
+        auto new_cap = _ceil_pow2( cap / 2 ) ;
 
         _buff_base buff( 2 * new_cap ) ;
 
@@ -471,11 +460,12 @@ segment_tree< T, Compare, Alloc >::shrink_size ( ssize_type const _size_ ) noexc
                 }
         }
         _view_base::_end() = _view_base::_begin() + _size_ ;
+        _rebuild_tree() ;
 }
 
 template< typename T, auto Compare, typename Alloc >
 constexpr void
-segment_tree< T, Compare, Alloc >::erase ( ssize_type const _position_ ) noexcept
+segment_tree< T, Compare, Alloc >::erase ( ssize_type const ) noexcept
 {
 
 }
@@ -617,7 +607,7 @@ template< typename T, auto Compare, typename Alloc >
 constexpr
 typename
 segment_tree< T, Compare, Alloc >::ssize_type
-segment_tree< T, Compare, Alloc >::_round_to_pow2 ( ssize_type _num_ ) const noexcept
+segment_tree< T, Compare, Alloc >::_ceil_pow2 ( ssize_type _num_ ) const noexcept
 {
         auto msb = _msb( _num_ ) ;
 
@@ -677,7 +667,7 @@ segment_tree< T, Compare, Alloc >::_rebuild_tree () noexcept
 
 template< typename T, auto Compare, typename Alloc >
 constexpr void
-segment_tree< T, Compare, Alloc >::_rebalance_tree ( ssize_type const _size_, ssize_type const _old_cap_ ) noexcept
+segment_tree< T, Compare, Alloc >::_rebalance_tree ( ssize_type const _size_, [[ maybe_unused ]] ssize_type const _old_cap_ ) noexcept
         requires( is_trivially_relocatable_v  < value_type > )
 {
         auto new_cap = capacity() ;
@@ -708,9 +698,6 @@ segment_tree< T, Compare, Alloc >::_rebalance_into ( _buff_base & _buff_ )
                 }
         }
 }
-
-
-UTI_DIAGS_POP()
 
 
 } // namespace uti

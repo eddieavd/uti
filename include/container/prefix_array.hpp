@@ -40,40 +40,40 @@ public:
         using        iterator = typename _base::       iterator ;
         using  const_iterator = typename _base:: const_iterator ;
 
-        constexpr prefix_array (                             ) noexcept = default ;
-        explicit  prefix_array ( ssize_type const _capacity_ )                    ;
+        constexpr          prefix_array (                             ) noexcept = default ;
+        constexpr explicit prefix_array ( ssize_type const _capacity_ )                    ;
 
-        prefix_array ( ssize_type const _count_, value_type const & _val_ ) ;
+        constexpr prefix_array ( ssize_type const _count_, value_type const & _val_ ) ;
 
-        template< random_access_iterator Iter >
-        prefix_array ( Iter _begin_, Iter const & _end_ ) ;
+        template< meta::random_access_iterator Iter >
+        constexpr prefix_array ( Iter _begin_, Iter const & _end_ ) ;
 
-        prefix_array             ( prefix_array const &  _other_ )          = default ;
-        prefix_array             ( prefix_array       && _other_ ) noexcept = default ;
-        prefix_array & operator= ( prefix_array const &  _other_ )          = default ;
-        prefix_array & operator= ( prefix_array       && _other_ ) noexcept = default ;
+        constexpr prefix_array             ( prefix_array const &  _other_ )          = default ;
+        constexpr prefix_array             ( prefix_array       && _other_ ) noexcept = default ;
+        constexpr prefix_array & operator= ( prefix_array const &  _other_ )          = default ;
+        constexpr prefix_array & operator= ( prefix_array       && _other_ ) noexcept = default ;
 
         constexpr bool operator== ( prefix_array const & _other_ ) const noexcept ;
 
-        prefix_array & operator+= ( prefix_array const & _other_ ) noexcept ;
-        prefix_array & operator-= ( prefix_array const & _other_ ) noexcept ;
+        constexpr prefix_array & operator+= ( prefix_array const & _other_ ) noexcept ;
+        constexpr prefix_array & operator-= ( prefix_array const & _other_ ) noexcept ;
 
-        prefix_array operator- () noexcept ;
+        constexpr prefix_array operator- () noexcept ;
 
-        friend prefix_array operator+ ( prefix_array const & _lhs_, prefix_array const & _rhs_ ) noexcept
+        friend constexpr prefix_array operator+ ( prefix_array const & _lhs_, prefix_array const & _rhs_ ) noexcept
         {
                 auto res = _lhs_ ;
                 res += _rhs_ ;
                 return res ;
         }
-        friend prefix_array operator- ( prefix_array const & _lhs_, prefix_array const & _rhs_ ) noexcept
+        friend constexpr prefix_array operator- ( prefix_array const & _lhs_, prefix_array const & _rhs_ ) noexcept
         {
                 auto res = _lhs_ ;
                 res -= _rhs_ ;
                 return res ;
         }
 
-        ~prefix_array () noexcept = default ;
+        constexpr ~prefix_array () noexcept = default ;
 
         UTI_NODISCARD constexpr
         decltype( auto ) element_at ( ssize_type const _x_, auto... _idxs_ ) const noexcept
@@ -113,8 +113,8 @@ public:
                 {
                         return [ & ]< ssize_type... Idxs >( uti::index_sequence< Idxs... > )
                         {
-                                return [ & ]( ssize_type const _x1_, index< Idxs >&&... lhs ,
-                                              ssize_type const _x2_, index< Idxs >&&... rhs )
+                                return [ & ]( ssize_type const _x1_, meta::index< Idxs >&&... lhs ,
+                                              ssize_type const _x2_, meta::index< Idxs >&&... rhs )
                                 {
                                         return _x1_ == 0 ? _base::at( _x2_     ).range( UTI_FWD( lhs )..., UTI_FWD( rhs )... )
                                                          : _base::at( _x2_     ).range( UTI_FWD( lhs )..., UTI_FWD( rhs )... )
@@ -124,25 +124,25 @@ public:
                 }
         }
 
-        void push_back ( value_type const &  _val_ ) ;
-        void push_back ( value_type       && _val_ ) ;
+        constexpr void push_back ( value_type const &  _val_ ) ;
+        constexpr void push_back ( value_type       && _val_ ) ;
 
-        void emplace_back ( auto&&... _args_ ) ;
+        constexpr void emplace_back ( auto&&... _args_ ) ;
 
-                            void pop_front     () noexcept ;
-        UTI_NODISCARD value_type pop_front_val () noexcept ;
-        UTI_NODISCARD value_type pop_back_val  () noexcept ;
+                      constexpr       void pop_front     () noexcept ;
+        UTI_NODISCARD constexpr value_type pop_front_val () noexcept ;
+        UTI_NODISCARD constexpr value_type pop_back_val  () noexcept ;
 
-        void insert ( ssize_type const _position_, value_type const &  _val_ ) ;
-        void insert ( ssize_type const _position_, value_type       && _val_ ) ;
+        constexpr void insert ( ssize_type const _position_, value_type const &  _val_ ) ;
+        constexpr void insert ( ssize_type const _position_, value_type       && _val_ ) ;
 
-        void erase        ( ssize_type const _position_ ) noexcept( is_nothrow_move_assignable_v< value_type > ) ;
-        void erase_stable ( ssize_type const _position_ ) noexcept( is_nothrow_move_assignable_v< value_type > )
+        constexpr void erase        ( ssize_type const _position_ ) noexcept( is_nothrow_move_assignable_v< value_type > ) ;
+        constexpr void erase_stable ( ssize_type const _position_ ) noexcept( is_nothrow_move_assignable_v< value_type > )
         {
                 erase( _position_ ) ;
         }
 private:
-        void _update_range ( ssize_type const _x_, ssize_type const _y_, value_type const & _diff_ ) noexcept ;
+        constexpr void _update_range ( ssize_type const _x_, ssize_type const _y_, value_type const & _diff_ ) noexcept ;
 };
 
 
@@ -151,10 +151,12 @@ prefix_array ( prefix_array< T, Alloc >::ssize_type const, T const & ) -> prefix
 
 
 template< typename T, typename Alloc >
+constexpr
 prefix_array< T, Alloc >::prefix_array ( ssize_type const _capacity_ )
         : _base( _capacity_ ) {}
 
 template< typename T, typename Alloc >
+constexpr
 prefix_array< T, Alloc >::prefix_array ( ssize_type const _capacity_, value_type const & _val_ )
         : _base( _capacity_ )
 {
@@ -168,7 +170,8 @@ prefix_array< T, Alloc >::prefix_array ( ssize_type const _capacity_, value_type
 }
 
 template< typename T, typename Alloc >
-template< random_access_iterator Iter >
+template< meta::random_access_iterator Iter >
+constexpr
 prefix_array< T, Alloc >::prefix_array ( Iter _begin_, Iter const & _end_ )
         : _base( _end_ - _begin_ )
 {
@@ -182,6 +185,7 @@ prefix_array< T, Alloc >::prefix_array ( Iter _begin_, Iter const & _end_ )
 }
 
 template< typename T, typename Alloc >
+constexpr
 prefix_array< T, Alloc > &
 prefix_array< T, Alloc >::operator+= ( prefix_array const & _other_ ) noexcept
 {
@@ -204,6 +208,7 @@ prefix_array< T, Alloc >::operator+= ( prefix_array const & _other_ ) noexcept
 }
 
 template< typename T, typename Alloc >
+constexpr
 prefix_array< T, Alloc > &
 prefix_array< T, Alloc >::operator-= ( prefix_array const & _other_ ) noexcept
 {
@@ -226,6 +231,7 @@ prefix_array< T, Alloc >::operator-= ( prefix_array const & _other_ ) noexcept
 }
 
 template< typename T, typename Alloc >
+constexpr
 prefix_array< T, Alloc >
 prefix_array< T, Alloc >::operator- () noexcept
 {
@@ -239,59 +245,45 @@ prefix_array< T, Alloc >::operator- () noexcept
 }
 
 template< typename T, typename Alloc >
-void
+constexpr void
 prefix_array< T, Alloc >::push_back ( value_type const & _val_ )
 {
         emplace_back( _val_ ) ;
 }
 
 template< typename T, typename Alloc >
-void
+constexpr void
 prefix_array< T, Alloc >::push_back ( value_type && _val_ )
 {
         emplace_back( UTI_MOVE( _val_ ) ) ;
 }
 
 template< typename T, typename Alloc >
-void
+constexpr void
 prefix_array< T, Alloc >::emplace_back ( auto&&... _args_ )
 {
-/*
-        if constexpr( is_trivial_v< value_type > )
+        if( _base::empty() )
         {
-                last_ += value_type{ _args_... } ;
-                _base::emplace_back( last_ ) ;
-
-//              _base::emplace_back( UTI_FWD( value_type( _args_... ) + static_cast< value_type >( ( _base::size() > 0 ) ) * _base::back() ) ) ;
-//              _base::emplace_back( value_type{ _args_... } + ( _base::size() > 0 ? _base::back() : value_type{} ) ) ;
-//              _base::emplace_back( value_type( _args_... ) + 1 ) ;
+                _base::emplace_back( UTI_FWD( _args_)... ) ;
         }
         else
-*/
         {
-                if( _base::empty() )
-                {
-                        _base::emplace_back( UTI_FWD( _args_)... ) ;
-                }
-                else
-                {
-                        _base::emplace_back( UTI_FWD( value_type( _args_... ) + _base::back() ) ) ;
-                }
+                _base::emplace_back( UTI_FWD( value_type( _args_... ) + _base::back() ) ) ;
         }
 }
 
 template< typename T, typename Alloc >
-void
+constexpr void
 prefix_array< T, Alloc >::pop_front () noexcept
 {
         UTI_ASSERT( !_base::empty(), "uti::prefix_array::pop_front: called on empty prefix_array" );
 
-        _update_range( 1, _base::size() - 1, -_base::front() ) ;
+        _update_range( 1, _base::size(), -_base::front() ) ;
         _base::pop_front();
 }
 
 template< typename T, typename Alloc >
-UTI_NODISCARD typename
+UTI_NODISCARD constexpr typename
 prefix_array< T, Alloc >::value_type
 prefix_array< T, Alloc >::pop_front_val () noexcept
 {
@@ -303,7 +295,7 @@ prefix_array< T, Alloc >::pop_front_val () noexcept
 }
 
 template< typename T, typename Alloc >
-UTI_NODISCARD typename
+UTI_NODISCARD constexpr typename
 prefix_array< T, Alloc >::value_type
 prefix_array< T, Alloc >::pop_back_val () noexcept
 {
@@ -315,7 +307,7 @@ prefix_array< T, Alloc >::pop_back_val () noexcept
 }
 
 template< typename T, typename Alloc >
-void
+constexpr void
 prefix_array< T, Alloc >::insert ( ssize_type const _position_, value_type const & _val_ )
 {
         UTI_ASSERT( 0 <= _position_ && _position_ <= _base::size(), "uti::prefix_array::insert: index out of range" );
@@ -326,7 +318,7 @@ prefix_array< T, Alloc >::insert ( ssize_type const _position_, value_type const
                 return ;
         }
         _base::insert( _position_, _val_ );
-        _update_range( _position_ + 1, _base::size() - 1, _val_ );
+        _update_range( _position_ + 1, _base::size(), _val_ );
 
         if( _position_ > 0 )
         {
@@ -335,7 +327,7 @@ prefix_array< T, Alloc >::insert ( ssize_type const _position_, value_type const
 }
 
 template< typename T, typename Alloc >
-void
+constexpr void
 prefix_array< T, Alloc >::insert ( ssize_type const _position_, value_type && _val_ )
 {
         UTI_ASSERT( 0 <= _position_ && _position_ <= _base::size(), "uti::prefix_array::insert: index out of range" );
@@ -346,7 +338,7 @@ prefix_array< T, Alloc >::insert ( ssize_type const _position_, value_type && _v
                 return ;
         }
         _base::insert( _position_, _val_ ) ;
-        _update_range( _position_ + 1, _base::size() - 1, _val_ );
+        _update_range( _position_ + 1, _base::size(), _val_ );
 
         if( _position_ > 0 )
         {
@@ -355,22 +347,22 @@ prefix_array< T, Alloc >::insert ( ssize_type const _position_, value_type && _v
 }
 
 template< typename T, typename Alloc >
-void
+constexpr void
 prefix_array< T, Alloc >::erase ( ssize_type const _position_ ) noexcept( is_nothrow_move_assignable_v< value_type > )
 {
         UTI_ASSERT( 0 <= _position_ && _position_ < _base::size(), "uti::prefix_array::erase: index out of range" );
 
         value_type const & to_erase = _base::at( _position_ );
 
-        _update_range( _position_, _base::size() - 1, -( to_erase ) );
+        _update_range( _position_, _base::size(), -( to_erase ) );
         _base::erase_stable( _position_ );
 }
 
 template< typename T, typename Alloc >
-void
+constexpr void
 prefix_array< T, Alloc >::_update_range ( ssize_type const _x_, ssize_type const _y_, value_type const & _diff_ ) noexcept
 {
-        for( ssize_type i = _x_; i <= _y_; ++i )
+        for( ssize_type i = _x_; i < _y_; ++i )
         {
                 _base::at( i ) += _diff_ ;
         }

@@ -73,6 +73,12 @@
 #       define UTI_HAS_BUILTIN( x ) 0
 #endif
 
+#if defined( __has_constexpr_builtin )
+#       define UTI_HAS_CEXPR_BUILTIN( x ) __has_constexpr_builtin( x )
+#else
+#       define UTI_HAS_CEXPR_BUILTIN( x ) 0
+#endif
+
 #if defined( __has_feature )
 #       define UTI_HAS_FEATURE( x ) __has_feature( x )
 #else
