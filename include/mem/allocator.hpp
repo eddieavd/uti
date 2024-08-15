@@ -273,17 +273,19 @@ public:
         }
         UTI_NODISCARD static constexpr block_type reallocate ( block_type const & _block_, ssize_type const _new_capacity_ ) noexcept
         {
-                if( !can_realloc_inplace( _block_, _new_capacity_ ) )
+                if( !_can_realloc_inplace( _block_, _new_capacity_ ) )
                 {
                         block_type new_block = allocate( _new_capacity_ );
                         ::uti::copy( _block_.ptr, _block_.ptr + _block_.size, new_block.ptr );
                         return new_block;
                 }
-                return _realloc_inplace( _block_, _new_capacity_ );
+                _realloc_inplace( _block_, _new_capacity_ ) ;
+
+                return { _block_.ptr, _new_capacity_ } ;
         }
         UTI_NODISCARD static constexpr bool realloc_inplace ( block_type const & _block_, ssize_type const _new_capacity_ ) noexcept
         {
-                if( _is_last_block( _block_ ) && _mem_available() >= ( _new_capacity_ - _block_.size ) )
+                if( _can_realloc_inplace( _block_, _new_capacity_ ) )
                 {
                         _realloc_inplace( _block_, _new_capacity_ ) ;
                         return true ;
@@ -304,6 +306,11 @@ private:
         static constexpr ssize_type _mem_available () noexcept { return memsize - ( end - mem ) ; }
 
         static constexpr bool _is_last_block ( block_type const & _block_ ) noexcept { return _block_.ptr == end - _block_.size ; }
+
+        static constexpr bool _can_realloc_inplace ( block_type const & _block_, ssize_type const _new_capacity_ ) noexcept
+        {
+                return _is_last_block( _block_ ) && _mem_available() >= ( _new_capacity_ - _block_.size ) ;
+        }
 
         static constexpr void _realloc_inplace ( block_type const & _block_, ssize_type const _new_capacity_ ) noexcept
         {
