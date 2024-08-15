@@ -11,14 +11,20 @@
 #include <type/traits.hpp>
 
 
+namespace uti::meta
+{
+
+template< typename... > struct type_list {} ;
+
+} // namespace uti::meta
+
+
 namespace uti::meta::list
 {
 
 
 ////////////////////////////////////////////////////////////////////////////////
 /// empty
-
-template< typename... > struct type_list {} ;
 
 template< typename List >
 struct empty : false_type {} ;
@@ -91,19 +97,49 @@ static_assert( is_same_v< push_back_t< type_list< int, float >, double >, type_l
 ////////////////////////////////////////////////////////////////////////////////
 /// pop_back
 
-template< typename List, typename RetList = type_list<> > struct pop_back ;
+template< typename FromList, typename ToList >
+struct make_same_container ;
 
-template< template< typename... > typename TypeList, typename T, typename RetList >
-struct pop_back< TypeList< T >, RetList > : type_identity< RetList > {} ;
+template< template< typename... > typename List,
+          typename... Elems,
+          template< typename... > typename ToList,
+          typename... Elems2 >
+struct make_same_container< List< Elems... >, ToList< Elems2... > > : type_identity< ToList< Elems... > > {} ;
 
-template< template< typename... > typename TypeList, typename T0, typename T1, typename... Ts, typename RetList >
-struct pop_back< TypeList< T0, T1, Ts... >, RetList > : pop_back< TypeList< T1, Ts... >, push_back_t< RetList, T0 > > {} ;
+template< typename FromList, typename ToList >
+using make_same_container_t = typename make_same_container< FromList, ToList >::type ;
+
+
+template< typename List, typename RetList = make_same_container_t< type_list<>, List > >
+struct pop_back ;
+
+template< template< typename... > typename List, typename T0, typename RetList >
+struct pop_back< List< T0 >, RetList > : type_identity< RetList > {} ;
+
+template< template< typename... > typename List, typename T0, typename T1, typename... Ts, typename RetList >
+struct pop_back< List< T0, T1, Ts... >, RetList > : pop_back< List< T1, Ts... >, push_back_t< RetList, T0 > > {} ;
 
 template< typename List >
 using pop_back_t = typename pop_back< List >::type ;
 
 static_assert( is_same_v< pop_back_t< type_list< int        > >, type_list<     > > ) ;
 static_assert( is_same_v< pop_back_t< type_list< int, float > >, type_list< int > > ) ;
+
+////////////////////////////////////////////////////////////////////////////////
+/// at
+
+template< ssize_t Idx, typename List > struct at : type_identity< typename at< Idx - 1, pop_front_t< List > >::type > {} ;
+
+template< typename List >
+struct at< 0, List > : front< List > {} ;
+
+template< ssize_t Idx, typename List >
+using at_t = typename at< Idx, List >::type ;
+
+static_assert( is_same_v<    int, at_t< 0, type_list< int, float, double > > > ) ;
+static_assert( is_same_v<  float, at_t< 1, type_list< int, float, double > > > ) ;
+static_assert( is_same_v< double, at_t< 2, type_list< int, float, double > > > ) ;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// any_match
@@ -158,18 +194,27 @@ static_assert( !contains_type_v< int, type_list<               > > ) ;
 static_assert( !contains_type_v< int, type_list< float, double > > ) ;
 
 ////////////////////////////////////////////////////////////////////////////////
+/// not
 
-template< ssize_t Idx, typename List > struct at : at< Idx - 1, pop_front_t< List > > {} ;
+template< template< typename... > typename Pred >
+struct _not
+{
+        template< typename... Ts >
+        using type = integral_constant< !Pred< Ts... >::value > ;
+} ;
 
-template< typename List >
-struct at< 0, List > : front< List > {} ;
+////////////////////////////////////////////////////////////////////////////////
+/// static_for
 
-template< ssize_t Idx, typename List >
-using at_t = typename at< Idx, List >::type ;
-
-static_assert( is_same_v<    int, at_t< 0, type_list< int, float, double > > > ) ;
-static_assert( is_same_v<  float, at_t< 1, type_list< int, float, double > > > ) ;
-static_assert( is_same_v< double, at_t< 2, type_list< int, float, double > > > ) ;
+template< i64_t First, i64_t Last, typename Lambda >
+constexpr void static_for ( Lambda const & fn )
+{
+        if constexpr( First < Last )
+        {
+                fn( integral_constant< First >{} );
+                static_for< First + 1, Last >( fn ) ;
+        }
+}
 
 
 } // namespace uti::meta::list

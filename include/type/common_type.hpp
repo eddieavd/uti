@@ -56,12 +56,12 @@ struct common_type< T > : public common_type< T, T > {} ;
 
 template< typename T, typename U >
 struct common_type< T, U >
-        : conditional
+        : conditional_t
         <
                 is_same_v< T, decay_t< T > > && is_same_v< U, decay_t< U > >,
                 _common_type_2_impl< T, U >,
                 common_type< decay_t< T >, decay_t< U > >
-        >::type {} ;
+        > {} ;
 
 template< typename T, typename U, typename V, typename... Rest >
 struct common_type< T, U, V, Rest... >

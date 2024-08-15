@@ -396,14 +396,22 @@ inline constexpr bool is_one_of_v = is_one_of< T, Args... >::value ;
 ///     conditionals
 ////////////////////////////////////////////////////////////////////////////////
 
-template< bool Cond, typename Then, typename Else >
-struct conditional : type_identity< Then > {} ;
+template< bool Cond >
+struct _conditional_impl
+{
+        template< typename Then, typename Else >
+        using fn = Then ;
+} ;
 
-template< typename Then, typename Else >
-struct conditional< false, Then, Else > : type_identity< Else > {} ;
+template<>
+struct _conditional_impl< false >
+{
+        template< typename Then, typename Else >
+        using fn = Else ;
+} ;
 
 template< bool Cond, typename Then, typename Else >
-using conditional_t = typename conditional< Cond, Then, Else >::type ;
+using conditional_t = typename _conditional_impl< Cond >::template fn< Then, Else > ;
 
 
 template< typename... Args > struct conjunction : true_type {} ;
@@ -1397,34 +1405,29 @@ inline constexpr bool is_trivial_v = is_trivial< T >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template< typename T, bool >
-struct _decay : remove_cv_t< T > {} ;
+template< typename T > struct _decay ;
 
-template< typename T >
-struct _decay< T, true > : conditional<
-                                is_array_v< T >,
-                                remove_extent_t< T >*,
+template< typename T > requires( !is_referenceable_v< T > )
+struct _decay< T > : remove_cv_t< T > {} ;
+
+template< typename T > requires( is_referenceable_v< T > )
+struct _decay< T > : type_identity<
+                        conditional_t<
+                                is_array_v     < T > ,
+                                remove_extent_t< T > * ,
                                 conditional_t<
-                                        is_function_v< T >,
-                                        add_pointer_t< T >,
-                                        remove_cv_t< T >
+                                        is_function_v< T > ,
+                                        add_pointer_t< T > ,
+                                        remove_cv_t  < T >
                                 >
-                           > {} ;
-
-template< typename T, bool B >
-using _decay_t = typename _decay< T, B >::type ;
+                           > > {} ;
 
 template< typename T >
-struct decay
-{
-private:
-        using U = remove_reference_t< T > ;
-public:
-        using type = _decay_t< U, is_referenceable_v< U > > ;
-};
+using decay = _decay< remove_reference_t< T > > ;
 
 template< typename T >
 using decay_t = typename decay< T >::type ;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///     swappability

@@ -11,7 +11,7 @@
 #include <container/array.hpp>
 #include <type/sequence.hpp>
 #include <meta/concepts.hpp>
-#include <type/iterator.hpp>
+#include <meta/iterator.hpp>
 
 
 namespace uti

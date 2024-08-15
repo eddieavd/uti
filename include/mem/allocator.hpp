@@ -315,7 +315,11 @@ private:
 template< typename T, ssize_t MemSize >
 class static_freelist_allocator
 {
+        static constexpr ssize_t memsize { MemSize } ;
+public:
 
+private:
+        inline static T mem [ memsize ] ;
 };
 
 

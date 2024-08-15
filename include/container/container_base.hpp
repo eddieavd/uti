@@ -7,6 +7,7 @@
 #pragma once
 
 #include <type/traits.hpp>
+#include <meta/iterator.hpp>
 
 
 namespace uti

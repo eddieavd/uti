@@ -12,7 +12,7 @@
 #include <mem/view.hpp>
 #include <mem/buffer.hpp>
 #include <meta/concepts.hpp>
-#include <type/iterator.hpp>
+#include <meta/iterator.hpp>
 
 
 namespace uti

@@ -71,7 +71,7 @@ public:
         template< typename Self, typename... Idxs >
         UTI_NODISCARD UTI_DEEP_INLINE constexpr
         decltype( auto ) at ( this Self && self, ssize_type const _x_, Idxs... _idxs_ ) noexcept
-                requires( is_n_dim_container_v< _self, sizeof...( _idxs_ ) + 1 > )
+//              requires( is_n_dim_container_v< _self, sizeof...( _idxs_ ) + 1 > )
         {
                 return UTI_FWD( self ).at( _x_ ).at( _idxs_... );
         }

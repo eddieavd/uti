@@ -112,6 +112,9 @@ concept unsigned_integral = integral< T > && !signed_integral< T > ;
 template< typename T >
 concept floating_point = is_floating_point_v< T > ;
 
+template< typename T >
+concept arithmetic = is_arithmetic_v< T > ;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename Lhs, typename Rhs >
