@@ -12,6 +12,10 @@
 #include <type/invoke.hpp>
 #include <algo/swap.hpp>
 
+#ifdef UTI_HAS_STL
+#include <functional>
+#endif
+
 
 namespace uti::meta
 {
