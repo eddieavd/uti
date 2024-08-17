@@ -153,4 +153,4 @@ jobs:
 
       - name: run tests
         run: |
-          ./test/gtest_uti
+          ./out/test/gtest_uti
