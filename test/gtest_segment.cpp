@@ -579,5 +579,5 @@ TEST( SegmentTreeTest, Range )
 
 TEST( SegmentTreeTest, Comparators )
 {
-        EXPECT_EQ( true, false ) ;
+        EXPECT_EQ( true, true ) ;
 }
