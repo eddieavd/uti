@@ -568,3 +568,16 @@ TEST( PrefixTest, NoDoubleFree )
         }
         EXPECT_EQ( dummy_counter, dummy_counter ) ;
 }
+
+TEST( PrefixTest, Range )
+{
+        uti::prefix_array< int > prefix( 1024, 1 ) ;
+
+        for( int i = 0; i < prefix.size(); ++i )
+        {
+                for( int j = i; j < prefix.size(); ++j )
+                {
+                        EXPECT_EQ( prefix.range( i, j ), j - i + 1 ) ;
+                }
+        }
+}

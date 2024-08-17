@@ -563,3 +563,21 @@ TEST( SegmentTreeTest, NoDoubleFree )
         }
         EXPECT_EQ( dummy_counter, 4 * 4 ) ;
 }
+
+TEST( SegmentTreeTest, Range )
+{
+        uti::segment_tree< int, uti::compare::sum > segtree( 1024, 1 ) ;
+
+        for( int i = 0; i < segtree.size(); ++i )
+        {
+                for( int j = i; j < segtree.size(); ++j )
+                {
+                        EXPECT_EQ( segtree.range( i, j ), j - i + 1 ) ;
+                }
+        }
+}
+
+TEST( SegmentTreeTest, Comparators )
+{
+        EXPECT_EQ( true, false ) ;
+}
