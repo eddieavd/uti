@@ -14,6 +14,7 @@
 #include <container/tuple.hpp>
 #include <container/vector.hpp>
 #include <container/prefix_array.hpp>
+#include <container/segment_tree.hpp>
 
 
 #define CUSTOM_CAP 16

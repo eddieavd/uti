@@ -15,6 +15,7 @@ add_executable(
         gtest_tuple.cpp
         gtest_vector.cpp
         gtest_prefix.cpp
+        gtest_segment.cpp
 )
 target_link_libraries(
         gtest_uti

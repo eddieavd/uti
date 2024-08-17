@@ -105,6 +105,9 @@ public:
 
         constexpr void emplace_back ( auto&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
+        constexpr void pop_back  () noexcept ;
+        constexpr void pop_front () noexcept ;
+
         constexpr void insert ( ssize_type const _position_, value_type const &  _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
         constexpr void insert ( ssize_type const _position_, value_type       && _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
@@ -119,7 +122,8 @@ public:
         constexpr void shrink_to_fit (                             ) noexcept ;
         constexpr void shrink_size   ( ssize_type const     _size_ ) noexcept ;
 
-        constexpr void erase ( ssize_type const _position_ ) noexcept ;
+        constexpr void erase        ( ssize_type const _position_ ) noexcept ;
+        constexpr void erase_stable ( ssize_type const _position_ ) noexcept ;
 
         constexpr void clear () noexcept ;
 
@@ -144,7 +148,7 @@ private:
 
         constexpr value_type _range ( ssize_type _x1_, ssize_type _x2_ ) const noexcept ;
 
-        constexpr ssize_type _msb           ( ssize_type _num_ ) const noexcept ;
+        constexpr ssize_type _msb       ( ssize_type _num_ ) const noexcept ;
         constexpr ssize_type _ceil_pow2 ( ssize_type _num_ ) const noexcept ;
 
         constexpr void _init_tree    () noexcept ;
@@ -152,11 +156,10 @@ private:
         constexpr void _rebuild_tree () noexcept ;
 
         constexpr void _rebalance_tree ( ssize_type const _size_, ssize_type const _old_cap_ ) noexcept
-                requires( is_trivially_relocatable_v  < value_type > ) ;
+                requires( is_trivially_relocatable_v< value_type > ) ;
 
         constexpr void _swap_buffer    ( _buff_base & _buff_ ) noexcept ;
-        constexpr void _rebalance_into ( _buff_base & _buff_ )
-                noexcept( is_nothrow_move_constructible_v< value_type > ) ;
+        constexpr void _rebalance_into ( _buff_base & _buff_ ) noexcept( is_nothrow_move_constructible_v< value_type > ) ;
 } ;
 
 
@@ -214,23 +217,68 @@ segment_tree< T, Compare, Alloc >::segment_tree ( segment_tree const & _other_ )
 template< typename T, auto Compare, typename Alloc >
 constexpr
 segment_tree< T, Compare, Alloc >::segment_tree ( segment_tree && _other_ ) noexcept
-        : _buff_base( UTI_MOVE( static_cast< _buff_base >( _other_ ) ) )  ,
-          _view_base( UTI_MOVE( static_cast< _view_base >( _other_ ) ) ) {}
+        : _buff_base( UTI_MOVE( _other_ ) )  ,
+          _view_base( UTI_MOVE( _other_ ) ) {}
 
 template< typename T, auto Compare, typename Alloc >
 constexpr
 segment_tree< T, Compare, Alloc > &
-segment_tree< T, Compare, Alloc >::operator= ( segment_tree const & ) UTI_NOEXCEPT_UNLESS_BADALLOC
+segment_tree< T, Compare, Alloc >::operator= ( segment_tree const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
+        if constexpr( is_trivially_copy_assignable_v< value_type > && is_trivially_destructible_v< value_type > )
+        {
+                reserve( _other_.size() ) ;
+                ::uti::copy( _other_.begin(), _other_.end(), _view_base::begin() ) ;
+                _rebuild_tree() ; // get rid of this by copying tree as well as elements
+        }
+        else
+        {
+                if( _view_base::size() >= _other_.size() )
+                {
+                        for( ssize_type i = 0; i < _other_.size(); ++i )
+                        {
+                                _view_base::at( i ) = _other_.at( i ) ;
+                        }
+                        shrink_size( _other_.size() ) ;
+                }
+                else
+                {
+                        reserve( _other_.size() ) ;
 
+                        ssize_type pos { 0 } ;
+                        for( ; pos < _view_base::size(); ++pos )
+                        {
+                                _view_base::at( pos ) = _other_.at( pos ) ;
+                        }
+                        for( ; pos < _other_.size(); ++pos )
+                        {
+                                _emplace( _other_.at( pos ) ) ;
+                        }
+                }
+        }
+        _view_base::_size() = _other_.size() ;
+
+        return *this ;
 }
 
 template< typename T, auto Compare, typename Alloc >
 constexpr
 segment_tree< T, Compare, Alloc > &
-segment_tree< T, Compare, Alloc >::operator= ( segment_tree && ) noexcept
+segment_tree< T, Compare, Alloc >::operator= ( segment_tree && _other_ ) noexcept
 {
+        clear() ;
+        _buff_base::deallocate() ;
 
+        this->_buffer()   = _other_._buffer()   ;
+        this->begin_      = _other_.begin_      ;
+        this->size_       = _other_.size_       ;
+        this->_capacity() = _other_._capacity() ;
+
+        _other_._buffer() = _other_.begin_ = nullptr ;
+        _other_.size_ = 0 ;
+        _other_._capacity() = 0 ;
+
+        return *this ;
 }
 
 template< typename T, auto Compare, typename Alloc >
@@ -281,9 +329,35 @@ segment_tree< T, Compare, Alloc >::emplace_back ( auto&&... _args_ ) UTI_NOEXCEP
 
 template< typename T, auto Compare, typename Alloc >
 constexpr void
+segment_tree< T, Compare, Alloc >::pop_back () noexcept
+{
+        if constexpr( !is_trivially_destructible_v< value_type > )
+        {
+                ::uti::destroy( _view_base::end() - 1 ) ;
+        }
+        _view_base::pop_back() ;
+        _rebuild_tree() ;
+}
+
+template< typename T, auto Compare, typename Alloc >
+constexpr void
+segment_tree< T, Compare, Alloc >::pop_front () noexcept
+{
+        erase_stable( 0 ) ;
+        _rebuild_tree() ;
+}
+
+template< typename T, auto Compare, typename Alloc >
+constexpr void
 segment_tree< T, Compare, Alloc >::insert ( ssize_type const _position_, value_type const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         UTI_CEXPR_ASSERT( 0 <= _position_ && _position_ < size(), "uti::segment_tree::insert: index out of bounds" ) ;
+
+        if( _position_ >= size() )
+        {
+                emplace_back( _val_ ) ;
+                return ;
+        }
         reserve() ;
 
         if constexpr( is_trivially_relocatable_v< value_type > )
@@ -295,12 +369,14 @@ segment_tree< T, Compare, Alloc >::insert ( ssize_type const _position_, value_t
         {
                 ::uti::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) ) ;
 
-                for( ssize_type i = size() - 1; i > _position_; ++i )
+                for( ssize_type i = size() - 1; i > _position_; --i )
                 {
                         _view_base::at( i ) = UTI_MOVE( _view_base::at( i - 1 ) ) ;
                 }
                 _view_base::at( _position_ ) = _val_ ;
         }
+        ++_view_base::_size() ;
+        _rebuild_tree() ;
 }
 
 template< typename T, auto Compare, typename Alloc >
@@ -308,6 +384,12 @@ constexpr void
 segment_tree< T, Compare, Alloc >::insert ( ssize_type const _position_, value_type && _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         UTI_CEXPR_ASSERT( 0 <= _position_ && _position_ < size(), "uti::segment_tree::insert: index out of bounds" ) ;
+
+        if( _position_ >= size() )
+        {
+                emplace_back( UTI_MOVE( _val_ ) ) ;
+                return ;
+        }
         reserve() ;
 
         if constexpr( is_trivially_relocatable_v< value_type > )
@@ -319,13 +401,16 @@ segment_tree< T, Compare, Alloc >::insert ( ssize_type const _position_, value_t
         {
                 ::uti::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) ) ;
 
-                for( ssize_type i = size() - 1; i > _position_; ++i )
+                for( ssize_type i = size() - 1; i > _position_; --i )
                 {
                         _view_base::at( i ) = UTI_MOVE( _view_base::at( i - 1 ) ) ;
                 }
                 _view_base::at( _position_ ) = UTI_MOVE( _val_ ) ;
         }
+        ++_view_base::_size() ;
+        _rebuild_tree() ;
 }
+
 template< typename T, auto Compare, typename Alloc >
 constexpr void
 segment_tree< T, Compare, Alloc >::update ( ssize_type const _position_, value_type const & _val_ )
@@ -429,7 +514,7 @@ segment_tree< T, Compare, Alloc >::shrink_to_fit () noexcept
 {
         auto cap = capacity() ;
 
-        if( 2 * size() >= cap ) return ;
+        if( size() >= cap ) return ;
 
         auto new_cap = _ceil_pow2( cap / 2 ) ;
 
@@ -466,9 +551,24 @@ segment_tree< T, Compare, Alloc >::shrink_size ( ssize_type const _size_ ) noexc
 
 template< typename T, auto Compare, typename Alloc >
 constexpr void
-segment_tree< T, Compare, Alloc >::erase ( ssize_type const ) noexcept
+segment_tree< T, Compare, Alloc >::erase ( ssize_type const _position_ ) noexcept
 {
+        _view_base::at( _position_ ) = UTI_MOVE( _view_base::back() ) ;
 
+        pop_back() ;
+        _rebuild_tree() ;
+}
+
+template< typename T, auto Compare, typename Alloc >
+constexpr void
+segment_tree< T, Compare, Alloc >::erase_stable ( ssize_type const _position_ ) noexcept
+{
+        for( ssize_type i = _position_; i < _view_base::size() - 1; ++i )
+        {
+                _view_base::at( i ) = UTI_MOVE( _view_base::at( i + 1 ) ) ;
+        }
+        pop_back() ;
+        _rebuild_tree() ;
 }
 
 template< typename T, auto Compare, typename Alloc >
