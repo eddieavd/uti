@@ -7,8 +7,8 @@
 #pragma once
 
 #include <util/assert.hpp>
-#include <container/container_base.hpp>
-#include <container/traits.hpp>
+#include <container/base.hpp>
+#include <container/meta.hpp>
 
 
 namespace uti

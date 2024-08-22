@@ -8,11 +8,9 @@
 
 #include <algo/swap.hpp>
 #include <algo/mem.hpp>
-#include <algo/distance.hpp>
-#include <mem/view.hpp>
-#include <mem/buffer.hpp>
+#include <container/view.hpp>
+#include <container/buffer.hpp>
 #include <meta/concepts.hpp>
-#include <meta/iterator.hpp>
 
 
 namespace uti
@@ -51,8 +49,8 @@ public:
 
         constexpr vector ( _buff_base && _buffer_, ssize_type const _size_ ) noexcept ;
 
-        template< meta::random_access_iterator Iter >
-        constexpr vector ( Iter begin, Iter const & end ) ;
+//      template< meta::random_access_iterator Iter >
+//      constexpr vector ( Iter begin, Iter const & end ) ;
 
         constexpr vector             ( vector const &  _other_ )          ;
         constexpr vector             ( vector       && _other_ ) noexcept ;
@@ -167,6 +165,7 @@ vector< T, Alloc >::vector ( _buff_base && _buffer_, ssize_type const _size_ ) n
           _view_base( _buff_base::begin(), _buff_base::begin() + _size_ )
 {}
 
+/*
 template< typename T, typename Alloc >
 template< meta::random_access_iterator Iter >
 constexpr
@@ -186,6 +185,7 @@ vector< T, Alloc >::vector ( Iter _begin_, Iter const & _end_ )
                 }
         }
 }
+*/
 
 template< typename T, typename Alloc >
 constexpr

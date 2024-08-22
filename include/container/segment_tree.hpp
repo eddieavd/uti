@@ -10,9 +10,9 @@
 #include <algo/mem.hpp>
 #include <meta/concepts.hpp>
 #include <type/sequence.hpp>
-#include <mem/view.hpp>
-#include <mem/buffer.hpp>
-#include <mem/allocator.hpp>
+#include <container/view.hpp>
+#include <container/buffer.hpp>
+#include <allocator/meta.hpp>
 
 
 

@@ -32,7 +32,7 @@ void copy ( InIter begin, InIter const & end, OutIter dest )
 {
         if constexpr( is_trivially_relocatable_v< ValT > )
         {
-                ssize_t const n = distance( begin, end ) ;
+                ssize_t const n = ::uti::distance( begin, end ) ;
                 if( n > 0 )
                 {
 #if UTI_HAS_BUILTIN( __builtin_memcpy )

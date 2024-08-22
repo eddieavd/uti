@@ -12,10 +12,6 @@
 #include <type/invoke.hpp>
 #include <algo/swap.hpp>
 
-#ifdef UTI_HAS_STL
-#include <functional>
-#endif
-
 
 namespace uti::meta
 {
@@ -350,13 +346,11 @@ concept regular = semiregular< T > && equality_comparable< T > ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef UTI_HAS_STL
-
 template< typename Fn, typename... Args >
 concept invocable =
         requires( Fn && fn, Args&&... args )
         {
-                std::invoke( UTI_FWD( fn ), UTI_FWD( args )... );
+                ::uti::invoke( UTI_FWD( fn ), UTI_FWD( args )... );
         };
 
 template< typename Fn, typename... Args >
@@ -367,7 +361,7 @@ concept regular_invocable = invocable< Fn, Args... > ;
 template< typename Fn, typename... Args >
 concept predicate =
         regular_invocable< Fn, Args... > &&
-        boolean_testable< std::invoke_result_t< Fn, Args... > > ;
+        boolean_testable< ::uti::invoke_result_t< Fn, Args... > > ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -399,8 +393,6 @@ concept equivalence_relation = relation< R, T, U > ;
 template< typename R, typename T, typename U >
 concept strict_weak_order = relation< R, T, U > ;
 
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename T >
@@ -412,6 +404,7 @@ concept container =
                 { T::     ssize_type } ;
                 { T::        pointer } ;
                 { T::      reference } ;
+                { T::const_reference } ;
                 { T::       iterator } ;
                 { T:: const_iterator } ;
                 { container. begin() } -> same_as< typename T::      iterator > ;

@@ -6,12 +6,11 @@
 
 #pragma once
 
-#include <mem/allocator.hpp>
+#include <allocator/meta.hpp>
 #include <container/vector.hpp>
 #include <container/array.hpp>
 #include <type/sequence.hpp>
 #include <meta/concepts.hpp>
-#include <meta/iterator.hpp>
 
 
 namespace uti
@@ -45,8 +44,8 @@ public:
 
         constexpr prefix_array ( ssize_type const _count_, value_type const & _val_ ) ;
 
-        template< meta::random_access_iterator Iter >
-        constexpr prefix_array ( Iter _begin_, Iter const & _end_ ) ;
+//      template< meta::random_access_iterator Iter >
+//      constexpr prefix_array ( Iter _begin_, Iter const & _end_ ) ;
 
         constexpr prefix_array             ( prefix_array const &  _other_ )          = default ;
         constexpr prefix_array             ( prefix_array       && _other_ ) noexcept = default ;
@@ -169,6 +168,7 @@ prefix_array< T, Alloc >::prefix_array ( ssize_type const _capacity_, value_type
         }
 }
 
+/*
 template< typename T, typename Alloc >
 template< meta::random_access_iterator Iter >
 constexpr
@@ -183,6 +183,7 @@ prefix_array< T, Alloc >::prefix_array ( Iter _begin_, Iter const & _end_ )
                 _base::_emplace( last ) ;
         }
 }
+*/
 
 template< typename T, typename Alloc >
 constexpr

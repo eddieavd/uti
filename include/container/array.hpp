@@ -7,9 +7,9 @@
 #pragma once
 
 #include <type/traits.hpp>
-#include <container/container_base.hpp>
-#include <mem/view.hpp>
-#include <mem/allocator.hpp>
+#include <container/base.hpp>
+#include <container/view.hpp>
+#include <allocator/meta.hpp>
 
 #include <initializer_list>
 
