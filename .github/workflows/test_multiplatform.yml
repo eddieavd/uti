@@ -152,5 +152,13 @@ jobs:
           endif()
 
       - name: run tests
+        shell: cmake -P {0}
         run: |
-          ./out/test/gtest_uti
+          execute_process(
+            COMMAND ./test/gtest_uti
+            WORKING_DIRECTORY out
+            RESULT_VARIABLE result
+          )
+          if( NOT result EQUAL 0 )
+            message( FATAL_ERROR "tests failed!" )
+          endif()
