@@ -294,6 +294,21 @@ concept cpp17_random_access_iterator =
         { iter[ n ]    } -> meta::convertible_to< iter_reference_t< Iter > > ;
 } ;
 
+
+namespace meta
+{
+
+
+template< typename Iter > concept               iterator = cpp17_iterator              < Iter > ;
+template< typename Iter > concept         input_iterator = cpp17_input_iterator        < Iter > ;
+template< typename Iter > concept       forward_iterator = cpp17_forward_iterator      < Iter > ;
+template< typename Iter > concept bidirectional_iterator = cpp17_bidirectional_iterator< Iter > ;
+template< typename Iter > concept random_access_iterator = cpp17_random_access_iterator< Iter > ;
+
+
+} // namespace meta
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename Iter >

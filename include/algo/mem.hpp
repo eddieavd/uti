@@ -27,43 +27,6 @@ constexpr void destroy ( T * ptr )
                 ptr->~T();
 }
 
-
-template< typename InputIter, typename Sentinel, typename DestIter >
-constexpr void _memmove_impl ( InputIter begin, Sentinel end, DestIter dest )
-{
-        while( begin != end )
-        {
-                *dest = *begin ;
-                ++dest  ;
-                ++begin ;
-        }
-}
-
-template< typename InVal, typename OutVal >
-        requires( is_same_v< remove_cv_t< InVal >, OutVal > )
-constexpr void memmove ( InVal * begin, InVal * end, OutVal * dest )
-{
-        _memmove_impl( begin, end, dest ) ;
-}
-
-template< typename InputIter, typename Sentinel, typename DestIter >
-constexpr void _memmove_back_impl ( InputIter begin, Sentinel end, DestIter dest )
-{
-        while( begin != end )
-        {
-                *dest = *begin ;
-                --dest  ;
-                --begin ;
-        }
-}
-
-template< typename InVal, typename OutVal >
-        requires( is_same_v< remove_cv_t< InVal >, OutVal > )
-constexpr void memmove_back ( InVal * begin, InVal * end, OutVal * dest )
-{
-        _memmove_back_impl( begin, end, dest ) ;
-}
-
 template< typename T >
 constexpr void memclr ( T * begin, T * end )
 {

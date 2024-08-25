@@ -8,6 +8,7 @@
 
 #include <type/traits.hpp>
 #include <algo/distance.hpp>
+#include <iterator/meta.hpp>
 
 #if !__has_builtin( __builtin_memmove ) && defined( UTI_HAS_STL )
 #include <cstring>
@@ -18,36 +19,77 @@ namespace uti
 {
 
 
-template< typename InputIter, typename Sentinel, typename DestIter >
-void _copy_impl ( InputIter begin, Sentinel end, DestIter dest )
+template< meta::forward_iterator Iter, meta::forward_iterator DestIter >
+void _copy_impl ( Iter begin, Iter end, DestIter dest )
 {
         while( begin != end )
         {
-                *dest++ = *begin++;
+                *dest = *begin ;
+                ++dest  ;
+                ++begin ;
         }
 }
 
-template< typename InIter, typename OutIter, typename ValT = remove_pointer_t< InIter > /* = iter_value_t< InIter > */ >
-void copy ( InIter begin, InIter const & end, OutIter dest )
+template< meta::forward_iterator Iter, meta::forward_iterator DestIter >
+void copy ( Iter begin, Iter const & end, DestIter dest )
 {
-        if constexpr( is_trivially_relocatable_v< ValT > )
+        using value_type = iterator_traits< Iter >::value_type ;
+
+        if constexpr( is_trivially_relocatable_v< value_type > )
         {
                 ssize_t const n = ::uti::distance( begin, end ) ;
-                if( n > 0 )
-                {
 #if UTI_HAS_BUILTIN( __builtin_memcpy )
-                        __builtin_memcpy( dest, begin, n * sizeof( ValT ) );
+                __builtin_memcpy( dest, begin, n * sizeof( value_type ) ) ;
 #elif defined( UTI_HAS_STL )
-                        std::memcpy( dest, begin, n * sizeof( ValT ) );
+                std::memcpy( dest, begin, n * sizeof( value_type ) ) ;
 #else
-                        _copy_impl( begin, end, dest );
+                _copy_impl( begin, end, dest ) ;
 #endif
-                }
         }
         else
         {
-                _copy_impl( begin, end, dest );
+                _copy_impl( begin, end, dest ) ;
         }
+}
+
+
+template< meta::bidirectional_iterator Iter, meta::bidirectional_iterator DestIter >
+void _copy_back_impl ( Iter begin, Iter end, DestIter dest )
+{
+        while( begin != end )
+        {
+                *dest = *begin ;
+                --dest ;
+                --begin ;
+        }
+}
+
+template< meta::random_access_iterator Iter, meta::random_access_iterator DestIter >
+void copy_backward ( Iter begin, Iter const & end, DestIter dest )
+{
+        using value_type = iterator_traits< Iter >::value_type ;
+
+        if constexpr( is_trivially_relocatable_v< value_type > )
+        {
+                ssize_t const n = ::uti::distance( end, begin ) ;
+#if UTI_HAS_BUILTIN( __builtin_memmove )
+                __builtin_memmove( dest - n, end, n * sizeof( value_type ) ) ;
+#elif defined( UTI_HAS_STL )
+                std::memmove( dest - n, end, n * sizeof( value_type ) ) ;
+#else
+                _copy_back_impl( begin, end, dest ) ;
+#endif
+        }
+        else
+        {
+                _copy_back_impl( begin, end, dest ) ;
+        }
+}
+
+template< meta::bidirectional_iterator Iter, meta::bidirectional_iterator DestIter >
+void copy_backward ( Iter begin, Iter const & end, DestIter dest )
+{
+        _copy_back_impl( begin, end, dest ) ;
 }
 
 

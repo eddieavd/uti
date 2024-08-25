@@ -362,7 +362,7 @@ segment_tree< T, Compare, Alloc >::insert ( ssize_type const _position_, value_t
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                ::uti::memmove_back( _view_base::end() - 1, _view_base::begin() + _position_, _view_base::end() ) ;
+                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_, _view_base::end() ) ;
                 _view_base::at( _position_ ) = _val_ ;
         }
         else
@@ -394,7 +394,7 @@ segment_tree< T, Compare, Alloc >::insert ( ssize_type const _position_, value_t
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                ::uti::memmove_back( _view_base::end() - 1, _view_base::begin() + _position_, _view_base::end() ) ;
+                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_, _view_base::end() ) ;
                 _view_base::at( _position_ ) = _val_ ;
         }
         else
@@ -775,7 +775,7 @@ segment_tree< T, Compare, Alloc >::_rebalance_tree ( ssize_type const _size_, [[
 {
         auto new_cap = capacity() ;
 
-        ::uti::memmove( _view_base::begin(), _view_base::begin() + _size_, _buff_base::begin() + new_cap ) ;
+        ::uti::copy( _view_base::begin(), _view_base::begin() + _size_, _buff_base::begin() + new_cap ) ;
 
         _view_base::_begin() = _buff_base:: begin() + new_cap ;
         _view_base:: _size() = _size_ ;
@@ -790,7 +790,7 @@ segment_tree< T, Compare, Alloc >::_rebalance_into ( _buff_base & _buff_ )
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                ::uti::memmove( _view_base::begin(), _view_base::end(), _buff_.begin() + new_cap ) ;
+                ::uti::copy( _view_base::begin(), _view_base::end(), _buff_.begin() + new_cap ) ;
         }
         else
         {
