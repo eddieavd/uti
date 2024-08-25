@@ -52,6 +52,53 @@ TEST( SegmentTreeTest, FillConstruct )
         }
 }
 
+TEST( SegmentTreeTest, IteratorConstruct )
+{
+        {
+                int arr[] = { 0, 1, 2, 3 } ;
+
+                int * begin = arr ;
+                int *   end = arr + ( sizeof( arr ) / sizeof( int ) ) ;
+
+                uti::segment_tree< int > segtree( begin, end ) ;
+
+                for( ssize_t i = 0; i < 4; ++i )
+                {
+                        EXPECT_EQ( segtree.at( i ), i ) ;
+                }
+        }
+        {
+                uti::vector< int > vec( 4, 1 ) ;
+
+                uti::segment_tree< int > segtree( vec.begin(), vec.end() ) ;
+
+                for( ssize_t i = 0; i < vec.size(); ++i )
+                {
+                        EXPECT_EQ( vec.at( i ), segtree.at( i ) ) ;
+                }
+        }
+        {
+                uti::prefix_array< int > prefix( 4, 1 ) ;
+
+                uti::segment_tree< int > segtree( prefix.begin(), prefix.end() ) ;
+
+                for( ssize_t i = 0; i < prefix.size(); ++i )
+                {
+                        EXPECT_EQ( segtree.at( i ), prefix.element_at( i ) ) ;
+                }
+        }
+        {
+                uti::segment_tree< int > segtree( 4, 1 ) ;
+
+                uti::segment_tree< int > segtree2( segtree.begin(), segtree.end() ) ;
+
+                for( ssize_t i = 0; i < segtree.size(); ++i )
+                {
+                        EXPECT_EQ( segtree.at( i ), segtree2.at( i ) ) ;
+                }
+        }
+}
+
 TEST( SegmentTreeTest, CopyConstruct )
 {
         uti::segment_tree<         int > segtreeint( CUSTOM_CAP, CUSTOM_VAL ) ;

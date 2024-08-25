@@ -8,6 +8,8 @@
 
 #include <algo/swap.hpp>
 #include <algo/mem.hpp>
+#include <iterator/meta.hpp>
+#include <iterator/base.hpp>
 #include <container/view.hpp>
 #include <container/buffer.hpp>
 #include <meta/concepts.hpp>
@@ -39,8 +41,8 @@ public:
         using       reference = typename      _base::      reference ;
         using const_reference = typename      _base::const_reference ;
 
-        using        iterator = typename      _base::       iterator ;
-        using  const_iterator = typename      _base:: const_iterator ;
+        using       iterator = _random_access_iterator< T       > ;
+        using const_iterator = _random_access_iterator< T const > ;
 
         constexpr          vector (                             ) noexcept = default ;
         constexpr explicit vector ( ssize_type const _capacity_ )                    ;
@@ -49,8 +51,11 @@ public:
 
         constexpr vector ( _buff_base && _buffer_, ssize_type const _size_ ) noexcept ;
 
-//      template< meta::random_access_iterator Iter >
-//      constexpr vector ( Iter begin, Iter const & end ) ;
+        template< meta::forward_iterator Iter >
+        constexpr vector ( Iter _begin_, Iter const & _end_ ) ;
+
+        template< meta::prefix_array_iterator Iter >
+        constexpr vector ( Iter _begin_, Iter const & _end_ ) ;
 
         constexpr vector             ( vector const &  _other_ )          ;
         constexpr vector             ( vector       && _other_ ) noexcept ;
@@ -165,27 +170,44 @@ vector< T, Alloc >::vector ( _buff_base && _buffer_, ssize_type const _size_ ) n
           _view_base( _buff_base::begin(), _buff_base::begin() + _size_ )
 {}
 
-/*
 template< typename T, typename Alloc >
-template< meta::random_access_iterator Iter >
+template< meta::forward_iterator Iter >
 constexpr
 vector< T, Alloc >::vector ( Iter _begin_, Iter const & _end_ )
-        : _buff_base( ::uti::distance( _begin_, _end_ ) ),
-          _view_base( _buff_base::begin(), _buff_base::end() )
+        : _buff_base( ::uti::distance( _begin_, _end_ ) ) ,
+          _view_base( _buff_base::begin(), _buff_base::begin() )
 {
-        if constexpr( is_trivially_copy_constructible_v< value_type > )
+        if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                uti::_memmove_impl( _begin_, _end_, _view_base::begin() ) ;
+                ::uti::copy( _begin_, _end_, _view_base::begin() ) ;
+                _view_base::_size() = _buff_base::capacity() ;
         }
         else
         {
                 while( _begin_ != _end_ )
                 {
-                        _emplace( *_begin_++ ) ;
+                        _emplace( *_begin_ ) ;
+                        ++_begin_ ;
                 }
         }
 }
-*/
+
+template< typename T, typename Alloc >
+template< meta::prefix_array_iterator Iter >
+constexpr
+vector< T, Alloc >::vector ( Iter _begin_, Iter const & _end_ )
+        : _buff_base( ::uti::distance( _begin_, _end_ ) ) ,
+          _view_base( _buff_base::begin(), _buff_base::begin() )
+{
+        value_type last = 0 ;
+
+        while( _begin_ != _end_ )
+        {
+                _emplace( *_begin_ - last ) ;
+                last = *_begin_ ;
+                ++_begin_ ;
+        }
+}
 
 template< typename T, typename Alloc >
 constexpr

@@ -7,6 +7,8 @@
 #pragma once
 
 #include <allocator/meta.hpp>
+#include <iterator/meta.hpp>
+#include <iterator/base.hpp>
 #include <container/vector.hpp>
 #include <container/array.hpp>
 #include <type/sequence.hpp>
@@ -17,16 +19,21 @@ namespace uti
 {
 
 
+template< typename T > struct prefix_array_iterator ;
+
+
 template< typename T, typename Alloc = allocator< T > >
 class prefix_array : public vector< T, Alloc >
 {
         using _self = prefix_array       ;
         using _base = vector< T, Alloc > ;
+
+        using _iter_traits = iterator_traits< prefix_array_iterator< T > > ;
 public:
-        using      value_type = typename _base::     value_type ;
-        using       size_type = typename _base::      size_type ;
-        using      ssize_type = typename _base::     ssize_type ;
-        using difference_type = typename _base::difference_type ;
+        using      value_type = typename _iter_traits::     value_type ;
+        using       size_type = typename        _base::      size_type ;
+        using      ssize_type = typename        _base::     ssize_type ;
+        using difference_type = typename _iter_traits::difference_type ;
 
         using  allocator_type = typename _base:: allocator_type ;
         using   _alloc_traits = typename _base::  _alloc_traits ;
@@ -36,16 +43,19 @@ public:
         using       reference = typename _base::      reference ;
         using const_reference = typename _base::const_reference ;
 
-        using        iterator = typename _base::       iterator ;
-        using  const_iterator = typename _base:: const_iterator ;
+        using       iterator = prefix_array_iterator< T       > ;
+        using const_iterator = prefix_array_iterator< T const > ;
 
         constexpr          prefix_array (                             ) noexcept = default ;
         constexpr explicit prefix_array ( ssize_type const _capacity_ )                    ;
 
         constexpr prefix_array ( ssize_type const _count_, value_type const & _val_ ) ;
 
-//      template< meta::random_access_iterator Iter >
-//      constexpr prefix_array ( Iter _begin_, Iter const & _end_ ) ;
+        template< meta::forward_iterator Iter >
+        constexpr prefix_array ( Iter _begin_, Iter const & _end_ ) ;
+
+        template< meta::prefix_array_iterator Iter >
+        constexpr prefix_array ( Iter _begin_, Iter const & _end_ ) ;
 
         constexpr prefix_array             ( prefix_array const &  _other_ )          = default ;
         constexpr prefix_array             ( prefix_array       && _other_ ) noexcept = default ;
@@ -140,6 +150,14 @@ public:
         {
                 erase( _position_ ) ;
         }
+
+        UTI_NODISCARD constexpr       iterator  begin ()       noexcept { return _base::begin() ; }
+        UTI_NODISCARD constexpr const_iterator  begin () const noexcept { return _base::begin() ; }
+        UTI_NODISCARD constexpr const_iterator cbegin () const noexcept { return        begin() ; }
+
+        UTI_NODISCARD constexpr       iterator  end ()       noexcept { return _base::end() ; }
+        UTI_NODISCARD constexpr const_iterator  end () const noexcept { return _base::end() ; }
+        UTI_NODISCARD constexpr const_iterator cend () const noexcept { return        end() ; }
 private:
         constexpr void _update_range ( ssize_type const _x_, ssize_type const _y_, value_type const & _diff_ ) noexcept ;
 };
@@ -147,6 +165,95 @@ private:
 
 template< typename T, typename Alloc = allocator< T > >
 prefix_array ( prefix_array< T, Alloc >::ssize_type const, T const & ) -> prefix_array< T, Alloc > ;
+
+
+template< typename T >
+struct prefix_array_iterator
+{
+        using _base = _random_access_iterator< T > ;
+
+        using      value_type = typename _base::     value_type ;
+        using         pointer = typename _base::        pointer ;
+        using       reference = typename _base::      reference ;
+        using difference_type = typename _base::difference_type ;
+
+        using iterator_category = prefix_array_iterator_tag ;
+
+        constexpr prefix_array_iterator (                         ) noexcept : ptr_( nullptr ) {}
+        constexpr prefix_array_iterator ( pointer const &   _ptr_ ) noexcept : ptr_(   _ptr_ ) {}
+        constexpr prefix_array_iterator ( _base   const & _other_ ) noexcept : ptr_( _other_ ) {}
+
+        constexpr operator pointer ()       noexcept { return ptr_ ; }
+        constexpr operator pointer () const noexcept { return ptr_ ; }
+
+        constexpr reference operator* () noexcept { return *ptr_ ; }
+
+        constexpr prefix_array_iterator & operator++ () noexcept { ++ptr_ ; return *this ; }
+        constexpr prefix_array_iterator & operator-- () noexcept { --ptr_ ; return *this ; }
+
+        constexpr prefix_array_iterator operator++ ( int ) noexcept { auto prev = *this ; ++ptr_ ; return prev ; }
+        constexpr prefix_array_iterator operator-- ( int ) noexcept { auto prev = *this ; --ptr_ ; return prev ; }
+
+        constexpr prefix_array_iterator & operator+= ( difference_type const _n_ ) noexcept { this->ptr_ += _n_ ; return *this ; }
+        constexpr prefix_array_iterator & operator-= ( difference_type const _n_ ) noexcept { this->ptr_ -= _n_ ; return *this ; }
+
+        friend constexpr bool operator== ( prefix_array_iterator const & _lhs_, prefix_array_iterator const & _rhs_ ) noexcept
+        {
+                return _lhs_.ptr_ == _rhs_.ptr_ ;
+        }
+        friend constexpr bool operator!= ( prefix_array_iterator const & _lhs_, prefix_array_iterator const & _rhs_ ) noexcept
+        {
+                return _lhs_.ptr_ != _rhs_.ptr_ ;
+        }
+        friend constexpr void swap ( prefix_array_iterator & _lhs_, prefix_array_iterator & _rhs_ ) noexcept
+        {
+                auto _tmp_ = _lhs_.ptr_ ;
+                _lhs_.ptr_ = _rhs_.ptr_ ;
+                _rhs_.ptr_ = _tmp_ ;
+        }
+
+        friend constexpr bool operator< ( prefix_array_iterator const & _lhs_, prefix_array_iterator const & _rhs_ ) noexcept
+        {
+                return _lhs_.ptr_ < _rhs_.ptr_ ;
+        }
+        friend constexpr bool operator> ( prefix_array_iterator const & _lhs_, prefix_array_iterator const & _rhs_ ) noexcept
+        {
+                return _lhs_.ptr_ > _rhs_.ptr_ ;
+        }
+        friend constexpr bool operator<= ( prefix_array_iterator const & _lhs_, prefix_array_iterator const & _rhs_ ) noexcept
+        {
+                return _lhs_.ptr_ <= _rhs_.ptr_ ;
+        }
+        friend constexpr bool operator>= ( prefix_array_iterator const & _lhs_, prefix_array_iterator const & _rhs_ ) noexcept
+        {
+                return _lhs_.ptr_ >= _rhs_.ptr_ ;
+        }
+
+        friend constexpr prefix_array_iterator operator+ ( prefix_array_iterator const & _iter_, difference_type const _diff_ ) noexcept
+        {
+                return prefix_array_iterator{ _iter_.ptr_ + _diff_ } ;
+        }
+        friend constexpr prefix_array_iterator operator+ ( difference_type const _diff_, prefix_array_iterator const & _iter_ ) noexcept
+        {
+                return prefix_array_iterator{ _iter_.ptr_ + _diff_ } ;
+        }
+
+        friend constexpr prefix_array_iterator operator- ( prefix_array_iterator const & _iter_, difference_type const _diff_ ) noexcept
+        {
+                return prefix_array_iterator{ _iter_.ptr_ - _diff_ } ;
+        }
+        friend constexpr difference_type operator- ( prefix_array_iterator const & _lhs_, prefix_array_iterator const & _rhs_ ) noexcept
+        {
+                return _lhs_.ptr_ - _rhs_.ptr_ ;
+        }
+
+        constexpr reference operator[] ( difference_type const _idx_ ) const noexcept
+        {
+                return this->ptr_[ _idx_ ] ;
+        }
+private:
+        pointer ptr_ ;
+} ;
 
 
 template< typename T, typename Alloc >
@@ -168,22 +275,28 @@ prefix_array< T, Alloc >::prefix_array ( ssize_type const _capacity_, value_type
         }
 }
 
-/*
 template< typename T, typename Alloc >
-template< meta::random_access_iterator Iter >
+template< meta::forward_iterator Iter >
 constexpr
 prefix_array< T, Alloc >::prefix_array ( Iter _begin_, Iter const & _end_ )
-        : _base( _end_ - _begin_ )
+        : _base( ::uti::distance( _begin_, _end_ ) )
 {
-        value_type last {} ;
+        value_type last = *_begin_ ;
 
         while( _begin_ != _end_ )
         {
-                last += *_begin_++ ;
                 _base::_emplace( last ) ;
+                ++_begin_ ;
+                last += *_begin_ ;
         }
 }
-*/
+
+template< typename T, typename Alloc >
+template< meta::prefix_array_iterator Iter >
+constexpr
+prefix_array< T, Alloc >::prefix_array ( Iter _begin_, Iter const & _end_ )
+        : _base( _random_access_iterator< value_type >( _begin_ ),
+                 _random_access_iterator< value_type >(   _end_ ) ) {}
 
 template< typename T, typename Alloc >
 constexpr

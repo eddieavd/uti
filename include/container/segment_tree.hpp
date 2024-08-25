@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "iterator/meta.hpp"
 #include <util/assert.hpp>
 #include <algo/mem.hpp>
 #include <meta/concepts.hpp>
@@ -66,6 +67,12 @@ public:
         constexpr explicit segment_tree ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
         constexpr segment_tree ( ssize_type const _count_, value_type const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        template< meta::forward_iterator Iter >
+        constexpr segment_tree ( Iter _begin_, Iter const & _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        template< meta::prefix_array_iterator Iter >
+        constexpr segment_tree ( Iter _begin_, Iter const & _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
         constexpr segment_tree             ( segment_tree const &  _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
         constexpr segment_tree             ( segment_tree       && _other_ )     noexcept                 ;
@@ -186,6 +193,49 @@ segment_tree< T, Compare, Alloc >::segment_tree ( ssize_type const _count_, valu
         {
                 emplace_back( _val_ ) ;
         }
+}
+
+template< typename T, auto Compare, typename Alloc >
+template< meta::forward_iterator Iter >
+constexpr
+segment_tree< T, Compare, Alloc >::segment_tree ( Iter _begin_, Iter const & _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+        : _buff_base( 2 * _ceil_pow2( ::uti::distance( _begin_, _end_ ) ) ) ,
+          _view_base( _buff_base::begin() + capacity() ,
+                      _buff_base::begin() + capacity() )
+{
+        _init_tree() ;
+
+        auto const real_size = ::uti::distance( _begin_, _end_ ) ;
+
+        while( _begin_ != _end_ )
+        {
+                _emplace( *_begin_ ) ;
+                ++_begin_ ;
+        }
+        _view_base::_size() = real_size ;
+}
+
+template< typename T, auto Compare, typename Alloc >
+template< meta::prefix_array_iterator Iter >
+constexpr
+segment_tree< T, Compare, Alloc >::segment_tree ( Iter _begin_, Iter const & _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+        : _buff_base( 2 * _ceil_pow2( ::uti::distance( _begin_, _end_ ) ) ) ,
+          _view_base( _buff_base::begin() + capacity() ,
+                      _buff_base::begin() + capacity() )
+{
+        _init_tree() ;
+
+        auto const real_size = ::uti::distance( _begin_, _end_ ) ;
+
+        value_type last = 0 ;
+
+        while( _begin_ != _end_ )
+        {
+                _emplace( *_begin_ - last ) ;
+                last = *_begin_ ;
+                ++_begin_ ;
+        }
+        _view_base::_size() = real_size ;
 }
 
 template< typename T, auto Compare, typename Alloc >

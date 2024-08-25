@@ -37,6 +37,7 @@ void copy ( Iter begin, Iter const & end, DestIter dest )
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
+                [[ maybe_unused ]]
                 ssize_t const n = ::uti::distance( begin, end ) ;
 #if UTI_HAS_BUILTIN( __builtin_memcpy )
                 __builtin_memcpy( dest, begin, n * sizeof( value_type ) ) ;
@@ -71,11 +72,12 @@ void copy_backward ( Iter begin, Iter const & end, DestIter dest )
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
+                [[ maybe_unused ]]
                 ssize_t const n = ::uti::distance( end, begin ) ;
 #if UTI_HAS_BUILTIN( __builtin_memmove )
-                __builtin_memmove( dest - n, end, n * sizeof( value_type ) ) ;
+                __builtin_memmove( dest - n + 1, end, n * sizeof( value_type ) ) ;
 #elif defined( UTI_HAS_STL )
-                std::memmove( dest - n, end, n * sizeof( value_type ) ) ;
+                std::memmove( dest - n + 1, end, n * sizeof( value_type ) ) ;
 #else
                 _copy_back_impl( begin, end, dest ) ;
 #endif

@@ -145,6 +145,8 @@ struct bidirectional_iterator_tag : public       forward_iterator_tag {} ;
 struct random_access_iterator_tag : public bidirectional_iterator_tag {} ;
 struct    contiguous_iterator_tag : public random_access_iterator_tag {} ;
 
+struct prefix_array_iterator_tag : public random_access_iterator_tag {} ;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename Iter >
@@ -288,9 +290,9 @@ concept cpp17_random_access_iterator =
         { iter +=    n } -> meta::same_as< Iter & > ;
         { iter -=    n } -> meta::same_as< Iter & > ;
         { iter +     n } -> meta::same_as< Iter   > ;
-        { iter -     n } -> meta::same_as< Iter   > ;
         {    n +  iter } -> meta::same_as< Iter   > ;
-        {    n -  iter } -> meta::same_as< Iter   > ;
+        { iter -     n } -> meta::same_as< Iter   > ;
+        { iter -  iter } -> meta::same_as< decltype( n ) > ;
         { iter[ n ]    } -> meta::convertible_to< iter_reference_t< Iter > > ;
 } ;
 
@@ -304,6 +306,11 @@ template< typename Iter > concept         input_iterator = cpp17_input_iterator 
 template< typename Iter > concept       forward_iterator = cpp17_forward_iterator      < Iter > ;
 template< typename Iter > concept bidirectional_iterator = cpp17_bidirectional_iterator< Iter > ;
 template< typename Iter > concept random_access_iterator = cpp17_random_access_iterator< Iter > ;
+
+template< typename Iter >
+concept prefix_array_iterator =
+        random_access_iterator< Iter > &&
+        same_as< typename iterator_traits< Iter >::iterator_category, prefix_array_iterator_tag > ;
 
 
 } // namespace meta

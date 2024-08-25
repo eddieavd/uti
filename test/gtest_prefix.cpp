@@ -52,6 +52,43 @@ TEST( PrefixTest, FillConstruct )
         }
 }
 
+TEST( PrefixTest, IteratorConstruct )
+{
+        {
+                int arr[] = { 0, 1, 2, 3 } ;
+
+                int * begin = arr ;
+                int *   end = arr + ( sizeof( arr ) / sizeof( int ) ) ;
+
+                uti::prefix_array< int > prefix( begin, end ) ;
+
+                for( ssize_t i = 0; i < 4; ++i )
+                {
+                        EXPECT_EQ( prefix.element_at( i ), i ) ;
+                }
+        }
+        {
+                uti::vector< int > vec( 4, 1 ) ;
+
+                uti::prefix_array< int > prefix( vec.begin(), vec.end() ) ;
+
+                for( ssize_t i = 0; i < vec.size(); ++i )
+                {
+                        EXPECT_EQ( vec.at( i ), prefix.element_at( i ) ) ;
+                }
+        }
+        {
+                uti::prefix_array< int > prefix( 4, 1 ) ;
+
+                uti::prefix_array< int > prefix2( prefix.begin(), prefix.end() ) ;
+
+                for( ssize_t i = 0; i < prefix.size(); ++i )
+                {
+                        EXPECT_EQ( prefix.at( i ), prefix2.at( i ) ) ;
+                }
+        }
+}
+
 TEST( PrefixTest, CopyConstruct )
 {
         uti::prefix_array<         int > prefixint( CUSTOM_CAP, CUSTOM_VAL ) ;

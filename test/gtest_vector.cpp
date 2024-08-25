@@ -53,6 +53,43 @@ TEST( VectorTest, FillConstruct )
         }
 }
 
+TEST( VectorTest, IteratorConstruct )
+{
+        {
+                int arr[] = { 0, 1, 2, 3 } ;
+
+                int * begin = arr ;
+                int *   end = arr + ( sizeof( arr ) / sizeof( int ) ) ;
+
+                uti::vector< int > vec( begin, end ) ;
+
+                for( ssize_t i = 0; i < 4; ++i )
+                {
+                        EXPECT_EQ( vec.at( i ), i ) ;
+                }
+        }
+        {
+                uti::vector< int > vec( 4, 1 ) ;
+
+                uti::vector< int > vec2( vec.begin(), vec.end() ) ;
+
+                for( ssize_t i = 0; i < vec.size(); ++i )
+                {
+                        EXPECT_EQ( vec.at( i ), vec2.at( i ) ) ;
+                }
+        }
+        {
+                uti::prefix_array< int > prefix( 4, 1 ) ;
+
+                uti::vector< int > vec( prefix.begin(), prefix.end() ) ;
+
+                for( ssize_t i = 0; i < prefix.size(); ++i )
+                {
+                        EXPECT_EQ( vec.at( i ), prefix.element_at( i ) ) ;
+                }
+        }
+}
+
 TEST( VectorTest, CopyConstruct )
 {
         uti::vector<         int > vecint( CUSTOM_CAP, CUSTOM_VAL ) ;
