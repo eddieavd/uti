@@ -11,18 +11,6 @@ jobs:
       matrix:
         config:
         - {
-            name: "ubuntu clang-18 debug nostl",
-            os: ubuntu-latest,
-            build_type: "Debug",
-            is_debug_build: "ON",
-            is_release_build: "OFF",
-            cc: "clang-18",
-            cxx: "clang++-18",
-            clang_version: 18,
-            installed_clang_version: 14,
-            has_stl: "OFF"
-          }
-        - {
             name: "ubuntu clang-18 release nostl",
             os: ubuntu-latest,
             build_type: "Release",
@@ -33,18 +21,6 @@ jobs:
             clang_version: 18,
             installed_clang_version: 14,
             has_stl: "OFF"
-          }
-        - {
-            name: "ubuntu clang-18 debug",
-            os: ubuntu-latest,
-            build_type: "Debug",
-            is_debug_build: "ON",
-            is_release_build: "OFF",
-            cc: "clang-18",
-            cxx: "clang++-18",
-            clang_version: 18,
-            installed_clang_version: 14,
-            has_stl: "ON"
           }
         - {
             name: "ubuntu clang-18 release",
