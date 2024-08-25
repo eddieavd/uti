@@ -21,7 +21,7 @@ T * addressof ( T const & t ) noexcept ;
 
 
 template< typename T >
-class reference_wrapper // : public _weak_result_type< T >
+class reference_wrapper
 {
 public:
         using type = T ;
@@ -42,18 +42,12 @@ public:
         constexpr operator type& () const noexcept { return *f_; }
 
         /// invoke
-#ifdef UTI_HAS_STL
-        template< typename... Args >
-#ifdef UTI_USE_LIBCXX
-        constexpr typename std::__invoke_of< type&, Args... >::type
-#elif defined( UTI_USE_LIBSTDCXX )
-        constexpr typename std::__invoke_result< T&, Args... >::type
-#endif
-        operator() ( Args&&... _args_ ) const
-        {
-                return std::invoke( std::get, UTI_FWD( _args_ )... );
-        }
-#endif
+//      template< typename... Args >
+//      constexpr invoke_result_t< T &, Args... >
+//      operator() ( Args&&... _args_ ) const
+//      {
+//              return invoke( ::uti::get, UTI_FWD( _args_ )... ) ;
+//      }
 };
 
 
