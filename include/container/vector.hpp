@@ -41,8 +41,8 @@ public:
         using       reference = typename      _base::      reference ;
         using const_reference = typename      _base::const_reference ;
 
-        using       iterator = _random_access_iterator< T       > ;
-        using const_iterator = _random_access_iterator< T const > ;
+        using       iterator = iterator_base< T      , random_access_iterator_tag > ;
+        using const_iterator = iterator_base< T const, random_access_iterator_tag > ;
 
         constexpr          vector (                             ) noexcept = default ;
         constexpr explicit vector ( ssize_type const _capacity_ )                    ;

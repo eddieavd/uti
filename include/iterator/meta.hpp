@@ -517,13 +517,25 @@ template< typename T >
 using _has_input_iterator_category = _has_iterator_category_convertible_to< T, input_iterator_tag > ;
 
 template< typename T >
+static constexpr bool _has_input_iterator_category_v = _has_input_iterator_category< T >::value ;
+
+template< typename T >
 using _has_forward_iterator_category = _has_iterator_category_convertible_to< T, forward_iterator_tag > ;
+
+template< typename T >
+static constexpr bool _has_forward_iterator_category_v = _has_forward_iterator_category< T >::value ;
 
 template< typename T >
 using _has_bidirectional_iterator_category = _has_iterator_category_convertible_to< T, bidirectional_iterator_tag > ;
 
 template< typename T >
+static constexpr bool _has_bidirectional_iterator_category_v = _has_bidirectional_iterator_category< T >::value ;
+
+template< typename T >
 using _has_random_access_iterator_category = _has_iterator_category_convertible_to< T, random_access_iterator_tag > ;
+
+template< typename T >
+static constexpr bool _has_random_access_iterator_category_v = _has_random_access_iterator_category< T >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 

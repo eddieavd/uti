@@ -62,8 +62,8 @@ public:
         using       reference = value_type       & ;
         using const_reference = value_type const & ;
 
-        using       iterator = _random_access_iterator< value_type       > ;
-        using const_iterator = _random_access_iterator< value_type const > ;
+        using       iterator = iterator_base< value_type      , random_access_iterator_tag > ;
+        using const_iterator = iterator_base< value_type const, random_access_iterator_tag > ;
 
         constexpr _string_storage (                             ) noexcept ;
         constexpr _string_storage ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;

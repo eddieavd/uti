@@ -13,288 +13,107 @@ namespace uti
 {
 
 
-template< typename T >
-struct _iterator
+template< typename T, typename IterCat >
+struct iterator_base
 {
+        using _self = iterator_base ;
+public:
         using      value_type = T   ;
         using         pointer = T * ;
         using       reference = T & ;
         using difference_type = ptrdiff_t ;
 
-        constexpr _iterator ( pointer const & _ptr_ ) noexcept : ptr_( _ptr_ ) {}
+        using iterator_category = IterCat ;
+
+        constexpr iterator_base (                       ) noexcept : ptr_( nullptr ) {}
+        constexpr iterator_base ( pointer const & _ptr_ ) noexcept : ptr_(   _ptr_ ) {}
+
+        template< typename IterCat1 >
+                requires is_base_of_v< IterCat1, IterCat >
+        constexpr iterator_base ( iterator_base< T, IterCat1 > const & _iter_ ) noexcept : ptr_( _iter_.ptr_ ) {}
 
         constexpr operator pointer ()       noexcept { return ptr_ ; }
         constexpr operator pointer () const noexcept { return ptr_ ; }
 
-        constexpr _iterator & operator++ () noexcept { ++ptr_ ; return *this ; }
+        constexpr iterator_base & operator++ (     ) noexcept requires   _has_input_iterator_category_v< _self > { ++ptr_ ; return *this ; }
+        constexpr iterator_base   operator++ ( int ) noexcept requires _has_forward_iterator_category_v< _self > { auto prev = *this ; ++ptr_ ; return prev ; }
 
-        constexpr reference operator* () const noexcept { return *ptr_ ; }
+        constexpr iterator_base & operator-- (     ) noexcept requires _has_bidirectional_iterator_category_v< _self > { --ptr_ ; return *this ; }
+        constexpr iterator_base   operator-- ( int ) noexcept requires _has_bidirectional_iterator_category_v< _self > { auto prev = *this ; --ptr_ ; return prev ; }
 
-        friend constexpr void swap ( _iterator & _lhs_, _iterator & _rhs_ ) noexcept
-        {
-                auto _tmp_ = _lhs_.ptr_ ;
-                _lhs_.ptr_ = _rhs_.ptr_ ;
-                _rhs_.ptr_ = _tmp_ ;
-        }
-private:
-        pointer ptr_ ;
-} ;
+        constexpr iterator_base & operator+= ( difference_type const _n_ ) noexcept requires _has_random_access_iterator_category_v< _self > { this->ptr_ += _n_ ; return *this ; }
+        constexpr iterator_base & operator-= ( difference_type const _n_ ) noexcept requires _has_random_access_iterator_category_v< _self > { this->ptr_ -= _n_ ; return *this ; }
 
-template< typename T >
-struct _input_iterator
-{
-        using _base = _iterator< T > ;
+        constexpr reference operator*  () noexcept requires _has_input_iterator_category_v< _self > { return *ptr_ ; }
+        constexpr pointer   operator-> () noexcept requires _has_input_iterator_category_v< _self > { return  ptr_ ; }
 
-        using      value_type = typename _base::     value_type ;
-        using         pointer = typename _base::        pointer ;
-        using       reference = typename _base::      reference ;
-        using difference_type = typename _base::difference_type ;
-
-        using iterator_category = input_iterator_tag ;
-
-        constexpr _input_iterator ( pointer const & _ptr_ ) noexcept : ptr_( _ptr_ ) {}
-
-        constexpr operator pointer ()       noexcept { return ptr_ ; }
-        constexpr operator pointer () const noexcept { return ptr_ ; }
-
-        constexpr value_type operator* () noexcept { return *ptr_ ; }
-
-        constexpr _input_iterator & operator++ () noexcept { ++ptr_ ; return *this ; }
-
-        constexpr _input_iterator operator++ ( int ) noexcept { auto prev = *this ; ++this->ptr_ ; return prev ; }
-
-        constexpr pointer operator-> () const noexcept { return  this->ptr_ ; }
-
-        friend constexpr bool operator== ( _input_iterator const & _lhs_, _input_iterator const & _rhs_ ) noexcept
+        friend constexpr bool operator== ( iterator_base const & _lhs_, iterator_base const & _rhs_ ) noexcept
+                requires _has_input_iterator_category_v< _self >
         {
                 return _lhs_.ptr_ == _rhs_.ptr_ ;
         }
-        friend constexpr bool operator!= ( _input_iterator const & _lhs_, _input_iterator const & _rhs_ ) noexcept
+        friend constexpr bool operator!= ( iterator_base const & _lhs_, iterator_base const & _rhs_ ) noexcept
+                requires _has_input_iterator_category_v< _self >
         {
                 return _lhs_.ptr_ != _rhs_.ptr_ ;
         }
-        friend constexpr void swap ( _input_iterator & _lhs_, _input_iterator & _rhs_ ) noexcept
-        {
-                auto _tmp_ = _lhs_.ptr_ ;
-                _lhs_.ptr_ = _rhs_.ptr_ ;
-                _rhs_.ptr_ = _tmp_ ;
-        }
-private:
-        pointer ptr_ ;
-} ;
-
-template< typename T >
-struct _output_iterator
-{
-        using _base = _iterator< T > ;
-
-        using      value_type = typename _base::     value_type ;
-        using         pointer = typename _base::        pointer ;
-        using       reference = typename _base::      reference ;
-        using difference_type = typename _base::difference_type ;
-
-        using iterator_category = output_iterator_tag ;
-
-        constexpr _output_iterator ( pointer const & _ptr_ ) noexcept : ptr_( _ptr_ ) {}
-
-        constexpr operator pointer ()       noexcept { return ptr_ ; }
-        constexpr operator pointer () const noexcept { return ptr_ ; }
-
-        constexpr reference operator* () noexcept { return *ptr_ ; }
-
-        constexpr _output_iterator & operator++ () noexcept { ++ptr_ ; return *this ; }
-
-        constexpr _output_iterator operator++ ( int ) noexcept { auto prev = *this ; ++this->ptr_ ; return prev ; }
-
-        friend constexpr bool operator== ( _output_iterator const & _lhs_, _output_iterator const & _rhs_ ) noexcept
-        {
-                return _lhs_.ptr_ == _rhs_.ptr_ ;
-        }
-        friend constexpr bool operator!= ( _output_iterator const & _lhs_, _output_iterator const & _rhs_ ) noexcept
-        {
-                return _lhs_.ptr_ != _rhs_.ptr_ ;
-        }
-        friend constexpr void swap ( _output_iterator & _lhs_, _output_iterator & _rhs_ ) noexcept
-        {
-                auto _tmp_ = _lhs_.ptr_ ;
-                _lhs_.ptr_ = _rhs_.ptr_ ;
-                _rhs_.ptr_ = _tmp_ ;
-        }
-private:
-        pointer ptr_ ;
-} ;
-
-template< typename T >
-struct _forward_iterator
-{
-        using _base = _input_iterator< T > ;
-
-        using      value_type = typename _base::     value_type ;
-        using         pointer = typename _base::        pointer ;
-        using       reference = typename _base::      reference ;
-        using difference_type = typename _base::difference_type ;
-
-        using iterator_category = forward_iterator_tag ;
-
-        constexpr _forward_iterator (                       ) noexcept : ptr_( nullptr ) {}
-        constexpr _forward_iterator ( pointer const & _ptr_ ) noexcept : ptr_(   _ptr_ ) {}
-
-        constexpr operator pointer ()       noexcept { return ptr_ ; }
-        constexpr operator pointer () const noexcept { return ptr_ ; }
-
-        constexpr reference operator* () noexcept { return *ptr_ ; }
-
-        constexpr _forward_iterator & operator++ () noexcept { ++ptr_ ; return *this ; }
-
-        constexpr _forward_iterator operator++ ( int ) noexcept { auto prev = *this ; ++ptr_ ; return prev ; }
-
-        friend constexpr bool operator== ( _forward_iterator const & _lhs_, _forward_iterator const & _rhs_ ) noexcept
-        {
-                return _lhs_.ptr_ == _rhs_.ptr_ ;
-        }
-        friend constexpr bool operator!= ( _forward_iterator const & _lhs_, _forward_iterator const & _rhs_ ) noexcept
-        {
-                return _lhs_.ptr_ != _rhs_.ptr_ ;
-        }
-        friend constexpr void swap ( _forward_iterator & _lhs_, _forward_iterator & _rhs_ ) noexcept
-        {
-                auto _tmp_ = _lhs_.ptr_ ;
-                _lhs_.ptr_ = _rhs_.ptr_ ;
-                _rhs_.ptr_ = _tmp_ ;
-        }
-private:
-        pointer ptr_ ;
-} ;
-
-template< typename T >
-struct _bidirectional_iterator
-{
-        using _base = _forward_iterator< T > ;
-
-        using      value_type = typename _base::     value_type ;
-        using         pointer = typename _base::        pointer ;
-        using       reference = typename _base::      reference ;
-        using difference_type = typename _base::difference_type ;
-
-        using iterator_category = bidirectional_iterator_tag ;
-
-        constexpr _bidirectional_iterator (                       ) noexcept : ptr_( nullptr ) {}
-        constexpr _bidirectional_iterator ( pointer const & _ptr_ ) noexcept : ptr_(   _ptr_ ) {}
-
-        constexpr operator pointer ()       noexcept { return ptr_ ; }
-        constexpr operator pointer () const noexcept { return ptr_ ; }
-
-        constexpr reference operator* () noexcept { return *ptr_ ; }
-
-        constexpr _bidirectional_iterator & operator++ () noexcept { ++ptr_ ; return *this ; }
-
-        constexpr _bidirectional_iterator operator++ ( int ) noexcept { auto prev = *this ; ++ptr_ ; return prev ; }
-
-        constexpr _bidirectional_iterator & operator-- (     ) noexcept { --this->ptr_ ; return *this ; }
-        constexpr _bidirectional_iterator   operator-- ( int ) noexcept { auto prev = *this ; --this->ptr_ ; return prev ; }
-
-        friend constexpr bool operator== ( _bidirectional_iterator const & _lhs_, _bidirectional_iterator const & _rhs_ ) noexcept
-        {
-                return _lhs_.ptr_ == _rhs_.ptr_ ;
-        }
-        friend constexpr bool operator!= ( _bidirectional_iterator const & _lhs_, _bidirectional_iterator const & _rhs_ ) noexcept
-        {
-                return _lhs_.ptr_ != _rhs_.ptr_ ;
-        }
-        friend constexpr void swap ( _bidirectional_iterator & _lhs_, _bidirectional_iterator & _rhs_ ) noexcept
-        {
-                auto _tmp_ = _lhs_.ptr_ ;
-                _lhs_.ptr_ = _rhs_.ptr_ ;
-                _rhs_.ptr_ = _tmp_ ;
-        }
-private:
-        pointer ptr_ ;
-} ;
-
-template< typename T >
-struct _random_access_iterator
-{
-        using _base = _bidirectional_iterator< T > ;
-
-        using      value_type = typename _base::     value_type ;
-        using         pointer = typename _base::        pointer ;
-        using       reference = typename _base::      reference ;
-        using difference_type = typename _base::difference_type ;
-
-        using iterator_category = random_access_iterator_tag ;
-
-        constexpr _random_access_iterator (                       ) noexcept : ptr_( nullptr ) {}
-        constexpr _random_access_iterator ( pointer const & _ptr_ ) noexcept : ptr_(   _ptr_ ) {}
-
-        constexpr operator pointer ()       noexcept { return ptr_ ; }
-        constexpr operator pointer () const noexcept { return ptr_ ; }
-
-        constexpr reference operator* () noexcept { return *ptr_ ; }
-
-        constexpr _random_access_iterator & operator++ () noexcept { ++ptr_ ; return *this ; }
-        constexpr _random_access_iterator & operator-- () noexcept { --ptr_ ; return *this ; }
-
-        constexpr _random_access_iterator operator++ ( int ) noexcept { auto prev = *this ; ++ptr_ ; return prev ; }
-        constexpr _random_access_iterator operator-- ( int ) noexcept { auto prev = *this ; --ptr_ ; return prev ; }
-
-        friend constexpr bool operator== ( _random_access_iterator const & _lhs_, _random_access_iterator const & _rhs_ ) noexcept
-        {
-                return _lhs_.ptr_ == _rhs_.ptr_ ;
-        }
-        friend constexpr bool operator!= ( _random_access_iterator const & _lhs_, _random_access_iterator const & _rhs_ ) noexcept
-        {
-                return _lhs_.ptr_ != _rhs_.ptr_ ;
-        }
-        friend constexpr void swap ( _random_access_iterator & _lhs_, _random_access_iterator & _rhs_ ) noexcept
+        friend constexpr void swap ( iterator_base & _lhs_, iterator_base & _rhs_ ) noexcept
+                requires _has_input_iterator_category_v< _self >
         {
                 auto _tmp_ = _lhs_.ptr_ ;
                 _lhs_.ptr_ = _rhs_.ptr_ ;
                 _rhs_.ptr_ = _tmp_ ;
         }
 
-        friend constexpr bool operator< ( _random_access_iterator const & _lhs_, _random_access_iterator const & _rhs_ ) noexcept
+        friend constexpr bool operator< ( iterator_base const & _lhs_, iterator_base const & _rhs_ ) noexcept
+                requires _has_random_access_iterator_category_v< _self >
         {
                 return _lhs_.ptr_ < _rhs_.ptr_ ;
         }
-        friend constexpr bool operator> ( _random_access_iterator const & _lhs_, _random_access_iterator const & _rhs_ ) noexcept
+        friend constexpr bool operator> ( iterator_base const & _lhs_, iterator_base const & _rhs_ ) noexcept
+                requires _has_random_access_iterator_category_v< _self >
         {
                 return _lhs_.ptr_ > _rhs_.ptr_ ;
         }
-        friend constexpr bool operator<= ( _random_access_iterator const & _lhs_, _random_access_iterator const & _rhs_ ) noexcept
+        friend constexpr bool operator<= ( iterator_base const & _lhs_, iterator_base const & _rhs_ ) noexcept
+                requires _has_random_access_iterator_category_v< _self >
         {
                 return _lhs_.ptr_ <= _rhs_.ptr_ ;
         }
-        friend constexpr bool operator>= ( _random_access_iterator const & _lhs_, _random_access_iterator const & _rhs_ ) noexcept
+        friend constexpr bool operator>= ( iterator_base const & _lhs_, iterator_base const & _rhs_ ) noexcept
+                requires _has_random_access_iterator_category_v< _self >
         {
                 return _lhs_.ptr_ >= _rhs_.ptr_ ;
         }
 
-        constexpr _random_access_iterator & operator+= ( difference_type const _n_ ) noexcept { this->ptr_ += _n_ ; return *this ; }
-        constexpr _random_access_iterator & operator-= ( difference_type const _n_ ) noexcept { this->ptr_ -= _n_ ; return *this ; }
+        friend constexpr iterator_base operator+ ( iterator_base const & _iter_, difference_type const _diff_ ) noexcept
+                requires _has_random_access_iterator_category_v< _self >
+        {
+                return iterator_base{ _iter_.ptr_ + _diff_ } ;
+        }
+        friend constexpr iterator_base operator+ ( difference_type const _diff_, iterator_base const & _iter_ ) noexcept
+                requires _has_random_access_iterator_category_v< _self >
+        {
+                return iterator_base{ _iter_.ptr_ + _diff_ } ;
+        }
 
-        friend constexpr _random_access_iterator operator+ ( _random_access_iterator const & _iter_, difference_type const _diff_ ) noexcept
+        friend constexpr iterator_base operator- ( iterator_base const & _iter_, difference_type const _diff_ ) noexcept
+                requires _has_random_access_iterator_category_v< _self >
         {
-                return _random_access_iterator{ _iter_.ptr_ + _diff_ } ;
+                return iterator_base{ _iter_.ptr_ - _diff_ } ;
         }
-        friend constexpr _random_access_iterator operator+ ( difference_type const _diff_, _random_access_iterator const & _iter_ ) noexcept
-        {
-                return _random_access_iterator{ _iter_.ptr_ + _diff_ } ;
-        }
-
-        friend constexpr _random_access_iterator operator- ( _random_access_iterator const & _iter_, difference_type const _diff_ ) noexcept
-        {
-                return _random_access_iterator{ _iter_.ptr_ - _diff_ } ;
-        }
-        friend constexpr difference_type operator- ( _random_access_iterator const & _lhs_, _random_access_iterator const & _rhs_ ) noexcept
+        friend constexpr difference_type operator- ( iterator_base const & _lhs_, iterator_base const & _rhs_ ) noexcept
+                requires _has_random_access_iterator_category_v< _self >
         {
                 return _lhs_.ptr_ - _rhs_.ptr_ ;
         }
 
         constexpr reference operator[] ( difference_type const _idx_ ) const noexcept
+                requires _has_random_access_iterator_category_v< _self >
         {
                 return this->ptr_[ _idx_ ] ;
         }
-private:
+
         pointer ptr_ ;
 } ;
 
