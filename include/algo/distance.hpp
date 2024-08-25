@@ -7,32 +7,13 @@
 #pragma once
 
 #include <type/traits.hpp>
-#include <iterator/iterator.hpp>
+#include <iterator/meta.hpp>
 
 
 namespace uti
 {
 
 
-template< typename Iter >
-constexpr ssize_t distance ( Iter begin, Iter end ) noexcept
-{
-        if constexpr( true )
-        {
-                return end - begin ;
-        }
-        else if constexpr( false )
-        {
-
-        }
-        else
-        {
-
-        }
-}
-
-
-/*
 template< typename Iter >
 constexpr typename iterator_traits< Iter >::difference_type _distance ( Iter _begin_, Iter _end_, input_iterator_tag ) noexcept
 {
@@ -58,7 +39,6 @@ distance ( Iter _begin_, Iter _end_ ) noexcept
 {
         return ::uti::_distance( _begin_, _end_, typename iterator_traits< Iter >::iterator_category{} ) ;
 }
-*/
 
 
 } // namespace uti

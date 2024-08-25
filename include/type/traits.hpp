@@ -1494,6 +1494,27 @@ template< typename T > inline constexpr bool is_swappable_v         = is_swappab
 template< typename T > inline constexpr bool is_nothrow_swappable_v = is_nothrow_swappable< T >::value ;
 
 
+////////////////////////////////////////////////////////////////////////////////
+///     is_primary_template
+////////////////////////////////////////////////////////////////////////////////
+
+template< template< typename... > typename Templ, typename... Args, typename = Templ< Args... > >
+true_type _sfinae_test_impl ( i32_t ) ;
+
+template< template< typename... > typename, typename... >
+false_type _sfinae_test_impl ( ... ) ;
+
+template< template< typename... > typename Templ, typename... Args >
+using _is_valid_expansion = decltype( ::uti::_sfinae_test_impl< Templ, Args... >( 0 ) ) ;
+
+
+template< typename T >
+using _test_for_primary_template = enable_if_t< is_same_v< T, typename T::_primary_template > > ;
+
+template< typename T >
+using _is_primary_template = _is_valid_expansion< _test_for_primary_template, T > ;
+
+
 } // namespace uti
 
 #endif // UTI_DOXYGEN_SKIP
