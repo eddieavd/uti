@@ -444,26 +444,31 @@ TEST( VectorTest, Shrink )
 
 TEST( VectorTest, Insert )
 {
-        uti::vector<         int > vecint( CUSTOM_CAP,    CUSTOM_VAL ) ;
+        uti::vector<         int > vecint( CUSTOM_CAP,            0  ) ;
         uti::vector< std::string > vecstr( CUSTOM_CAP, "insert_test" ) ;
+
+        for( ssize_t i = 0; i < vecint.size(); ++i )
+        {
+                vecint.at( i ) = i ;
+        }
 
         EXPECT_EQ( vecint.size(), CUSTOM_CAP ) ;
         EXPECT_EQ( vecstr.size(), CUSTOM_CAP ) ;
 
-        vecint.insert( 0, CUSTOM_VAL * 2 ) ;
-        vecstr.insert( 0,    "inserted"  ) ;
+        vecint.insert( 0,         0  ) ;
+        vecstr.insert( 0, "inserted" ) ;
 
         EXPECT_EQ( vecint.size(), CUSTOM_CAP + 1 ) ;
         EXPECT_EQ( vecstr.size(), CUSTOM_CAP + 1 ) ;
 
-        vecint.insert( CUSTOM_CAP / 2, CUSTOM_VAL * 2 ) ;
-        vecstr.insert( CUSTOM_CAP / 2,     "inserted" ) ;
+        vecint.insert( CUSTOM_CAP / 2,         0  ) ;
+        vecstr.insert( CUSTOM_CAP / 2, "inserted" ) ;
 
         EXPECT_EQ( vecint.size(), CUSTOM_CAP + 2 ) ;
         EXPECT_EQ( vecstr.size(), CUSTOM_CAP + 2 ) ;
 
-        vecint.insert( vecint.size(), CUSTOM_VAL * 2 ) ;
-        vecstr.insert( vecstr.size(),     "inserted" ) ;
+        vecint.insert( vecint.size(),         0  ) ;
+        vecstr.insert( vecstr.size(), "inserted" ) ;
 
         EXPECT_EQ( vecint.size(), CUSTOM_CAP + 3 ) ;
         EXPECT_EQ( vecstr.size(), CUSTOM_CAP + 3 ) ;
@@ -472,12 +477,17 @@ TEST( VectorTest, Insert )
         {
                 if( i == 0 || i == CUSTOM_CAP / 2 || i == vecint.size() - 1 )
                 {
-                        EXPECT_EQ( vecint.at( i ), CUSTOM_VAL * 2 ) ;
-                        EXPECT_EQ( vecstr.at( i ),     "inserted" ) ;
+                        EXPECT_EQ( vecint.at( i ),         0  ) ;
+                        EXPECT_EQ( vecstr.at( i ), "inserted" ) ;
+                }
+                else if( i < CUSTOM_CAP / 2 )
+                {
+                        EXPECT_EQ( vecint.at( i ),        i - 1  ) ;
+                        EXPECT_EQ( vecstr.at( i ), "insert_test" ) ;
                 }
                 else
                 {
-                        EXPECT_EQ( vecint.at( i ),    CUSTOM_VAL ) ;
+                        EXPECT_EQ( vecint.at( i ),        i - 2  ) ;
                         EXPECT_EQ( vecstr.at( i ), "insert_test" ) ;
                 }
         }

@@ -20,7 +20,7 @@ namespace uti
 
 
 template< meta::forward_iterator Iter, meta::forward_iterator DestIter >
-void _copy_impl ( Iter begin, Iter end, DestIter dest )
+constexpr void _copy_impl ( Iter begin, Iter end, DestIter dest )
 {
         while( begin != end )
         {
@@ -31,7 +31,7 @@ void _copy_impl ( Iter begin, Iter end, DestIter dest )
 }
 
 template< meta::forward_iterator Iter, meta::forward_iterator DestIter >
-void copy ( Iter begin, Iter const & end, DestIter dest )
+constexpr void copy ( Iter begin, Iter const & end, DestIter dest )
 {
         using value_type = iterator_traits< Iter >::value_type ;
 
@@ -55,41 +55,18 @@ void copy ( Iter begin, Iter const & end, DestIter dest )
 
 
 template< meta::bidirectional_iterator Iter, meta::bidirectional_iterator DestIter >
-void _copy_back_impl ( Iter begin, Iter end, DestIter dest )
+constexpr void _copy_back_impl ( Iter begin, Iter end, DestIter dest )
 {
         while( begin != end )
         {
                 *dest = *begin ;
-                --dest ;
+                --dest  ;
                 --begin ;
         }
 }
 
-template< meta::random_access_iterator Iter, meta::random_access_iterator DestIter >
-void copy_backward ( Iter begin, Iter const & end, DestIter dest )
-{
-        using value_type = iterator_traits< Iter >::value_type ;
-
-        if constexpr( is_trivially_relocatable_v< value_type > )
-        {
-                [[ maybe_unused ]]
-                ssize_t const n = ::uti::distance( end, begin ) ;
-#if UTI_HAS_BUILTIN( __builtin_memmove )
-                __builtin_memmove( dest - n + 1, end, n * sizeof( value_type ) ) ;
-#elif defined( UTI_HAS_STL )
-                std::memmove( dest - n + 1, end, n * sizeof( value_type ) ) ;
-#else
-                _copy_back_impl( begin, end, dest ) ;
-#endif
-        }
-        else
-        {
-                _copy_back_impl( begin, end, dest ) ;
-        }
-}
-
 template< meta::bidirectional_iterator Iter, meta::bidirectional_iterator DestIter >
-void copy_backward ( Iter begin, Iter const & end, DestIter dest )
+constexpr void copy_backward ( Iter begin, Iter const & end, DestIter dest )
 {
         _copy_back_impl( begin, end, dest ) ;
 }

@@ -501,7 +501,7 @@ vector< T, Alloc >::insert ( ssize_type const _position_, value_type const & _va
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_, _view_base::end() ) ;
+                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_ - 1, _view_base::end() ) ;
         }
         else
         {
@@ -530,7 +530,7 @@ vector< T, Alloc >::insert ( ssize_type const _position_, value_type && _val_ )
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_, _view_base::end() ) ;
+                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_ - 1, _view_base::end() ) ;
         }
         else
         {

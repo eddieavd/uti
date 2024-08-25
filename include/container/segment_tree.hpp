@@ -412,7 +412,7 @@ segment_tree< T, Compare, Alloc >::insert ( ssize_type const _position_, value_t
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_, _view_base::end() ) ;
+                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_ - 1, _view_base::end() ) ;
                 _view_base::at( _position_ ) = _val_ ;
         }
         else
@@ -444,7 +444,7 @@ segment_tree< T, Compare, Alloc >::insert ( ssize_type const _position_, value_t
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_, _view_base::end() ) ;
+                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_ - 1, _view_base::end() ) ;
                 _view_base::at( _position_ ) = _val_ ;
         }
         else
