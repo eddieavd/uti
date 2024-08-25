@@ -8,7 +8,7 @@
 
 #ifndef UTI_DOXYGEN_SKIP
 
-#include <meta/traits.hpp>
+#include <type/traits.hpp>
 
 #include <ostream>
 
@@ -35,6 +35,7 @@ inline std::ostream & operator<< ( std::ostream & stream, copy_stats const & sta
         return stream;
 }
 
+/*
 struct copy_counter
 {
         inline static copy_stats stats ;
@@ -62,6 +63,58 @@ struct copy_counter
                 return old_stats;
         }
 };
+*/
+
+template< ssize_t Idx >
+struct indexed_copy_counter
+{
+        struct reset_after_construct_t {} ;
+
+        static constexpr reset_after_construct_t reset_after_construct {} ;
+
+        inline static copy_stats stats ;
+
+        explicit indexed_copy_counter ( reset_after_construct_t ) noexcept { reset() ; }
+
+        indexed_copy_counter () noexcept { stats.n_default_constructs++ ; }
+
+        indexed_copy_counter             ( indexed_copy_counter const &  ) noexcept { stats.n_copies++ ;                }
+        indexed_copy_counter             ( indexed_copy_counter       && ) noexcept { stats.n_moves ++ ;                }
+        indexed_copy_counter & operator= ( indexed_copy_counter const &  ) noexcept { stats.n_copies++ ; return *this ; }
+        indexed_copy_counter & operator= ( indexed_copy_counter       && ) noexcept { stats.n_moves ++ ; return *this ; }
+
+        static copy_stats reset () noexcept
+        {
+                auto old_stats             = stats ;
+                stats.n_copies             = 0 ;
+                stats.n_moves              = 0 ;
+                stats.n_default_constructs = 0 ;
+                return old_stats ;
+        }
+
+        template< ssize_t Idx1 >
+        bool operator== ( indexed_copy_counter< Idx1 > const & other ) const noexcept
+        {
+                return stats == other.stats ;
+        }
+} ;
+
+
+namespace _detail
+{
+
+static constexpr ssize_t default_copy_counter_idx { 102115517 } ;
+
+} // namespace _detail
+
+
+using copy_counter = indexed_copy_counter< _detail::default_copy_counter_idx > ;
+
+template< ssize_t Idx = _detail::default_copy_counter_idx >
+indexed_copy_counter< Idx > make_copy_counter ()
+{
+        return indexed_copy_counter< Idx >{ indexed_copy_counter< Idx >::reset_after_construct } ;
+}
 
 
 } // namespace uti::test

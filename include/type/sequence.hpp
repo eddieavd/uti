@@ -8,7 +8,7 @@
 
 #ifndef UTI_DOXYGEN_SKIP
 
-#include <meta/traits.hpp>
+#include <type/traits.hpp>
 
 
 namespace uti
@@ -30,24 +30,27 @@ template< ssize_t... Ts >
 using index_sequence = integer_sequence< ssize_t, Ts... > ;
 
 
-template< typename Seq1, typename Seq2 >
+template< typename T, typename Seq1, typename Seq2 >
 struct _merge_and_renumber ;
 
 template< typename T, T... I1, T... I2 >
-struct _merge_and_renumber< integer_sequence< T, I1... >, integer_sequence< T, I2... > >
+struct _merge_and_renumber< T, integer_sequence< T, I1... >, integer_sequence< T, I2... > >
         : integer_sequence< T, I1..., ( sizeof...( I1 ) + I2 )... > {} ;
 
+template< typename T, ssize_t N >
+struct _make_integer_sequence
+        : _merge_and_renumber< T,
+                               typename _make_integer_sequence< T,     N / 2 >::type,
+                               typename _make_integer_sequence< T, N - N / 2 >::type > {} ;
+
+template< typename T > struct _make_integer_sequence< T, 0 > : integer_sequence< T    > {} ;
+template< typename T > struct _make_integer_sequence< T, 1 > : integer_sequence< T, 0 > {} ;
+
+template< typename T, ssize_t N >
+using make_integer_sequence = typename _make_integer_sequence< T, N >::type ;
+
 template< ssize_t N >
-struct _make_index_sequence
-        : _merge_and_renumber< typename _make_index_sequence<     N / 2 >::type,
-                               typename _make_index_sequence< N - N / 2 >::type > {} ;
-
-template<> struct _make_index_sequence< 0 > : index_sequence<   > {} ;
-template<> struct _make_index_sequence< 1 > : index_sequence< 0 > {} ;
-
-
-template< ssize_t N >
-using make_index_sequence = _make_index_sequence< N > ;
+using make_index_sequence = make_integer_sequence< ssize_t, N > ;
 
 template< typename... Ts >
 using index_sequence_for = make_index_sequence< sizeof...( Ts ) > ;

@@ -52,6 +52,43 @@ TEST( PrefixTest, FillConstruct )
         }
 }
 
+TEST( PrefixTest, IteratorConstruct )
+{
+        {
+                int arr[] = { 0, 1, 2, 3 } ;
+
+                int * begin = arr ;
+                int *   end = arr + ( sizeof( arr ) / sizeof( int ) ) ;
+
+                uti::prefix_array< int > prefix( begin, end ) ;
+
+                for( ssize_t i = 0; i < 4; ++i )
+                {
+                        EXPECT_EQ( prefix.element_at( i ), i ) ;
+                }
+        }
+        {
+                uti::vector< int > vec( 4, 1 ) ;
+
+                uti::prefix_array< int > prefix( vec.begin(), vec.end() ) ;
+
+                for( ssize_t i = 0; i < vec.size(); ++i )
+                {
+                        EXPECT_EQ( vec.at( i ), prefix.element_at( i ) ) ;
+                }
+        }
+        {
+                uti::prefix_array< int > prefix( 4, 1 ) ;
+
+                uti::prefix_array< int > prefix2( prefix.begin(), prefix.end() ) ;
+
+                for( ssize_t i = 0; i < prefix.size(); ++i )
+                {
+                        EXPECT_EQ( prefix.at( i ), prefix2.at( i ) ) ;
+                }
+        }
+}
+
 TEST( PrefixTest, CopyConstruct )
 {
         uti::prefix_array<         int > prefixint( CUSTOM_CAP, CUSTOM_VAL ) ;
@@ -413,20 +450,20 @@ TEST( PrefixTest, Insert )
         EXPECT_EQ( prefixint.size(), CUSTOM_CAP ) ;
         EXPECT_EQ( prefixstr.size(), CUSTOM_CAP ) ;
 
-        prefixint.insert( CUSTOM_VAL * 2, 0 ) ;
-        prefixstr.insert(    "inserted" , 0 ) ;
+        prefixint.insert( 0, CUSTOM_VAL * 2 ) ;
+        prefixstr.insert( 0,    "inserted"  ) ;
 
         EXPECT_EQ( prefixint.size(), CUSTOM_CAP + 1 ) ;
         EXPECT_EQ( prefixstr.size(), CUSTOM_CAP + 1 ) ;
 
-        prefixint.insert( CUSTOM_VAL * 2, CUSTOM_CAP / 2 ) ;
-        prefixstr.insert(     "inserted", CUSTOM_CAP / 2 ) ;
+        prefixint.insert( CUSTOM_CAP / 2, CUSTOM_VAL * 2 ) ;
+        prefixstr.insert( CUSTOM_CAP / 2,     "inserted" ) ;
 
         EXPECT_EQ( prefixint.size(), CUSTOM_CAP + 2 ) ;
         EXPECT_EQ( prefixstr.size(), CUSTOM_CAP + 2 ) ;
 
-        prefixint.insert( CUSTOM_VAL * 2, prefixint.size() ) ;
-        prefixstr.insert(     "inserted", prefixstr.size() ) ;
+        prefixint.insert( prefixint.size(), CUSTOM_VAL * 2 ) ;
+        prefixstr.insert( prefixstr.size(),     "inserted" ) ;
 
         EXPECT_EQ( prefixint.size(), CUSTOM_CAP + 3 ) ;
         EXPECT_EQ( prefixstr.size(), CUSTOM_CAP + 3 ) ;
@@ -540,9 +577,9 @@ TEST( PrefixTest, NoDoubleFree )
                 uti::prefix_array< std::string > prefix1d;
                 for( int i = 0; i < 4; ++i )
                 {
-                        prefix1d.insert( std::to_string( i ), 0 );
+                        prefix1d.insert( 0, std::to_string( i ) );
                 }
-                prefix2d.insert( UTI_MOVE( prefix1d ), 0 );
+                prefix2d.insert( 0, UTI_MOVE( prefix1d ) );
         }
         uti::prefix_array< uti::prefix_array< std::string > > vec2d2;
 
@@ -550,11 +587,11 @@ TEST( PrefixTest, NoDoubleFree )
         {
                 if( i % 2 == 0 )
                 {
-                        vec2d2.insert( UTI_MOVE( prefix2d.at( i ) ), 0 );
+                        vec2d2.insert( 0, UTI_MOVE( prefix2d.at( i ) ) );
                 }
                 else
                 {
-                        vec2d2.insert( prefix2d.at( i ), 0 );
+                        vec2d2.insert( 0, prefix2d.at( i ) );
                 }
         }
         ssize_t dummy_counter { 0 } ;
@@ -567,4 +604,17 @@ TEST( PrefixTest, NoDoubleFree )
                 }
         }
         EXPECT_EQ( dummy_counter, dummy_counter ) ;
+}
+
+TEST( PrefixTest, Range )
+{
+        uti::prefix_array< int > prefix( 1024, 1 ) ;
+
+        for( int i = 0; i < prefix.size(); ++i )
+        {
+                for( int j = i; j < prefix.size(); ++j )
+                {
+                        EXPECT_EQ( prefix.range( i, j ), j - i + 1 ) ;
+                }
+        }
 }

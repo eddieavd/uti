@@ -1,7 +1,7 @@
 //
 //
 //      uti
-//      traits.hpp
+//      type/traits.hpp
 //
 
 #pragma once
@@ -35,13 +35,13 @@ namespace uti
 ///     typedefs
 ////////////////////////////////////////////////////////////////////////////////
 
-using  i8_t =           char ;
+using  i8_t =   signed  char ;
 using  u8_t = unsigned  char ;
-using i16_t =          short ;
+using i16_t =   signed short ;
 using u16_t = unsigned short ;
-using i32_t =            int ;
+using i32_t =   signed   int ;
 using u32_t = unsigned   int ;
-using i64_t =           long ;
+using i64_t =   signed  long ;
 using u64_t = unsigned  long ;
 
 static_assert( sizeof(  i8_t ) == 1 ) ;
@@ -52,6 +52,16 @@ static_assert( sizeof( i32_t ) == 4 ) ;
 static_assert( sizeof( u32_t ) == 4 ) ;
 static_assert( sizeof( i64_t ) == 8 ) ;
 static_assert( sizeof( u64_t ) == 8 ) ;
+
+constexpr  u8_t  u8_t_max { 0x00000000000000FF } ;
+constexpr u16_t u16_t_max { 0x000000000000FFFF } ;
+constexpr u32_t u32_t_max { 0x00000000FFFFFFFF } ;
+constexpr u64_t u64_t_max { 0xFFFFFFFFFFFFFFFF } ;
+
+constexpr  i8_t  i8_t_max { 0x000000000000007F } ;
+constexpr i16_t i16_t_max { 0x0000000000007FFF } ;
+constexpr i32_t i32_t_max { 0x000000007FFFFFFF } ;
+constexpr i64_t i64_t_max { 0x7FFFFFFFFFFFFFFF } ;
 
 using  size_t = u64_t ;
 using ssize_t = i64_t ;
@@ -130,7 +140,7 @@ using type_identity_t = typename type_identity< T >::type ;
 struct identity
 {
         template< typename T >
-        [[ nodiscard ]] constexpr T && operator() ( T && t ) const noexcept
+        UTI_NODISCARD constexpr T && operator() ( T && t ) const noexcept
         {
                 return UTI_FWD( t );
         }
@@ -160,7 +170,7 @@ struct integral_constant
         constexpr operator U< Val > () const noexcept {}
 
         ////////////////////////////////////////////////////////////////////////
-        // conversions to and from std::integral_constant                     //
+        // conversions to and from other integral_constants                   //
         //                                                                    //
         template< template< typename T1, T1 Val1 > typename U >               //
         constexpr integral_constant ( U< value_type, Val > ) noexcept {}      //
@@ -386,14 +396,22 @@ inline constexpr bool is_one_of_v = is_one_of< T, Args... >::value ;
 ///     conditionals
 ////////////////////////////////////////////////////////////////////////////////
 
-template< bool Cond, typename Then, typename Else >
-struct conditional : type_identity< Then > {} ;
+template< bool Cond >
+struct _conditional_impl
+{
+        template< typename Then, typename Else >
+        using fn = Then ;
+} ;
 
-template< typename Then, typename Else >
-struct conditional< false, Then, Else > : type_identity< Else > {} ;
+template<>
+struct _conditional_impl< false >
+{
+        template< typename Then, typename Else >
+        using fn = Else ;
+} ;
 
 template< bool Cond, typename Then, typename Else >
-using conditional_t = typename conditional< Cond, Then, Else >::type ;
+using conditional_t = typename _conditional_impl< Cond >::template fn< Then, Else > ;
 
 
 template< typename... Args > struct conjunction : true_type {} ;
@@ -747,6 +765,231 @@ using is_signed = _is_signed_impl< T > ;
 
 template< typename T >
 inline constexpr bool is_signed_v = is_signed< T >::value ;
+
+
+template< typename Unqualified, bool IsConst, bool IsVolatile >
+struct _cv_selector ;
+
+template< typename Unqualified >
+struct _cv_selector< Unqualified, false, false > : type_identity< Unqualified > {} ;
+
+template< typename Unqualified >
+struct _cv_selector< Unqualified, false, true > : type_identity< Unqualified volatile > {} ;
+
+template< typename Unqualified >
+struct _cv_selector< Unqualified, true, false > : type_identity< Unqualified const > {} ;
+
+template< typename Unqualified >
+struct _cv_selector< Unqualified, true, true > : type_identity< Unqualified const volatile > {} ;
+
+template< typename Qualified, typename Unqualified,
+          bool IsConst = is_const_v< Qualified > ,
+          bool IsVolatile = is_volatile_v< Qualified > >
+class _match_cv_qualifiers
+{
+        using _match = _cv_selector< Unqualified, IsConst, IsVolatile > ;
+public:
+        using _type = typename _match::type ;
+} ;
+
+
+template< typename T >
+struct _make_unsigned : type_identity< T > {} ;
+
+template<>
+struct _make_unsigned< char > : type_identity< unsigned char > {} ;
+
+template<>
+struct _make_unsigned< signed char > : type_identity< unsigned char > {} ;
+
+template<>
+struct _make_unsigned< short > : type_identity< unsigned short > {} ;
+
+template<>
+struct _make_unsigned< int > : type_identity< unsigned int > {} ;
+
+template<>
+struct _make_unsigned< long > : type_identity< unsigned long > {} ;
+
+template<>
+struct _make_unsigned< long long > : type_identity< unsigned long long > {} ;
+
+#ifdef __GLIBCXX_TYPE_INT_N_0
+template<>
+struct _make_unsigned< __GLIBCXX_TYPE_INT_N_0 > : type_identity< unsigned __GLIBCXX_TYPE_INT_N_0 > {} ;
+#endif
+
+#ifdef __GLIBCXX_TYPE_INT_N_1
+template<>
+struct _make_unsigned< __GLIBCXX_TYPE_INT_N_1 > : type_identity< unsigned __GLIBCXX_TYPE_INT_N_1 > {} ;
+#endif
+
+#ifdef __GLIBCXX_TYPE_INT_N_2
+template<>
+struct _make_unsigned< __GLIBCXX_TYPE_INT_N_2 > : type_identity< unsigned __GLIBCXX_TYPE_INT_N_2 > {} ;
+#endif
+
+#ifdef __GLIBCXX_TYPE_INT_N_3
+template<>
+struct _make_unsigned< __GLIBCXX_TYPE_INT_N_3 > : type_identity< unsigned __GLIBCXX_TYPE_INT_N_3 > {} ;
+#endif
+
+template< typename T,
+          bool IsInt = is_integral_v< T >,
+          bool IsEnum = is_enum_v< T > >
+class _make_unsigned_selector ;
+
+template< typename T >
+class _make_unsigned_selector< T, true, false >
+{
+        using _unsigned_type = typename _make_unsigned< remove_cv_t< T > >::type ;
+public:
+        using _type = typename _match_cv_qualifiers< T, _unsigned_type >::_type ;
+} ;
+
+class _make_unsigned_selector_base
+{
+protected:
+        template< typename... > struct _list {} ;
+
+        template< typename T, typename... Us >
+        struct _list< T, Us... > : _list< Us... >
+        { static constexpr size_t _size = sizeof( T ) ; } ;
+
+        template< size_t Sz, typename T, bool = ( Sz <= T::_size ) >
+        struct _select ;
+
+        template< size_t Sz, typename Uint, typename... Uints >
+        struct _select< Sz, _list< Uint, Uints... >, true >
+        { using _type = Uint ; } ;
+
+        template< size_t Sz, typename Uint, typename... Uints >
+        struct _select< Sz, _list< Uint, Uints... >, false >
+                : _select< Sz, _list< Uints... > >
+        {} ;
+} ;
+
+template< typename T >
+class _make_unsigned_selector< T, false, true >
+        : _make_unsigned_selector_base
+{
+        using Uints = _list< unsigned      char ,
+                             unsigned     short ,
+                             unsigned       int ,
+                             unsigned      long ,
+                             unsigned long long
+        > ;
+        using _unsigned_type = typename _select< sizeof( T ), Uints >::_type ;
+public:
+        using _type = typename _match_cv_qualifiers< T, _unsigned_type >::_type ;
+} ;
+
+template<>
+struct _make_unsigned< wchar_t > : type_identity< _make_unsigned_selector< wchar_t, false, true >::_type > {} ;
+
+#ifdef _GLIBCXX_USE_CHAR8_T
+template<>
+struct _make_unsigned< char8_t > : type_identity< _make_unsigned_selector< char8_t, false, true >::_type > {} ;
+#endif
+
+template<>
+struct _make_unsigned< char16_t > : type_identity< _make_unsigned_selector< char16_t, false, true >::_type > {} ;
+
+template<>
+struct _make_unsigned< char32_t > : type_identity< _make_unsigned_selector< char32_t, false, true >::_type > {} ;
+
+template< typename T >
+struct make_unsigned : type_identity< typename _make_unsigned_selector< T >::_type > {} ;
+
+template<>
+struct make_unsigned< bool > ;
+
+
+template< typename T >
+struct _make_signed : type_identity< T > {} ;
+
+template<>
+struct _make_signed< char > : type_identity< signed char > {} ;
+
+template<>
+struct _make_signed< unsigned char > : type_identity< signed char > {} ;
+
+template<>
+struct _make_signed< unsigned short > : type_identity< signed short > {} ;
+
+template<>
+struct _make_signed< unsigned int > : type_identity< signed int > {} ;
+
+template<>
+struct _make_signed< unsigned long > : type_identity< signed long > {} ;
+
+template<>
+struct _make_signed< unsigned long long > : type_identity< signed long long > {} ;
+
+#ifdef __GLIBCXX_TYPE_INT_N_0
+template<>
+struct _make_signed< unsigned __GLIBCXX_TYPE_INT_N_0 > : type_identity< signed __GLIBCXX_TYPE_INT_N_0 > {} ;
+#endif
+
+#ifdef __GLIBCXX_TYPE_INT_N_1
+template<>
+struct _make_signed< unsigned __GLIBCXX_TYPE_INT_N_1 > : type_identity< signed __GLIBCXX_TYPE_INT_N_1 > {} ;
+#endif
+
+#ifdef __GLIBCXX_TYPE_INT_N_2
+template<>
+struct _make_signed< unsigned __GLIBCXX_TYPE_INT_N_2 > : type_identity< signed __GLIBCXX_TYPE_INT_N_2 > {} ;
+#endif
+
+#ifdef __GLIBCXX_TYPE_INT_N_3
+template<>
+struct _make_signed< unsigned __GLIBCXX_TYPE_INT_N_3 > : type_identity< signed __GLIBCXX_TYPE_INT_N_3 > {} ;
+#endif
+
+template< typename T,
+          bool IsInt = is_integral_v< T >,
+          bool IsEnum = is_enum_v< T > >
+class _make_signed_selector ;
+
+template< typename T >
+class _make_signed_selector< T, true, false >
+{
+        using _signed_type = typename _make_signed< remove_cv_t< T > >::type ;
+public:
+        using _type = typename _match_cv_qualifiers< T, _signed_type >::_type ;
+} ;
+
+template< typename T >
+class _make_signed_selector< T, false, true >
+{
+        using _unsigned_type = typename _make_unsigned_selector< T >::_type ;
+public:
+        using _type = typename _make_signed_selector< _unsigned_type >::_type ;
+} ;
+
+template<>
+struct _make_signed< wchar_t > : type_identity< typename _make_signed_selector< wchar_t, false, true >::_type > {} ;
+
+#ifdef _GLIBCXX_USE_CHAR8_T
+//template<>
+//struct _make_signed< char8_t > : type_identity< typename _make_signed_selector< char8_t, false, true >::_type > {} ;
+#endif
+
+template<>
+struct _make_signed< char16_t > : type_identity< typename _make_signed_selector< char16_t, false, true >::_type > {} ;
+
+template<>
+struct _make_signed< char32_t > : type_identity< typename _make_signed_selector< char32_t, false, true >::_type > {} ;
+
+template< typename T >
+struct make_signed : type_identity< typename _make_signed_selector< T >::_type > {} ;
+
+template<>
+struct make_signed< bool > ;
+
+template< typename T > using make_signed_t   = typename make_signed  < T >::type ;
+template< typename T > using make_unsigned_t = typename make_unsigned< T >::type ;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1162,36 +1405,29 @@ inline constexpr bool is_trivial_v = is_trivial< T >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template< typename T, bool >
-struct _decay : remove_cv_t< T > {} ;
+template< typename T > struct _decay ;
 
-template< typename T >
-struct _decay< T, true > : conditional
-                        <
-                                is_array_v< T >,
-                                remove_extent_t< T >*,
-                                conditional_t
-                                <
-                                        is_function_v< T >,
-                                        add_pointer_t< T >,
-                                        remove_cv_t< T >
+template< typename T > requires( !is_referenceable_v< T > )
+struct _decay< T > : remove_cv_t< T > {} ;
+
+template< typename T > requires( is_referenceable_v< T > )
+struct _decay< T > : type_identity<
+                        conditional_t<
+                                is_array_v     < T > ,
+                                remove_extent_t< T > * ,
+                                conditional_t<
+                                        is_function_v< T > ,
+                                        add_pointer_t< T > ,
+                                        remove_cv_t  < T >
                                 >
-                        > {} ;
-
-template< typename T, bool B >
-using _decay_t = typename _decay< T, B >::type ;
+                           > > {} ;
 
 template< typename T >
-struct decay
-{
-private:
-        using U = remove_reference_t< T > ;
-public:
-        using type = _decay_t< U, is_referenceable_v< U > > ;
-};
+using decay = _decay< remove_reference_t< T > > ;
 
 template< typename T >
 using decay_t = typename decay< T >::type ;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///     swappability
@@ -1208,18 +1444,12 @@ template< typename... Ts > struct _is_tuple_like_impl< tuple< Ts... > > :  true_
 template< typename T > struct _is_tuple_like : public _is_tuple_like_impl< remove_cvref_t< T > >::type {} ;
 
 template< typename T >
-inline constexpr
-enable_if_t
-<
-        conjunction_v
-        <
-                is_not< _is_tuple_like< T > >,
-                is_move_constructible< T >,
-                is_move_assignable< T >
-        >
->
-swap ( T &, T & )
-        noexcept( is_nothrow_move_constructible_v< T > && is_nothrow_move_assignable_v< T > ) ;
+        requires is_not_v< _is_tuple_like< T > > &&
+                 is_move_constructible_v< T > &&
+                 is_move_assignable_v< T >
+constexpr void swap ( T & _lhs_, T & _rhs_ )
+        noexcept( is_nothrow_move_constructible_v< T > &&
+                  is_nothrow_move_assignable_v   < T >  ) ;
 
 template< typename T, ssize_t N >
 inline constexpr
@@ -1262,6 +1492,27 @@ template< typename T > using is_nothrow_swappable = _is_nothrow_swappable< T > ;
 
 template< typename T > inline constexpr bool is_swappable_v         = is_swappable        < T >::value ;
 template< typename T > inline constexpr bool is_nothrow_swappable_v = is_nothrow_swappable< T >::value ;
+
+
+////////////////////////////////////////////////////////////////////////////////
+///     is_primary_template
+////////////////////////////////////////////////////////////////////////////////
+
+template< template< typename... > typename Templ, typename... Args, typename = Templ< Args... > >
+true_type _sfinae_test_impl ( i32_t ) ;
+
+template< template< typename... > typename, typename... >
+false_type _sfinae_test_impl ( ... ) ;
+
+template< template< typename... > typename Templ, typename... Args >
+using _is_valid_expansion = decltype( ::uti::_sfinae_test_impl< Templ, Args... >( 0 ) ) ;
+
+
+template< typename T >
+using _test_for_primary_template = enable_if_t< is_same_v< T, typename T::_primary_template > > ;
+
+template< typename T >
+using _is_primary_template = _is_valid_expansion< _test_for_primary_template, T > ;
 
 
 } // namespace uti

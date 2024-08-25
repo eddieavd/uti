@@ -8,8 +8,8 @@
 
 #ifndef UTI_DOXYGEN_SKIP
 
-#include <meta/traits.hpp>
-#include <meta/invoke.hpp>
+#include <type/traits.hpp>
+#include <type/invoke.hpp>
 
 
 namespace uti

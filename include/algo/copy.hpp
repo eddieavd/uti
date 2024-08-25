@@ -6,7 +6,9 @@
 
 #pragma once
 
-#include <meta/traits.hpp>
+#include <type/traits.hpp>
+#include <algo/distance.hpp>
+#include <iterator/meta.hpp>
 
 #if !__has_builtin( __builtin_memmove ) && defined( UTI_HAS_STL )
 #include <cstring>
@@ -17,39 +19,79 @@ namespace uti
 {
 
 
-template< typename InputIter, typename Sentinel, typename DestIter >
-void _copy_impl ( InputIter begin, Sentinel end, DestIter dest )
+template< meta::forward_iterator Iter, meta::forward_iterator DestIter >
+void _copy_impl ( Iter begin, Iter end, DestIter dest )
 {
         while( begin != end )
         {
-                *dest = *begin;
-                ++dest;
-                ++begin;
+                *dest = *begin ;
+                ++dest  ;
+                ++begin ;
         }
 }
 
-template< typename InVal, typename OutVal,
-          typename = enable_if_t< is_same_v< remove_cv_t< InVal >, OutVal > > >
-void copy ( InVal * begin, InVal * end, OutVal * dest )
+template< meta::forward_iterator Iter, meta::forward_iterator DestIter >
+void copy ( Iter begin, Iter const & end, DestIter dest )
 {
-        if constexpr( is_trivially_relocatable_v< InVal > )
+        using value_type = iterator_traits< Iter >::value_type ;
+
+        if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                ssize_t const n = static_cast< ssize_t >( end - begin );
-                if( n > 0 )
-                {
-#if __has_builtin( __builtin_memmove )
-                        __builtin_memmove( dest, begin, n * sizeof( OutVal ) );
+                [[ maybe_unused ]]
+                ssize_t const n = ::uti::distance( begin, end ) ;
+#if UTI_HAS_BUILTIN( __builtin_memcpy )
+                __builtin_memcpy( dest, begin, n * sizeof( value_type ) ) ;
 #elif defined( UTI_HAS_STL )
-                        std::memmove( dest, begin, n * sizeof( OutVal ) );
+                std::memcpy( dest, begin, n * sizeof( value_type ) ) ;
 #else
-                        _copy_impl( begin, end, dest );
+                _copy_impl( begin, end, dest ) ;
 #endif
-                }
         }
         else
         {
-                _copy_impl( begin, end, dest );
+                _copy_impl( begin, end, dest ) ;
         }
+}
+
+
+template< meta::bidirectional_iterator Iter, meta::bidirectional_iterator DestIter >
+void _copy_back_impl ( Iter begin, Iter end, DestIter dest )
+{
+        while( begin != end )
+        {
+                *dest = *begin ;
+                --dest ;
+                --begin ;
+        }
+}
+
+template< meta::random_access_iterator Iter, meta::random_access_iterator DestIter >
+void copy_backward ( Iter begin, Iter const & end, DestIter dest )
+{
+        using value_type = iterator_traits< Iter >::value_type ;
+
+        if constexpr( is_trivially_relocatable_v< value_type > )
+        {
+                [[ maybe_unused ]]
+                ssize_t const n = ::uti::distance( end, begin ) ;
+#if UTI_HAS_BUILTIN( __builtin_memmove )
+                __builtin_memmove( dest - n + 1, end, n * sizeof( value_type ) ) ;
+#elif defined( UTI_HAS_STL )
+                std::memmove( dest - n + 1, end, n * sizeof( value_type ) ) ;
+#else
+                _copy_back_impl( begin, end, dest ) ;
+#endif
+        }
+        else
+        {
+                _copy_back_impl( begin, end, dest ) ;
+        }
+}
+
+template< meta::bidirectional_iterator Iter, meta::bidirectional_iterator DestIter >
+void copy_backward ( Iter begin, Iter const & end, DestIter dest )
+{
+        _copy_back_impl( begin, end, dest ) ;
 }
 
 

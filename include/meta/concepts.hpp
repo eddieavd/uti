@@ -6,18 +6,18 @@
 
 #pragma once
 
-#include <meta/common_type.hpp>
-#include <meta/common_ref.hpp>
-#include <meta/invoke.hpp>
+#include <type/traits.hpp>
+#include <type/common_type.hpp>
+#include <type/common_ref.hpp>
+#include <type/invoke.hpp>
 #include <algo/swap.hpp>
 
 
-namespace uti
+namespace uti::meta
 {
 
 
 template< typename, ssize_t > concept any = true ;
-// template< ssize_t > struct any { any( auto ){} } ;
 
 
 template< ssize_t > struct index
@@ -46,22 +46,28 @@ concept derived_from =
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename From, typename To >
-concept convertible_to = is_convertible_v< From, To > && requires
-{
-        static_cast< To >( uti::declval< From >() ) ;
-};
+concept convertible_to =
+        is_convertible_v< From, To > &&
+        requires
+        {
+                static_cast< To >( uti::declval< From >() ) ;
+        };
 
 template< typename From, typename To >
-concept nothrow_convertible_to = is_nothrow_convertible_v< From, To > && requires
-{
-        static_cast< To >( uti::declval< From >() ) ;
-};
+concept nothrow_convertible_to =
+        is_nothrow_convertible_v< From, To > &&
+        requires
+        {
+                static_cast< To >( uti::declval< From >() ) ;
+        };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename T, typename U >
 concept common_reference_with =
-        same_as< common_reference_t< T, U >, common_reference_t< U, T > > &&
+        same_as< common_reference_t< T, U >,
+                 common_reference_t< U, T >
+        > &&
         convertible_to< T, common_reference_t< T, U > > &&
         convertible_to< U, common_reference_t< T, U > > ;
 
@@ -69,7 +75,9 @@ concept common_reference_with =
 
 template< typename T, typename U >
 concept common_with =
-        same_as< common_type_t< T, U >, common_type_t< U, T > > &&
+        same_as< common_type_t< T, U >,
+                 common_type_t< U, T >
+        > &&
         requires
         {
                 static_cast< common_type_t< T, U > >( uti::declval< T >() ) ;
@@ -104,6 +112,9 @@ concept unsigned_integral = integral< T > && !signed_integral< T > ;
 template< typename T >
 concept floating_point = is_floating_point_v< T > ;
 
+template< typename T >
+concept arithmetic = is_arithmetic_v< T > ;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename Lhs, typename Rhs >
@@ -125,21 +136,22 @@ concept nothrow_assignable_from = assignable_from< Lhs, Rhs > && nothrow_assign<
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename T >
-concept swappable = requires( T & t, T & u )
-{
-        ::uti::swap( t, u ) ;
-};
+concept swappable =
+        requires( T & t, T & u )
+        {
+                ::uti::swap( t, u ) ;
+        };
 
 template< typename T, typename U >
 concept swappable_with =
         common_reference_with< T, U > &&
         requires( T && t, U && u )
-{
-        ::uti::swap( UTI_FWD( t ), UTI_FWD( t ) ) ;
-        ::uti::swap( UTI_FWD( t ), UTI_FWD( u ) ) ;
-        ::uti::swap( UTI_FWD( u ), UTI_FWD( t ) ) ;
-        ::uti::swap( UTI_FWD( u ), UTI_FWD( u ) ) ;
-};
+        {
+                ::uti::swap( UTI_FWD( t ), UTI_FWD( t ) ) ;
+                ::uti::swap( UTI_FWD( t ), UTI_FWD( u ) ) ;
+                ::uti::swap( UTI_FWD( u ), UTI_FWD( t ) ) ;
+                ::uti::swap( UTI_FWD( u ), UTI_FWD( u ) ) ;
+        };
 
 template< typename T >
 concept nothrow_swappable = swappable< T > && noexcept( ::uti::swap( uti::declval< T >(), uti::declval< T >() ) ) ;
@@ -204,18 +216,19 @@ concept boolean_testable =
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename T, typename U >
-concept _weakly_eq_comparable_with = requires( remove_reference_t< T > const & t,
-                                               remove_reference_t< U > const & u )
-{
-        { t == u } -> boolean_testable ;
-        { t != u } -> boolean_testable ;
-        { u == t } -> boolean_testable ;
-        { u != t } -> boolean_testable ;
-};
+concept _weakly_eq_comparable_with =
+        requires( remove_reference_t< T > const & t ,
+                  remove_reference_t< U > const & u )
+        {
+                { t == u } -> boolean_testable ;
+                { t != u } -> boolean_testable ;
+                { u == t } -> boolean_testable ;
+                { u != t } -> boolean_testable ;
+        };
 
 template< typename T, typename U, typename C = common_reference_t< T const &, U const & > >
 concept _comparison_common_type_with_impl =
-        same_as< common_reference_t< T const &, U const & >,
+        same_as< common_reference_t< T const &, U const & > ,
                  common_reference_t< U const &, T const & > > &&
         requires
         {
@@ -261,8 +274,12 @@ concept totally_ordered =
 
 template< typename T, typename U >
 concept totally_ordered_with =
-        totally_ordered< T > && totally_ordered< U > &&
-        common_reference_with< remove_reference_t< T > const &, remove_reference_t< U > const & > &&
+        totally_ordered< T > &&
+        totally_ordered< U > &&
+        common_reference_with<
+                remove_reference_t< T > const &,
+                remove_reference_t< U > const &
+        > &&
         totally_ordered<
                 common_reference_t<
                         remove_reference_t< T > const &,
@@ -329,13 +346,11 @@ concept regular = semiregular< T > && equality_comparable< T > ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef UTI_HAS_STL
-
 template< typename Fn, typename... Args >
 concept invocable =
         requires( Fn && fn, Args&&... args )
         {
-                std::invoke( UTI_FWD( fn ), UTI_FWD( args )... );
+                ::uti::invoke( UTI_FWD( fn ), UTI_FWD( args )... );
         };
 
 template< typename Fn, typename... Args >
@@ -346,7 +361,7 @@ concept regular_invocable = invocable< Fn, Args... > ;
 template< typename Fn, typename... Args >
 concept predicate =
         regular_invocable< Fn, Args... > &&
-        boolean_testable< std::invoke_result_t< Fn, Args... > > ;
+        boolean_testable< ::uti::invoke_result_t< Fn, Args... > > ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -357,8 +372,10 @@ concept predicate =
  */
 template< typename R, typename T, typename U >
 concept relation =
-        predicate< R, T, T > && predicate< R, U, U > &&
-        predicate< R, T, U > && predicate< R, U, T >  ;
+        predicate< R, T, T > &&
+        predicate< R, U, U > &&
+        predicate< R, T, U > &&
+        predicate< R, U, T >  ;
 
 /*
  * specifies that the relation R imposes an equivalence relation on its arguments
@@ -374,66 +391,73 @@ concept equivalence_relation = relation< R, T, U > ;
  *
  */
 template< typename R, typename T, typename U >
-concept string_weak_order = relation< R, T, U > ;
-
-#endif
+concept strict_weak_order = relation< R, T, U > ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename T >
-concept container_c = requires( T container )
-{
-        { T::     value_type } ;
-        { T::      size_type } ;
-        { T::     ssize_type } ;
-        { T::        pointer } ;
-        { T::      reference } ;
-        { T::       iterator } ;
-        { T:: const_iterator } ;
-        { container. begin() } -> same_as< typename T::      iterator > ;
-        { container.   end() } -> same_as< typename T::      iterator > ;
-        { container. begin() } -> same_as< typename T::const_iterator > ;
-        { container.   end() } -> same_as< typename T::const_iterator > ;
-        { container.cbegin() } -> same_as< typename T::const_iterator > ;
-        { container.  cend() } -> same_as< typename T::const_iterator > ;
-        { container.  size() } -> one_of < typename T::size_type, typename T::ssize_type > ;
-};
+concept container =
+        requires( T container )
+        {
+                { T::     value_type } ;
+                { T::      size_type } ;
+                { T::     ssize_type } ;
+                { T::        pointer } ;
+                { T::      reference } ;
+                { T::const_reference } ;
+                { T::       iterator } ;
+                { T:: const_iterator } ;
+                { container. begin() } -> same_as< typename T::      iterator > ;
+                { container.   end() } -> same_as< typename T::      iterator > ;
+                { container. begin() } -> same_as< typename T::const_iterator > ;
+                { container.   end() } -> same_as< typename T::const_iterator > ;
+                { container.cbegin() } -> same_as< typename T::const_iterator > ;
+                { container.  cend() } -> same_as< typename T::const_iterator > ;
+                { container.  size() } -> one_of < typename T:: size_type
+                                                 , typename T::ssize_type
+                                                 >                              ;
+        };
 
 template< typename T >
-concept range_container_c = requires( T container )
-{
-        container_c< T > ;
-        { container.range( ssize_t(), ssize_t() ) } -> same_as< typename T::value_type > ;
-};
+concept range_container =
+        requires( T c )
+        {
+                container< T > ;
+                { c.range( ssize_t(), ssize_t() ) } -> same_as< typename T::value_type > ;
+        };
 
 template< typename T >
-concept two_d_container_c = requires
-{
-        container_c<          T             > ;
-        container_c< typename T::value_type > ;
-};
+concept two_d_container =
+        requires
+        {
+                container<          T             > ;
+                container< typename T::value_type > ;
+        };
 
 template< typename T >
-concept two_d_range_container_c = requires
-{
-        two_d_container_c<          T             > ;
-        range_container_c<          T             > ;
-        range_container_c< typename T::value_type > ;
-};
+concept two_d_range_container =
+        requires
+        {
+                two_d_container<          T             > ;
+                range_container<          T             > ;
+                range_container< typename T::value_type > ;
+        };
 
 template< typename T >
-concept three_d_container_c = requires
-{
-        two_d_container_c<          T             > ;
-        two_d_container_c< typename T::value_type > ;
-};
+concept three_d_container =
+        requires
+        {
+                two_d_container<          T             > ;
+                two_d_container< typename T::value_type > ;
+        };
 
 template< typename T >
-concept three_d_range_container_c = requires
-{
-        two_d_range_container_c<          T             > ;
-        two_d_range_container_c< typename T::value_type > ;
-};
+concept three_d_range_container =
+        requires
+        {
+                two_d_range_container<          T             > ;
+                two_d_range_container< typename T::value_type > ;
+        };
 
 
-} // namespace uti
+} // namespace uti::meta

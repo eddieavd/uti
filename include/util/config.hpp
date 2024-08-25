@@ -11,6 +11,44 @@
 
 #define UTI_STRINGIZE( x ) #x
 
+
+#if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ )
+#       define UTI_TARGET_OS "windows"
+#       define UTI_TARGET_WINDOWS 1
+#elif defined( __ANDROID__ )
+#       define UTI_TARGET_OS "android"
+#       define UTI_TARGET_ANDROID 1
+#elif defined( __linux__ )
+#       define UTI_TARGET_OS "linux"
+#       define UTI_TARGET_LINUX 1
+#elif defined( __APPLE__ )
+#       include "TargetConditionals.h"
+#       if TARGET_OS_IPHONE && TARGET_IPHONE_SIMULATOR
+#               define UTI_TARGET_OS "ios_sim"
+#               define UTI_TARGET_IOS_SIM 1
+#       elif TARGET_OS_IPHONE && TARGET_OS_MACCATALYST
+#               define UTI_TARGET_OS "mac_catalyst"
+#               define UTI_TARGET_MAC_CATALYST 1
+#       elif TARGET_OS_IPHONE
+#               define UTI_TARGET_OS "ios"
+#               define UTI_TARGET_IOS 1
+#       elif TARGET_OS_MAC
+#               define UTI_TARGET_OS "mac"
+#               define UTI_TARGET_MAC 1
+#       else
+#               define UTI_TARGET_OS "apple_other"
+#               define UTI_TARGET_APPLE_OTHER 1
+#       endif
+#endif
+
+
+#if UTI_TARGET_ANDROID || UTI_TARGET_MAC || UTI_TARGET_IOS
+#       define UTI_NOEXCEPT_UNLESS_BADALLOC noexcept
+#else
+#       define UTI_NOEXCEPT_UNLESS_BADALLOC
+#endif
+
+
 // shamelessly stolen from
 // https://github.com/psiha/build/blob/master/include/psi/build/disable_warnings.hpp
 #if defined( __GNUC__ ) || defined( __clang__ )
@@ -68,6 +106,12 @@
 #       define UTI_HAS_BUILTIN( x ) __has_builtin( x )
 #else
 #       define UTI_HAS_BUILTIN( x ) 0
+#endif
+
+#if defined( __has_constexpr_builtin )
+#       define UTI_HAS_CEXPR_BUILTIN( x ) __has_constexpr_builtin( x )
+#else
+#       define UTI_HAS_CEXPR_BUILTIN( x ) 0
 #endif
 
 #if defined( __has_feature )

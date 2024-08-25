@@ -8,8 +8,8 @@
 
 #ifndef UTI_DOXYGEN_SKIP
 
-#include <meta/traits.hpp>
-#include <meta/common_type.hpp>
+#include <type/traits.hpp>
+#include <type/common_type.hpp>
 
 
 namespace uti
@@ -68,7 +68,7 @@ using _common_ref_C = remove_reference_t< _common_ref_t< X&, Y& > > && ;
 
 /*
  * if A and B are both rvalue reference types, C is well-formed, and
- * is_convertible_V< A, C > && is_convertible_v< B, C > is true, then COMMON_REF( A, B ) is C
+ * is_convertible_v< A, C > && is_convertible_v< B, C > is true, then COMMON_REF( A, B ) is C
  *
  */
 template< typename A, typename B, typename X, typename Y >

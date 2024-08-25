@@ -53,6 +53,43 @@ TEST( VectorTest, FillConstruct )
         }
 }
 
+TEST( VectorTest, IteratorConstruct )
+{
+        {
+                int arr[] = { 0, 1, 2, 3 } ;
+
+                int * begin = arr ;
+                int *   end = arr + ( sizeof( arr ) / sizeof( int ) ) ;
+
+                uti::vector< int > vec( begin, end ) ;
+
+                for( ssize_t i = 0; i < 4; ++i )
+                {
+                        EXPECT_EQ( vec.at( i ), i ) ;
+                }
+        }
+        {
+                uti::vector< int > vec( 4, 1 ) ;
+
+                uti::vector< int > vec2( vec.begin(), vec.end() ) ;
+
+                for( ssize_t i = 0; i < vec.size(); ++i )
+                {
+                        EXPECT_EQ( vec.at( i ), vec2.at( i ) ) ;
+                }
+        }
+        {
+                uti::prefix_array< int > prefix( 4, 1 ) ;
+
+                uti::vector< int > vec( prefix.begin(), prefix.end() ) ;
+
+                for( ssize_t i = 0; i < prefix.size(); ++i )
+                {
+                        EXPECT_EQ( vec.at( i ), prefix.element_at( i ) ) ;
+                }
+        }
+}
+
 TEST( VectorTest, CopyConstruct )
 {
         uti::vector<         int > vecint( CUSTOM_CAP, CUSTOM_VAL ) ;
@@ -413,20 +450,20 @@ TEST( VectorTest, Insert )
         EXPECT_EQ( vecint.size(), CUSTOM_CAP ) ;
         EXPECT_EQ( vecstr.size(), CUSTOM_CAP ) ;
 
-        vecint.insert( CUSTOM_VAL * 2, 0 ) ;
-        vecstr.insert(    "inserted" , 0 ) ;
+        vecint.insert( 0, CUSTOM_VAL * 2 ) ;
+        vecstr.insert( 0,    "inserted"  ) ;
 
         EXPECT_EQ( vecint.size(), CUSTOM_CAP + 1 ) ;
         EXPECT_EQ( vecstr.size(), CUSTOM_CAP + 1 ) ;
 
-        vecint.insert( CUSTOM_VAL * 2, CUSTOM_CAP / 2 ) ;
-        vecstr.insert(     "inserted", CUSTOM_CAP / 2 ) ;
+        vecint.insert( CUSTOM_CAP / 2, CUSTOM_VAL * 2 ) ;
+        vecstr.insert( CUSTOM_CAP / 2,     "inserted" ) ;
 
         EXPECT_EQ( vecint.size(), CUSTOM_CAP + 2 ) ;
         EXPECT_EQ( vecstr.size(), CUSTOM_CAP + 2 ) ;
 
-        vecint.insert( CUSTOM_VAL * 2, vecint.size() ) ;
-        vecstr.insert(     "inserted", vecstr.size() ) ;
+        vecint.insert( vecint.size(), CUSTOM_VAL * 2 ) ;
+        vecstr.insert( vecstr.size(),     "inserted" ) ;
 
         EXPECT_EQ( vecint.size(), CUSTOM_CAP + 3 ) ;
         EXPECT_EQ( vecstr.size(), CUSTOM_CAP + 3 ) ;
@@ -538,9 +575,9 @@ TEST( VectorTest, NoDoubleFree )
                 uti::vector< std::string > vec1d;
                 for( int i = 0; i < 4; ++i )
                 {
-                        vec1d.insert( std::to_string( i ), 0 );
+                        vec1d.insert( 0, std::to_string( i ) ) ;
                 }
-                vec2d.insert( UTI_MOVE( vec1d ), 0 );
+                vec2d.insert( 0, UTI_MOVE( vec1d ) ) ;
         }
         uti::vector< uti::vector< std::string > > vec2d2;
 
@@ -548,11 +585,11 @@ TEST( VectorTest, NoDoubleFree )
         {
                 if( i % 2 == 0 )
                 {
-                        vec2d2.insert( UTI_MOVE( vec2d.at( i ) ), 0 );
+                        vec2d2.insert( 0, UTI_MOVE( vec2d.at( i ) ) ) ;
                 }
                 else
                 {
-                        vec2d2.insert( vec2d.at( i ), 0 );
+                        vec2d2.insert( 0, vec2d.at( i ) ) ;
                 }
         }
         ssize_t dummy_counter { 0 } ;

@@ -6,10 +6,12 @@
 
 #pragma once
 
-#include <meta/traits.hpp>
-#include <mem/container_base.hpp>
-#include <mem/view.hpp>
-#include <mem/allocator.hpp>
+#include <type/traits.hpp>
+#include <container/base.hpp>
+#include <container/view.hpp>
+#include <allocator/meta.hpp>
+
+#include <initializer_list>
 
 
 namespace uti
@@ -38,9 +40,29 @@ public:
         using        iterator = typename _base::       iterator ;
         using  const_iterator = typename _base:: const_iterator ;
 
-        constexpr array () noexcept = default ;
+        constexpr array () noexcept : _view_base( data, data + capacity_ ) {}
 
         constexpr array ( value_type const & _val_ ) noexcept( is_nothrow_copy_assignable_v< value_type > ) ;
+
+        constexpr array ( std::initializer_list< value_type > _list_ ) : _view_base( data, data + capacity_ )
+        {
+                if constexpr( is_trivially_copy_constructible_v< value_type > )
+                {
+                        UTI_CEXPR_ASSERT( _list_.size() <= capacity_, "uti::array: excess elements in initializer list" ) ;
+                        UTI_CEXPR_ASSERT( _list_.size() >= capacity_, "uti::array: missing elements in initializer list" ) ;
+
+                        ssize_type pos = 0 ;
+
+                        for( auto const & val : _list_ )
+                        {
+                                _view_base::at( pos++ ) = val ;
+                        }
+                }
+                else
+                {
+
+                }
+        }
 
         constexpr array             ( array const & _other_ ) noexcept( is_nothrow_copy_assignable_v< value_type > ) ;
         constexpr array & operator= ( array const & _other_ ) noexcept( is_nothrow_copy_assignable_v< value_type > &&
@@ -50,20 +72,21 @@ public:
         constexpr array & operator= ( array && _other_ ) noexcept( is_nothrow_move_assignable_v< value_type > &&
                                                                    is_nothrow_destructible_v      < value_type > ) ;
 
-        constexpr ~array () noexcept ;
+        constexpr ~array () noexcept = default ;
 
         constexpr void fill ( value_type const & _val_ ) noexcept( is_nothrow_copy_assignable_v< value_type > &&
                                                                    is_nothrow_destructible_v   < value_type > ) ;
 
         UTI_NODISCARD ssize_type capacity () const noexcept { return capacity_ ; }
 private:
-        value_type data[ capacity_ ] ;
+        value_type data[ capacity_ ] {} ;
 };
 
 
 template< typename T, ssize_t Capacity >
 constexpr
 array< T, Capacity >::array ( value_type const & _val_ ) noexcept( is_nothrow_copy_assignable_v< value_type > )
+        : _view_base( data, capacity_ )
 {
         for( ssize_type i = 0; i < capacity_; ++i )
         {
@@ -74,6 +97,7 @@ array< T, Capacity >::array ( value_type const & _val_ ) noexcept( is_nothrow_co
 template< typename T, ssize_t Capacity >
 constexpr
 array< T, Capacity >::array ( array const & _other_ ) noexcept( is_nothrow_copy_assignable_v< value_type > )
+        : _view_base( data, capacity_ )
 {
         for( ssize_type i = 0; i < capacity_; ++i )
         {
@@ -90,11 +114,13 @@ array< T, Capacity >::operator= ( array const & _other_ ) noexcept( is_nothrow_c
         {
                 _view_base::at( i ) = _other_.at( i );
         }
+        return *this ;
 }
 
 template< typename T, ssize_t Capacity >
 constexpr
 array< T, Capacity >::array ( array && _other_ ) noexcept( is_nothrow_move_assignable_v< value_type > )
+        : _view_base( data, capacity_ )
 {
         for( ssize_type i = 0; i < capacity_; ++i )
         {
@@ -111,19 +137,7 @@ array< T, Capacity >::operator= ( array && _other_ ) noexcept( is_nothrow_move_a
         {
                 _view_base::at( i ) = UTI_MOVE( _other_.at( i ) );
         }
-}
-
-template< typename T, ssize_t Capacity >
-constexpr
-array< T, Capacity >::~array () noexcept
-{
-        if constexpr( !is_trivially_destructible_v< value_type > )
-        {
-                for( auto it = _view_base::begin(); it != _view_base::end(); ++it )
-                {
-                        ::uti::allocator< value_type >::destroy( it );
-                }
-        }
+        return *this ;
 }
 
 
