@@ -292,14 +292,7 @@ constexpr
 void
 _string_storage< CharType >::_inc_size () noexcept
 {
-        if( string_data_.ptr_ == static_cast< void const * >( &string_data_.rep_ ) )
-        {
-                --string_data_.rep_.small_string_.size_ ;
-        }
-        else
-        {
-                ++string_data_.rep_.heap_string_.size_ ;
-        }
+        _inc_size( 1 ) ;
 }
 
 template< typename CharType >
@@ -322,14 +315,7 @@ constexpr
 void
 _string_storage< CharType >::_dec_size () noexcept
 {
-        if( string_data_.ptr_ == static_cast< void const * >( &string_data_.rep_ ) )
-        {
-                ++string_data_.rep_.small_string_.size_ ;
-        }
-        else
-        {
-                --string_data_.rep_.heap_string_.size_ ;
-        }
+        _dec_size( 1 ) ;
 }
 
 template< typename CharType >
@@ -351,7 +337,7 @@ _string_storage< CharType >::_dec_size ( ssize_type const _size_ ) noexcept
 } // namespace _detail
 
 
-template< typename CharType >
+template< typename CharType = char >
 class string : public _detail::_string_storage< CharType >
 {
         using _base = _detail::_string_storage< CharType > ;
