@@ -13,20 +13,26 @@ namespace uti
 {
 
 
-template< typename T, typename IterCat >
+template< typename T, typename IterCat, typename DiffType = ptrdiff_t, typename Pointer = T *, typename Reference = T & >
 struct iterator_base
 {
         using _self = iterator_base ;
 public:
-        using      value_type = T   ;
-        using         pointer = T * ;
-        using       reference = T & ;
-        using difference_type = ptrdiff_t ;
+        using        value_type =         T ;
+        using           pointer =   Pointer ;
+        using         reference = Reference ;
+        using   difference_type =  DiffType ;
+        using iterator_category =   IterCat ;
 
-        using iterator_category = IterCat ;
-
-        constexpr iterator_base (                       ) noexcept requires _has_forward_iterator_category_v< _self >: ptr_( nullptr ) {}
+        constexpr iterator_base (                       ) noexcept requires _has_forward_iterator_category_v< _self > : ptr_( nullptr ) {}
         constexpr iterator_base ( pointer const & _ptr_ ) noexcept : ptr_(   _ptr_ ) {}
+
+        constexpr iterator_base             ( iterator_base const &  ) noexcept = default ;
+        constexpr iterator_base & operator= ( iterator_base const &  ) noexcept = default ;
+        constexpr iterator_base             ( iterator_base       && ) noexcept = default ;
+        constexpr iterator_base & operator= ( iterator_base       && ) noexcept = default ;
+
+        constexpr ~iterator_base () noexcept = default ;
 
         template< typename IterCat1 >
                 requires is_base_of_v< IterCat1, IterCat >

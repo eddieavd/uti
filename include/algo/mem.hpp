@@ -30,8 +30,8 @@ constexpr void destroy ( T * ptr )
 template< typename T >
 constexpr void memclr ( T * begin, T * end )
 {
-        u8_t * mem = static_cast< u8_t * >( begin ) ;
-        u8_t * fin = static_cast< u8_t * >(   end ) ;
+        u8_t * mem = static_cast< u8_t * >( static_cast< void * >( begin ) ) ;
+        u8_t * fin = static_cast< u8_t * >( static_cast< void * >(   end ) ) ;
 
         while( mem != fin )
         {

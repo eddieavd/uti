@@ -10,6 +10,7 @@
 #include <algo/mem.hpp>
 #include <iterator/meta.hpp>
 #include <iterator/base.hpp>
+#include <iterator/reverse_iterator.hpp>
 #include <container/view.hpp>
 #include <container/buffer.hpp>
 #include <meta/concepts.hpp>
@@ -41,8 +42,10 @@ public:
         using       reference = typename      _base::      reference ;
         using const_reference = typename      _base::const_reference ;
 
-        using       iterator = iterator_base< T      , random_access_iterator_tag > ;
-        using const_iterator = iterator_base< T const, random_access_iterator_tag > ;
+        using               iterator = iterator_base< T      , random_access_iterator_tag > ;
+        using         const_iterator = iterator_base< T const, random_access_iterator_tag > ;
+        using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
+        using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
         constexpr          vector (                             ) noexcept = default ;
         constexpr explicit vector ( ssize_type const _capacity_ )                    ;
@@ -101,6 +104,14 @@ public:
         UTI_NODISCARD constexpr       iterator  end ()       noexcept { return _view_base:: end(); }
         UTI_NODISCARD constexpr const_iterator  end () const noexcept { return _view_base:: end(); }
         UTI_NODISCARD constexpr const_iterator cend () const noexcept { return _view_base::cend(); }
+
+        UTI_NODISCARD constexpr       reverse_iterator  rbegin ()       noexcept { return  --end() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rbegin () const noexcept { return  --end() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crbegin () const noexcept { return rbegin() ; }
+
+        UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return --begin() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return --begin() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return    rend()   ; }
 protected:
         template< typename... Args >
         constexpr void _emplace ( Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > ) ;
