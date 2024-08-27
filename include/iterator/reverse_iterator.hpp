@@ -27,7 +27,8 @@ public:
 
         using iterator_type = Iter ;
 
-        constexpr reverse_iterator ( iterator_type const & _iter_ ) noexcept : iter_( _iter_ ) {}
+        constexpr reverse_iterator (                              ) noexcept requires _has_forward_iterator_category_v< _self > : iter_(        ) {}
+        constexpr reverse_iterator ( iterator_type const & _iter_ ) noexcept                                                    : iter_( _iter_ ) {}
 
         constexpr reverse_iterator             ( reverse_iterator const &  ) noexcept = default ;
         constexpr reverse_iterator & operator= ( reverse_iterator const &  ) noexcept = default ;

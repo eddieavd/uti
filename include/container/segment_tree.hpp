@@ -6,11 +6,13 @@
 
 #pragma once
 
-#include "iterator/meta.hpp"
 #include <util/assert.hpp>
 #include <algo/mem.hpp>
 #include <meta/concepts.hpp>
 #include <type/sequence.hpp>
+#include <iterator/meta.hpp>
+#include <iterator/base.hpp>
+#include <iterator/reverse_iterator.hpp>
 #include <container/view.hpp>
 #include <container/buffer.hpp>
 #include <allocator/meta.hpp>
@@ -60,8 +62,10 @@ public:
         using       reference = typename      _base::      reference ;
         using const_reference = typename      _base::const_reference ;
 
-        using        iterator = typename      _base::       iterator ;
-        using  const_iterator = typename      _base:: const_iterator ;
+        using               iterator = iterator_base< T      , random_access_iterator_tag > ;
+        using         const_iterator = iterator_base< T const, random_access_iterator_tag > ;
+        using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
+        using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
         constexpr          segment_tree (                             )     noexcept       = default ;
         constexpr explicit segment_tree ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
@@ -141,6 +145,14 @@ public:
         UTI_NODISCARD constexpr       iterator  end ()       noexcept { return _view_base::end() ; }
         UTI_NODISCARD constexpr const_iterator  end () const noexcept { return _view_base::end() ; }
         UTI_NODISCARD constexpr const_iterator cend () const noexcept { return end() ; }
+
+        UTI_NODISCARD constexpr       reverse_iterator  rbegin ()       noexcept { return  --end() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rbegin () const noexcept { return  --end() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crbegin () const noexcept { return rbegin() ; }
+
+        UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return --begin() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return --begin() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return    rend() ; }
 
         UTI_NODISCARD constexpr       bool    empty () const noexcept { return _view_base::   empty()     ; }
         UTI_NODISCARD constexpr ssize_type     size () const noexcept { return _view_base::    size()     ; }
