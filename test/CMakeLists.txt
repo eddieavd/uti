@@ -12,10 +12,12 @@ add_executable(
         gtest_uti
         gtest_uti.cpp
         gtest_traits.cpp
+        gtest_iterator.cpp
         gtest_tuple.cpp
         gtest_vector.cpp
         gtest_prefix.cpp
         gtest_segment.cpp
+        gtest_string.cpp
 )
 target_link_libraries(
         gtest_uti

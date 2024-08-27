@@ -9,6 +9,9 @@
 #include <type/traits.hpp>
 #include <iterator/meta.hpp>
 #include <iterator/base.hpp>
+#include <iterator/reverse_iterator.hpp>
+#include <algo/copy.hpp>
+#include <algo/mem.hpp>
 #include <allocator/meta.hpp>
 #include <string/string_view.hpp> // refactor: move strlen somewhere else
 
@@ -62,23 +65,24 @@ public:
         using       reference = value_type       & ;
         using const_reference = value_type const & ;
 
-        using       iterator = iterator_base< value_type      , random_access_iterator_tag > ;
-        using const_iterator = iterator_base< value_type const, random_access_iterator_tag > ;
+        using               iterator = iterator_base< value_type      , random_access_iterator_tag > ;
+        using         const_iterator = iterator_base< value_type const, random_access_iterator_tag > ;
+        using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
+        using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
         constexpr _string_storage (                             ) noexcept ;
         constexpr _string_storage ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        constexpr _string_storage             ( _string_storage const &  ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+        constexpr _string_storage & operator= ( _string_storage const &  ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+        constexpr _string_storage             ( _string_storage       && )     noexcept                 ;
+        constexpr _string_storage & operator= ( _string_storage       && )     noexcept                 ;
 
         constexpr ~_string_storage () noexcept ;
 
         constexpr void reserve ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
         constexpr void deallocate () noexcept ;
-
-        UTI_NODISCARD constexpr       reference operator[] ( ssize_type const _index_ )       noexcept ;
-        UTI_NODISCARD constexpr const_reference operator[] ( ssize_type const _index_ ) const noexcept ;
-
-        UTI_NODISCARD constexpr       reference at ( ssize_type const _index_ )       noexcept ;
-        UTI_NODISCARD constexpr const_reference at ( ssize_type const _index_ ) const noexcept ;
 
         UTI_NODISCARD constexpr       pointer data ()       noexcept { return string_data_.ptr_ ; }
         UTI_NODISCARD constexpr const_pointer data () const noexcept { return string_data_.ptr_ ; }
@@ -94,6 +98,14 @@ public:
         UTI_NODISCARD constexpr       iterator  end ()       noexcept { return string_data_.ptr_ + size() ; }
         UTI_NODISCARD constexpr const_iterator  end () const noexcept { return string_data_.ptr_ + size() ; }
         UTI_NODISCARD constexpr const_iterator cend () const noexcept { return end() ; }
+
+        UTI_NODISCARD constexpr       reverse_iterator  rbegin ()       noexcept { return  --end() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rbegin () const noexcept { return  --end() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crbegin () const noexcept { return rbegin() ; }
+
+        UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return --begin() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return --begin() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return    rend() ; }
 protected:
         string_data string_data_ ;
 
@@ -135,6 +147,69 @@ _string_storage< CharType >::_string_storage ( ssize_type const _capacity_ ) UTI
 
 template< typename CharType >
 constexpr
+_string_storage< CharType >::_string_storage ( _string_storage const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+        : string_data_{}
+{
+        if( _other_.capacity() > UTI_SSO_CAP )
+        {
+                string_data_.rep_.heap_string_ = heap_string{} ;
+
+                string_data_.ptr_ = ::uti::alloc_typed_buffer< CharType >( _other_.capacity() ) ;
+
+                string_data_.rep_.heap_string_.capacity_ = _other_.capacity() ;
+        }
+        else
+        {
+                string_data_.rep_.small_string_ = small_string{} ;
+
+                ::uti::copy( &string_data_, &string_data_ + 1, &_other_ ) ;
+
+                string_data_.ptr_ = string_data_.rep_.small_string_.data_ ;
+        }
+}
+
+template< typename CharType >
+constexpr
+_string_storage< CharType >::_string_storage ( _string_storage && _other_ ) noexcept
+        : string_data_{}
+{
+        ::uti::copy( &_other_.string_data_, &_other_.string_data_ + 1, &string_data_ ) ;
+        if( _other_.string_data_.ptr_ == static_cast< void const * >( &_other_.string_data_.rep_ ) )
+        {
+                string_data_.ptr_ = string_data_.rep_.small_string_.data_ ;
+        }
+        ::uti::memclr( &_other_.string_data_, &_other_.string_data_ + 1 ) ;
+}
+
+template< typename CharType >
+constexpr
+_string_storage< CharType > &
+_string_storage< CharType >::operator= ( _string_storage const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        reserve( _other_.size() ) ;
+
+        return *this ;
+}
+
+template< typename CharType >
+constexpr
+_string_storage< CharType > &
+_string_storage< CharType >::operator= ( _string_storage && _other_ ) noexcept
+{
+        deallocate() ;
+
+        ::uti::copy( &_other_.string_data_, &_other_.string_data_ + 1, &string_data_ ) ;
+        if( _other_.string_data_.ptr_ == static_cast< void const * >( &_other_.string_data_.rep_ ) )
+        {
+                string_data_.ptr_ = string_data_.rep_.small_string_.data_ ;
+        }
+        ::uti::memclr( &_other_.string_data_, &_other_.string_data_ + 1 ) ;
+
+        return *this ;
+}
+
+template< typename CharType >
+constexpr
 _string_storage< CharType >::~_string_storage () noexcept
 {
         deallocate() ;
@@ -144,6 +219,24 @@ template< typename CharType >
 constexpr
 void _string_storage< CharType >::reserve ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
+        if( !capacity() )
+        {
+                if( _capacity_ <= UTI_SSO_CAP )
+                {
+                        string_data_.rep_.small_string_ = small_string{} ;
+
+                        string_data_.ptr_ = string_data_.rep_.small_string_.data_ ;
+                        string_data_.rep_.small_string_.size_ = UTI_SSO_CAP ;
+                }
+                else
+                {
+                        string_data_.rep_.heap_string_ = heap_string{} ;
+
+                        string_data_.ptr_ = ::uti::alloc_typed_buffer< value_type >( _capacity_ ) ;
+
+                        string_data_.rep_.heap_string_.capacity_ = _capacity_ ;
+                }
+        }
         if( string_data_.ptr_ == static_cast< void const * >( &string_data_.rep_ ) )
         {
                 if( _capacity_ <= UTI_SSO_CAP ) return ;
@@ -189,47 +282,15 @@ _string_storage< CharType >::deallocate () noexcept
 }
 
 template< typename CharType >
-constexpr
-_string_storage< CharType >::reference
-_string_storage< CharType >::operator[] ( ssize_type const _index_ ) noexcept
-{
-        return string_data_.ptr_[ _index_ ] ;
-}
-
-template< typename CharType >
-constexpr
-_string_storage< CharType >::const_reference
-_string_storage< CharType >::operator[] ( ssize_type const _index_ ) const noexcept
-{
-        return string_data_.ptr_[ _index_ ] ;
-}
-
-template< typename CharType >
-constexpr
-_string_storage< CharType >::reference
-_string_storage< CharType >::at ( ssize_type const _index_ ) noexcept
-{
-        UTI_CEXPR_ASSERT( !empty() && _index_in_bounds( _index_ ), "uti::string::at: index out of bounds" ) ;
-
-        return operator[]( _index_ ) ;
-}
-
-template< typename CharType >
-constexpr
-_string_storage< CharType >::const_reference
-_string_storage< CharType >::at ( ssize_type const _index_ ) const noexcept
-{
-        UTI_CEXPR_ASSERT( !empty() && _index_in_bounds( _index_ ), "uti::string::at: index out of bounds" ) ;
-
-        return operator[]( _index_ ) ;
-}
-
-template< typename CharType >
 UTI_NODISCARD constexpr
 _string_storage< CharType >::ssize_type
 _string_storage< CharType >::capacity () const noexcept
 {
-        if( string_data_.ptr_ == static_cast< void const * >( &string_data_.rep_ ) )
+        if( !string_data_.ptr_ )
+        {
+                return 0 ;
+        }
+        else if( string_data_.ptr_ == static_cast< void const * >( &string_data_.rep_ ) )
         {
                 return UTI_SSO_CAP ;
         }
@@ -244,7 +305,11 @@ UTI_NODISCARD constexpr
 _string_storage< CharType >::ssize_type
 _string_storage< CharType >::size () const noexcept
 {
-        if( string_data_.ptr_ == static_cast< void const * >( &string_data_.rep_ ) )
+        if( !string_data_.ptr_ )
+        {
+                return 0 ;
+        }
+        else if( string_data_.ptr_ == static_cast< void const * >( &string_data_.rep_ ) )
         {
                 return UTI_SSO_CAP - string_data_.rep_.small_string_.size_ ;
         }
@@ -275,6 +340,8 @@ constexpr
 void
 _string_storage< CharType >::_set_size ( ssize_type const _size_ ) noexcept
 {
+        if( !string_data_.ptr_ ) return ;
+
         if( string_data_.ptr_ == static_cast< void const * >( &string_data_.rep_ ) )
         {
                 UTI_CEXPR_ASSERT( _size_ < u8_t_max, "uti::string::_set_size: bad size" ) ;
@@ -300,6 +367,8 @@ constexpr
 void
 _string_storage< CharType >::_inc_size ( ssize_type const _size_ ) noexcept
 {
+        if( !string_data_.ptr_ ) return ;
+
         if( string_data_.ptr_ == static_cast< void const * >( &string_data_.rep_ ) )
         {
                 string_data_.rep_.small_string_.size_ -= _size_ ;
@@ -323,6 +392,8 @@ constexpr
 void
 _string_storage< CharType >::_dec_size ( ssize_type const _size_ ) noexcept
 {
+        if( !string_data_.ptr_ ) return ;
+
         if( string_data_.ptr_ == static_cast< void const * >( &string_data_.rep_ ) )
         {
                 string_data_.rep_.small_string_.size_ += _size_ ;
@@ -352,17 +423,38 @@ public:
         using       reference = typename _base::      reference ;
         using const_reference = typename _base::const_reference ;
 
-        using        iterator = typename _base::       iterator ;
-        using  const_iterator = typename _base:: const_iterator ;
+        using               iterator = typename _base::               iterator   ;
+        using         const_iterator = typename _base::         const_iterator   ;
+        using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
+        using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
         constexpr string () noexcept = default ;
+
+        constexpr string             ( string const &  ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+        constexpr string & operator= ( string const &  ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+        constexpr string             ( string       && )     noexcept       = default ;
+        constexpr string & operator= ( string       && )     noexcept       = default ;
 
         constexpr explicit string ( ssize_type    const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
         constexpr          string ( const_pointer const &   _cstr_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
         constexpr          string ( const_pointer const &    _ptr_ , ssize_type const _len_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
+        constexpr ~string () noexcept = default ;
+
         template< meta::forward_iterator Iter >
         constexpr string ( Iter _begin_, Iter const & _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        UTI_NODISCARD constexpr       reference operator[] ( ssize_type const _index_ )       noexcept { return _base::string_data_.ptr_[ _index_ ] ; }
+        UTI_NODISCARD constexpr const_reference operator[] ( ssize_type const _index_ ) const noexcept { return _base::string_data_.ptr_[ _index_ ] ; }
+
+        UTI_NODISCARD constexpr       reference at ( ssize_type const _index_ )       noexcept { return operator[]( _index_ ) ; }
+        UTI_NODISCARD constexpr const_reference at ( ssize_type const _index_ ) const noexcept { return operator[]( _index_ ) ; }
+
+        UTI_NODISCARD constexpr       reference front ()       noexcept { return *_base::begin() ; }
+        UTI_NODISCARD constexpr const_reference front () const noexcept { return *_base::begin() ; }
+
+        UTI_NODISCARD constexpr       reference back ()       noexcept { return *_base::rbegin() ; }
+        UTI_NODISCARD constexpr const_reference back () const noexcept { return *_base::rbegin() ; }
 
         constexpr const_pointer c_str () const noexcept { return _base::data() ; }
 
@@ -377,6 +469,8 @@ public:
 
         constexpr void insert ( ssize_type const _position_, value_type const & _char_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
         constexpr void insert ( ssize_type const _position_, string     const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        constexpr void clear () noexcept ;
 } ;
 
 
@@ -388,6 +482,34 @@ string< CharType >::string ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_B
 
 template< typename CharType >
 constexpr
+string< CharType >::string ( string const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+        : _base( _other_.size() + 1 )
+{
+        ::uti::copy( _other_.begin(), _other_.end(), _base::begin() ) ;
+
+        _base::_set_size( _other_.size() ) ;
+
+        *_base::end() = '\0' ;
+}
+
+template< typename CharType >
+constexpr
+string< CharType > &
+string< CharType >::operator= ( string const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        _base::reserve( _other_.size() + 1 ) ;
+
+        ::uti::copy( _other_.begin(), _other_.end(), _base::begin() ) ;
+
+        _base::_set_size( _other_.size() ) ;
+
+        *_base::end() = '\0' ;
+
+        return *this ;
+}
+
+template< typename CharType >
+constexpr
 string< CharType >::string ( const_pointer const & _cstr_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
         : _base( ::uti::strlen( _cstr_ ) + 1 )
 {
@@ -395,7 +517,7 @@ string< CharType >::string ( const_pointer const & _cstr_ ) UTI_NOEXCEPT_UNLESS_
 
         ::uti::copy( _cstr_, _cstr_ + _base::size(), _base::data() ) ;
 
-        _base::operator[]( _base::size() ) = '\0' ;
+        *_base::end() = '\0' ;
 }
 
 template< typename CharType >
@@ -407,7 +529,7 @@ string< CharType >::string ( const_pointer const & _ptr_, ssize_type const _len_
 
         ::uti::copy( _ptr_, _ptr_ + _len_, _base::data() ) ;
 
-        _base::operator[]( _base::size() ) = '\0' ;
+        *_base::end() = '\0' ;
 }
 
 template< typename CharType >
@@ -416,18 +538,20 @@ constexpr
 string< CharType >::string ( Iter _begin_, Iter const & _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
         : _base( ::uti::distance( _begin_, _end_ ) + 1 )
 {
+        _base::_set_size( ::uti::distance( _begin_, _end_ ) ) ;
+
         ::uti::copy( _begin_, _end_, _base::data() ) ;
 
-        _base::operator[]( _base::size() ) = '\0' ;
+        *_base::end() = '\0' ;
 }
 
 template< typename CharType >
 constexpr void
 string< CharType >::reserve () UTI_NOEXCEPT_UNLESS_BADALLOC
 {
-        if( _base::size() + 1 >= _base::capacity() )
+        if( _base::empty() || _base::size() + 1 >= _base::capacity() )
         {
-                _base::reserve( 2 * _base::capacity() ) ;
+                _base::reserve( _base::empty() ? 1 : 2 * _base::capacity() ) ;
         }
 }
 
@@ -437,11 +561,11 @@ string< CharType >::push_back ( value_type const & _char_ ) UTI_NOEXCEPT_UNLESS_
 {
         reserve() ;
 
-        _base::operator[]( _base::size() ) = _char_ ;
+        *_base::end() = _char_ ;
 
         _base::_inc_size() ;
 
-        _base::operator[]( _base::size() ) = '\0' ;
+        *_base::end() = '\0' ;
 }
 
 template< typename CharType >
@@ -455,7 +579,7 @@ string< CharType >::append ( string const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALL
 
         _base::_inc_size( _other_.size() ) ;
 
-        _base::operator[]( _base::size() ) = '\0' ;
+        *_base::end() = '\0' ;
 
         return *this ;
 }
@@ -474,7 +598,7 @@ string< CharType >::append ( Iter _begin_, Iter const & _end_ ) UTI_NOEXCEPT_UNL
 
         _base::_inc_size( sz ) ;
 
-        _base::operator[]( _base::size() ) = '\0' ;
+        *_base::end() = '\0' ;
 
         return *this ;
 }
@@ -492,10 +616,10 @@ string< CharType >::insert ( ssize_type const _position_, value_type const & _ch
 
         ::uti::copy_backward( _base::end() - 1, _base::begin() + _position_, _base::end() ) ;
 
-        _base::at( _position_ ) = _char_ ;
+        at( _position_ ) = _char_ ;
         _base::_inc_size() ;
 
-        _base::operator[]( _base::size() ) = '\0' ;
+        *_base::end() = '\0' ;
 }
 
 template< typename CharType >
@@ -504,16 +628,7 @@ string< CharType >::insert ( ssize_type const _position_, string const & _other_
 {
         if( _position_ >= _base::size() )
         {
-                auto sz = _base::size() ;
-
-                _base::reserve( sz + _other_.size() + 1 ) ;
-
-                ::uti::copy( _other_.begin(), _other_.end(), _base::begin() + sz ) ;
-
-                _base::_inc_size( _other_.size() ) ;
-
-                _base::operator[]( _base::size() ) = '\0' ;
-
+                append( _other_ ) ;
                 return ;
         }
         _base::reserve( _base::size() + _other_.size() + 1 ) ;
@@ -523,7 +638,14 @@ string< CharType >::insert ( ssize_type const _position_, string const & _other_
 
         _base::_inc_size( _other_.size() ) ;
 
-        _base::operator[]( _base::size() ) = '\0' ;
+        *_base::end() = '\0' ;
+}
+
+template< typename CharType >
+constexpr void
+string< CharType >::clear () noexcept
+{
+        _base::deallocate() ;
 }
 
 

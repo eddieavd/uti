@@ -11,10 +11,14 @@
 #include <type_traits>
 
 #include <type/traits.hpp>
+#include <iterator/meta.hpp>
+#include <iterator/base.hpp>
 #include <container/tuple.hpp>
 #include <container/vector.hpp>
 #include <container/prefix_array.hpp>
 #include <container/segment_tree.hpp>
+
+#include <string/string.hpp>
 
 
 #define CUSTOM_CAP 16
