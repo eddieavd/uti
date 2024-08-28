@@ -30,6 +30,10 @@ public:
         constexpr reverse_iterator (                              ) noexcept requires _has_forward_iterator_category_v< _self > : iter_(        ) {}
         constexpr reverse_iterator ( iterator_type const & _iter_ ) noexcept                                                    : iter_( _iter_ ) {}
 
+        template< typename Iter1 >
+                requires is_base_of_v< typename iterator_traits< Iter1 >::iterator_category, iterator_category >
+        constexpr reverse_iterator ( reverse_iterator< Iter1 > const & _iter_ ) noexcept : iter_( _iter_.iter_ ) {}
+
         constexpr reverse_iterator             ( reverse_iterator const &  ) noexcept = default ;
         constexpr reverse_iterator & operator= ( reverse_iterator const &  ) noexcept = default ;
         constexpr reverse_iterator             ( reverse_iterator       && ) noexcept = default ;
@@ -40,11 +44,11 @@ public:
         constexpr operator pointer ()       noexcept { return static_cast< pointer >( iter_ ) ; }
         constexpr operator pointer () const noexcept { return static_cast< pointer >( iter_ ) ; }
 
-        constexpr reverse_iterator & operator++ (     ) noexcept { --iter_ ; return *this ; }
-        constexpr reverse_iterator   operator++ ( int ) noexcept { auto prev = *this ; --iter_ ; return prev ; }
+        constexpr reverse_iterator & operator++ (     ) noexcept {                     --iter_ ; return *this ; }
+        constexpr reverse_iterator   operator++ ( int ) noexcept { auto prev = *this ; --iter_ ; return  prev ; }
 
-        constexpr reverse_iterator & operator-- (     ) noexcept requires _has_bidirectional_iterator_category_v< _self > { ++iter_ ; return *this ; }
-        constexpr reverse_iterator   operator-- ( int ) noexcept requires _has_bidirectional_iterator_category_v< _self > { auto prev = *this ; ++iter_ ; return prev ; }
+        constexpr reverse_iterator & operator-- (     ) noexcept requires _has_bidirectional_iterator_category_v< _self > {                     ++iter_ ; return *this ; }
+        constexpr reverse_iterator   operator-- ( int ) noexcept requires _has_bidirectional_iterator_category_v< _self > { auto prev = *this ; ++iter_ ; return  prev ; }
 
         constexpr reverse_iterator & operator+= ( difference_type const _n_ ) noexcept requires _has_random_access_iterator_category_v< _self > { iter_ -= _n_ ; return *this ; }
         constexpr reverse_iterator & operator-= ( difference_type const _n_ ) noexcept requires _has_random_access_iterator_category_v< _self > { iter_ += _n_ ; return *this ; }

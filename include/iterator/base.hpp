@@ -35,17 +35,17 @@ public:
         constexpr ~iterator_base () noexcept = default ;
 
         template< typename IterCat1 >
-                requires is_base_of_v< IterCat1, IterCat >
+                requires is_base_of_v< IterCat1, iterator_category >
         constexpr iterator_base ( iterator_base< T, IterCat1 > const & _iter_ ) noexcept : ptr_( _iter_.ptr_ ) {}
 
         constexpr operator pointer ()       noexcept { return ptr_ ; }
         constexpr operator pointer () const noexcept { return ptr_ ; }
 
-        constexpr iterator_base & operator++ (     ) noexcept { ++ptr_ ; return *this ; }
-        constexpr iterator_base   operator++ ( int ) noexcept { auto prev = *this ; ++ptr_ ; return prev ; }
+        constexpr iterator_base & operator++ (     ) noexcept {                     ++ptr_ ; return *this ; }
+        constexpr iterator_base   operator++ ( int ) noexcept { auto prev = *this ; ++ptr_ ; return  prev ; }
 
-        constexpr iterator_base & operator-- (     ) noexcept requires _has_bidirectional_iterator_category_v< _self > { --ptr_ ; return *this ; }
-        constexpr iterator_base   operator-- ( int ) noexcept requires _has_bidirectional_iterator_category_v< _self > { auto prev = *this ; --ptr_ ; return prev ; }
+        constexpr iterator_base & operator-- (     ) noexcept requires _has_bidirectional_iterator_category_v< _self > {                     --ptr_ ; return *this ; }
+        constexpr iterator_base   operator-- ( int ) noexcept requires _has_bidirectional_iterator_category_v< _self > { auto prev = *this ; --ptr_ ; return  prev ; }
 
         constexpr iterator_base & operator+= ( difference_type const _n_ ) noexcept requires _has_random_access_iterator_category_v< _self > { this->ptr_ += _n_ ; return *this ; }
         constexpr iterator_base & operator-= ( difference_type const _n_ ) noexcept requires _has_random_access_iterator_category_v< _self > { this->ptr_ -= _n_ ; return *this ; }

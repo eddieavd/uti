@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <iterator/meta.hpp>
+#include <iterator/base.hpp>
 #include <container/base.hpp>
 #include <allocator/meta.hpp>
 #include <allocator/default.hpp>
@@ -35,8 +37,8 @@ public:
         using       reference = typename _base::      reference ;
         using const_reference = typename _base::const_reference ;
 
-        using        iterator = typename _base::       iterator ;
-        using  const_iterator = typename _base:: const_iterator ;
+        using        iterator = iterator_base< value_type      , random_access_iterator_tag > ;
+        using  const_iterator = iterator_base< value_type const, random_access_iterator_tag > ;
 
         constexpr          buffer (                             )     noexcept       = default ;
         constexpr explicit buffer ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;

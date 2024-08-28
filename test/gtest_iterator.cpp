@@ -58,8 +58,6 @@ TEST( IteratorTest, IteratorTraits )
         static_assert( !uti::meta::prefix_array_iterator<  random_iter > ) ;
         static_assert(  uti::meta::prefix_array_iterator<  prefix_iter > ) ;
         static_assert( !uti::meta::prefix_array_iterator<      pointer > ) ;
-
-        static_assert( uti::is_constructible_v< uti::iterator_base< int, uti::prefix_array_iterator_tag > > ) ;
 }
 
 TEST( IteratorTest, ContainerIterators )

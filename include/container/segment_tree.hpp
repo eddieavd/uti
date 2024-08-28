@@ -140,19 +140,19 @@ public:
 
         UTI_NODISCARD constexpr       iterator  begin ()       noexcept { return _view_base::begin() ; }
         UTI_NODISCARD constexpr const_iterator  begin () const noexcept { return _view_base::begin() ; }
-        UTI_NODISCARD constexpr const_iterator cbegin () const noexcept { return begin() ; }
+        UTI_NODISCARD constexpr const_iterator cbegin () const noexcept { return             begin() ; }
 
         UTI_NODISCARD constexpr       iterator  end ()       noexcept { return _view_base::end() ; }
         UTI_NODISCARD constexpr const_iterator  end () const noexcept { return _view_base::end() ; }
-        UTI_NODISCARD constexpr const_iterator cend () const noexcept { return end() ; }
+        UTI_NODISCARD constexpr const_iterator cend () const noexcept { return             end() ; }
 
-        UTI_NODISCARD constexpr       reverse_iterator  rbegin ()       noexcept { return  --end() ; }
-        UTI_NODISCARD constexpr const_reverse_iterator  rbegin () const noexcept { return  --end() ; }
-        UTI_NODISCARD constexpr const_reverse_iterator crbegin () const noexcept { return rbegin() ; }
+        UTI_NODISCARD constexpr       iterator  rbegin ()       noexcept { return _view_base::rbegin() ; }
+        UTI_NODISCARD constexpr const_iterator  rbegin () const noexcept { return _view_base::rbegin() ; }
+        UTI_NODISCARD constexpr const_iterator crbegin () const noexcept { return             rbegin() ; }
 
-        UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return --begin() ; }
-        UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return --begin() ; }
-        UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return    rend() ; }
+        UTI_NODISCARD constexpr       iterator  rend ()       noexcept { return _view_base::rend() ; }
+        UTI_NODISCARD constexpr const_iterator  rend () const noexcept { return _view_base::rend() ; }
+        UTI_NODISCARD constexpr const_iterator crend () const noexcept { return             rend() ; }
 
         UTI_NODISCARD constexpr       bool    empty () const noexcept { return _view_base::   empty()     ; }
         UTI_NODISCARD constexpr ssize_type     size () const noexcept { return _view_base::    size()     ; }

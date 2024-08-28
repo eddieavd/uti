@@ -105,13 +105,13 @@ public:
         UTI_NODISCARD constexpr const_iterator  end () const noexcept { return _view_base:: end(); }
         UTI_NODISCARD constexpr const_iterator cend () const noexcept { return _view_base::cend(); }
 
-        UTI_NODISCARD constexpr       reverse_iterator  rbegin ()       noexcept { return  --end() ; }
-        UTI_NODISCARD constexpr const_reverse_iterator  rbegin () const noexcept { return  --end() ; }
-        UTI_NODISCARD constexpr const_reverse_iterator crbegin () const noexcept { return rbegin() ; }
+        UTI_NODISCARD constexpr       reverse_iterator  rbegin ()       noexcept { return _view_base:: rbegin() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rbegin () const noexcept { return _view_base:: rbegin() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crbegin () const noexcept { return _view_base::crbegin() ; }
 
-        UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return --begin() ; }
-        UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return --begin() ; }
-        UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return    rend()   ; }
+        UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return _view_base:: rend() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return _view_base:: rend() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return _view_base::crend() ; }
 protected:
         template< typename... Args >
         constexpr void _emplace ( Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > ) ;
