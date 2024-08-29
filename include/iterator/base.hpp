@@ -27,10 +27,38 @@ public:
         constexpr iterator_base (                       ) noexcept requires _has_forward_iterator_category_v< _self > : ptr_( nullptr ) {}
         constexpr iterator_base ( pointer const & _ptr_ ) noexcept : ptr_(   _ptr_ ) {}
 
+        constexpr iterator_base             ( nullptr_t ) noexcept : ptr_ ( nullptr ) {}
+        constexpr iterator_base & operator= ( nullptr_t ) noexcept { ptr_ = nullptr ; return *this ; }
+
         constexpr iterator_base             ( iterator_base const &  ) noexcept = default ;
         constexpr iterator_base & operator= ( iterator_base const &  ) noexcept = default ;
         constexpr iterator_base             ( iterator_base       && ) noexcept = default ;
         constexpr iterator_base & operator= ( iterator_base       && ) noexcept = default ;
+
+        constexpr iterator_base ( iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >, add_lvalue_reference_t< remove_const_t< T > > > const & _other_ )
+                noexcept requires( is_const_v< T > ) : ptr_( _other_.ptr_ ) {} ;
+
+        constexpr iterator_base & operator= ( iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >, add_lvalue_reference_t< remove_const_t< T > > > const & _other_ )
+                noexcept requires( is_const_v< T > ) { ptr_ = _other_.ptr_ ; }
+
+        constexpr iterator_base ( iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >, add_lvalue_reference_t< remove_const_t< T > > > && _other_ )
+                noexcept requires( is_const_v< T > ) : ptr_( _other_.ptr_ ) {} ;
+
+        constexpr iterator_base & operator= ( iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >, add_lvalue_reference_t< remove_const_t< T > > > && _other_ )
+                noexcept requires( is_const_v< T > ) { ptr_ = _other_.ptr_ ; }
+
+
+        constexpr iterator_base ( iterator_base< T const, IterCat, DiffType, add_pointer_t< T const >, add_lvalue_reference_t< T const > > const & _other_ )
+                noexcept requires( !is_const_v< T > ) : ptr_( _other_.ptr_ ) {}
+
+        constexpr iterator_base & operator= ( iterator_base< T const, IterCat, DiffType, add_pointer_t< T const >, add_lvalue_reference_t< T const > > const & _other_ )
+                noexcept requires( !is_const_v< T > ) { ptr_ = _other_.ptr_ ; }
+
+        constexpr iterator_base ( iterator_base< T const, IterCat, DiffType, add_pointer_t< T const >, add_lvalue_reference_t< T const > > && _other_ )
+                noexcept requires( !is_const_v< T > ) : ptr_( _other_.ptr_ ) {}
+
+        constexpr iterator_base & operator= ( iterator_base< T const, IterCat, DiffType, add_pointer_t< T const >, add_lvalue_reference_t< T const > > && _other_ )
+                noexcept requires( !is_const_v< T > ) { ptr_ = _other_.ptr_ ; }
 
         constexpr ~iterator_base () noexcept = default ;
 

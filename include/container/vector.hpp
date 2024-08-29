@@ -297,7 +297,8 @@ vector< T, Alloc >::operator= ( vector && _other_ ) noexcept
         this->size_       = _other_.size_       ;
         this->_capacity() = _other_._capacity() ;
 
-        _other_._buffer() = _other_.begin_ = nullptr;
+        _other_._buffer() = nullptr;
+        _other_.begin_ = nullptr ;
         _other_.size_ = 0 ;
         _other_._capacity() = 0 ;
 

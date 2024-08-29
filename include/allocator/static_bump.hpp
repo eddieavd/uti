@@ -7,6 +7,14 @@
 #pragma once
 
 #include <allocator/meta.hpp>
+#include <iterator/meta.hpp>
+#include <iterator/base.hpp>
+
+#include <iostream>
+
+#ifndef UTI_STATIC_MEM_SIZE
+#define UTI_STATIC_MEM_SIZE 8 * 1024 * 1024
+#endif
 
 
 namespace uti
@@ -30,31 +38,37 @@ public:
         using       reference = value_type       & ;
         using const_reference = value_type const & ;
 
-        using        iterator =       pointer ;
-        using  const_iterator = const_pointer ;
+        using        iterator = uti::iterator_base< value_type      , random_access_iterator_tag > ;
+        using  const_iterator = uti::iterator_base< value_type const, random_access_iterator_tag > ;
 
-        UTI_NODISCARD static constexpr block_type allocate ( ssize_type const _capacity_ ) noexcept
+        UTI_NODISCARD constexpr block_type allocate ( ssize_type const _capacity_ ) noexcept
         {
+                block_type block {} ;
+
                 if( _mem_available() >= _capacity_ )
                 {
-                        end += _capacity_ ;
-                        return { end - _capacity_, _capacity_ } ;
+                        block. begin_ = end_ ;
+                        block.size_ = _capacity_ ;
+                        end_ += _capacity_ ;
                 }
-                return { nullptr, 0 } ;
+                return block ;
         }
-        UTI_NODISCARD static constexpr block_type reallocate ( block_type const & _block_, ssize_type const _new_capacity_ ) noexcept
+        constexpr void reallocate ( block_type & _block_, ssize_type const _new_capacity_ ) noexcept
         {
-                if( !_can_realloc_inplace( _block_, _new_capacity_ ) )
+                if( _can_realloc_inplace( _block_, _new_capacity_ ) )
                 {
-                        block_type new_block = allocate( _new_capacity_ );
-                        ::uti::copy( _block_.ptr, _block_.ptr + _block_.size, new_block.ptr );
-                        return new_block;
+                        _realloc_inplace( _block_, _new_capacity_ ) ;
+                        std::cout << "success\n" ;
                 }
-                _realloc_inplace( _block_, _new_capacity_ ) ;
-
-                return { _block_.ptr, _new_capacity_ } ;
+                else
+                {
+                        block_type new_block = allocate( _new_capacity_ ) ;
+                        ::uti::copy( _block_.begin_, _block_.begin_ + _block_.size_, new_block.begin_ ) ;
+                        _block_ = new_block ;
+                        std::cout << "fail\n" ;
+                }
         }
-        UTI_NODISCARD static constexpr bool realloc_inplace ( block_type const & _block_, ssize_type const _new_capacity_ ) noexcept
+        UTI_NODISCARD constexpr bool realloc_inplace ( block_type & _block_, ssize_type const _new_capacity_ ) noexcept
         {
                 if( _can_realloc_inplace( _block_, _new_capacity_ ) )
                 {
@@ -63,31 +77,42 @@ public:
                 }
                 return false ;
         }
-        static constexpr void deallocate ( block_type const & _block_ ) noexcept
+        constexpr void deallocate ( block_type & _block_ ) noexcept
         {
-                if( ( _block_.ptr + _block_.size ) == end )
+                if( _is_last_block( _block_ ) )
                 {
-                        end = _block_.ptr;
+                        end_ = _block_.begin() ;
                 }
+                _block_.begin_  = nullptr ;
+                _block_.size_ =       0 ;
         }
+
+        UTI_NODISCARD constexpr       iterator  begin ()       noexcept { return mem_    ; }
+        UTI_NODISCARD constexpr const_iterator  begin () const noexcept { return mem_    ; }
+        UTI_NODISCARD constexpr const_iterator cbegin () const noexcept { return begin() ; }
+
+        UTI_NODISCARD constexpr       iterator  end ()       noexcept { return end_  ; }
+        UTI_NODISCARD constexpr const_iterator  end () const noexcept { return end_  ; }
+        UTI_NODISCARD constexpr const_iterator cend () const noexcept { return end() ; }
 private:
-        inline static T   mem [ memsize ] ;
-        inline static T * end { mem     } ;
+        inline static value_type mem_ [ memsize ] ;
+        inline static iterator   end_ { mem_    } ;
 
-        static constexpr ssize_type _mem_available () noexcept { return memsize - ( end - mem ) ; }
+        constexpr ssize_type _mem_available () noexcept { return memsize - ::uti::distance( cbegin(), cend() ) ; }
 
-        static constexpr bool _is_last_block ( block_type const & _block_ ) noexcept { return _block_.ptr == end - _block_.size ; }
+        constexpr bool _is_last_block ( block_type const & _block_ ) noexcept { return _block_.cbegin() + _block_.size_ == cend() ; }
 
-        static constexpr bool _can_realloc_inplace ( block_type const & _block_, ssize_type const _new_capacity_ ) noexcept
+        constexpr bool _can_realloc_inplace ( block_type const & _block_, ssize_type const _new_capacity_ ) noexcept
         {
-                return _is_last_block( _block_ ) && _mem_available() >= ( _new_capacity_ - _block_.size ) ;
+                return _is_last_block( _block_ ) && _mem_available() >= ( _new_capacity_ - _block_.size_ ) ;
         }
 
-        static constexpr void _realloc_inplace ( block_type const & _block_, ssize_type const _new_capacity_ ) noexcept
+        constexpr void _realloc_inplace ( block_type & _block_, ssize_type const _new_capacity_ ) noexcept
         {
-                end += _new_capacity_ - _block_.size ;
+                end_ += _new_capacity_ - _block_.size_ ;
+                _block_.size_ = _new_capacity_ ;
         }
-};
+} ;
 
 
 } // namespace uti
