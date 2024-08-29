@@ -451,41 +451,51 @@ TEST( SegmentTreeTest, Shrink )
 
 TEST( SegmentTreeTest, Insert )
 {
-        uti::segment_tree<         int > segtreeint( CUSTOM_CAP,    CUSTOM_VAL ) ;
-        uti::segment_tree< std::string > segtreestr( CUSTOM_CAP, "insert_test" ) ;
+        uti::segment_tree<         int > segint( CUSTOM_CAP,            0  ) ;
+        uti::segment_tree< std::string > segstr( CUSTOM_CAP, "insert_test" ) ;
 
-        EXPECT_EQ( segtreeint.size(), CUSTOM_CAP ) ;
-        EXPECT_EQ( segtreestr.size(), CUSTOM_CAP ) ;
-
-        segtreeint.insert( 0, CUSTOM_VAL * 2 ) ;
-        segtreestr.insert( 0,    "inserted"  ) ;
-
-        EXPECT_EQ( segtreeint.size(), CUSTOM_CAP + 1 ) ;
-        EXPECT_EQ( segtreestr.size(), CUSTOM_CAP + 1 ) ;
-
-        segtreeint.insert( CUSTOM_CAP / 2, CUSTOM_VAL * 2 ) ;
-        segtreestr.insert( CUSTOM_CAP / 2,     "inserted" ) ;
-
-        EXPECT_EQ( segtreeint.size(), CUSTOM_CAP + 2 ) ;
-        EXPECT_EQ( segtreestr.size(), CUSTOM_CAP + 2 ) ;
-
-        segtreeint.insert( segtreeint.size(), CUSTOM_VAL * 2 ) ;
-        segtreestr.insert( segtreestr.size(),     "inserted" ) ;
-
-        EXPECT_EQ( segtreeint.size(), CUSTOM_CAP + 3 ) ;
-        EXPECT_EQ( segtreestr.size(), CUSTOM_CAP + 3 ) ;
-
-        for( ssize_t i = 0; i < segtreeint.size(); ++i )
+        for( ssize_t i = 0; i < segint.size(); ++i )
         {
-                if( i == 0 || i == CUSTOM_CAP / 2 || i == segtreeint.size() - 1 )
+                segint.at( i ) = i ;
+        }
+
+        EXPECT_EQ( segint.size(), CUSTOM_CAP ) ;
+        EXPECT_EQ( segstr.size(), CUSTOM_CAP ) ;
+
+        segint.insert( 0,         0  ) ;
+        segstr.insert( 0, "inserted" ) ;
+
+        EXPECT_EQ( segint.size(), CUSTOM_CAP + 1 ) ;
+        EXPECT_EQ( segstr.size(), CUSTOM_CAP + 1 ) ;
+
+        segint.insert( CUSTOM_CAP / 2,         0  ) ;
+        segstr.insert( CUSTOM_CAP / 2, "inserted" ) ;
+
+        EXPECT_EQ( segint.size(), CUSTOM_CAP + 2 ) ;
+        EXPECT_EQ( segstr.size(), CUSTOM_CAP + 2 ) ;
+
+        segint.insert( segint.size(),         0  ) ;
+        segstr.insert( segstr.size(), "inserted" ) ;
+
+        EXPECT_EQ( segint.size(), CUSTOM_CAP + 3 ) ;
+        EXPECT_EQ( segstr.size(), CUSTOM_CAP + 3 ) ;
+
+        for( ssize_t i = 0; i < segint.size(); ++i )
+        {
+                if( i == 0 || i == CUSTOM_CAP / 2 || i == segint.size() - 1 )
                 {
-                        EXPECT_EQ( segtreeint.at( i ), CUSTOM_VAL * 2 ) ;
-                        EXPECT_EQ( segtreestr.at( i ).starts_with( "inserted" ), true ) ;
+                        EXPECT_EQ( segint.at( i ),         0  ) ;
+                        EXPECT_EQ( segstr.at( i ), "inserted" ) ;
+                }
+                else if( i < CUSTOM_CAP / 2 )
+                {
+                        EXPECT_EQ( segint.at( i ),        i - 1  ) ;
+                        EXPECT_EQ( segstr.at( i ), "insert_test" ) ;
                 }
                 else
                 {
-                        EXPECT_EQ( segtreeint.at( i ), CUSTOM_VAL ) ;
-                        EXPECT_EQ( segtreestr.at( i ).starts_with( "insert_test" ), true ) ;
+                        EXPECT_EQ( segint.at( i ),        i - 2  ) ;
+                        EXPECT_EQ( segstr.at( i ), "insert_test" ) ;
                 }
         }
 }

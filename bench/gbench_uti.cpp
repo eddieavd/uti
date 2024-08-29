@@ -7,6 +7,7 @@
 #include "gbench_uti.hpp"
 
 #include <container/vector.hpp>
+#include <allocator/static_bump.hpp>
 
 
 using namespace uti::bench ;

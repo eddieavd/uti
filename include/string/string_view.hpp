@@ -18,13 +18,13 @@ namespace uti
 
 
 template< typename CharType >
-struct string_view ;
+struct generic_string_view ;
 
-using string_view_t = string_view< char const > ;
+using string_view = generic_string_view< char const > ;
 
 
 template< typename CharType >
-struct string_view
+struct generic_string_view
 {
         using value_type = CharType ;
         using  size_type =   size_t ;
@@ -38,21 +38,21 @@ struct string_view
         using       iterator =       pointer ;
         using const_iterator = const_pointer ;
 
-        constexpr string_view (                                     ) noexcept ;
-        constexpr string_view ( pointer _c_str_                     ) noexcept ;
-        constexpr string_view ( pointer  _data_, ssize_type _count_ ) noexcept ;
+        constexpr generic_string_view (                                     ) noexcept ;
+        constexpr generic_string_view ( pointer _c_str_                     ) noexcept ;
+        constexpr generic_string_view ( pointer  _data_, ssize_type _count_ ) noexcept ;
 
-        constexpr string_view ( string_view const &  _other_ ) noexcept = default ;
-        constexpr string_view ( string_view       && _other_ ) noexcept           ;
+        constexpr generic_string_view ( generic_string_view const &  _other_ ) noexcept = default ;
+        constexpr generic_string_view ( generic_string_view       && _other_ ) noexcept           ;
 
-        constexpr string_view & operator= ( string_view const &  _other_ ) noexcept = default ;
-        constexpr string_view & operator= ( string_view       && _other_ ) noexcept           ;
+        constexpr generic_string_view & operator= ( generic_string_view const &  _other_ ) noexcept = default ;
+        constexpr generic_string_view & operator= ( generic_string_view       && _other_ ) noexcept           ;
 
         constexpr       reference operator[] ( ssize_type const _index_ )       noexcept { return data_[ _index_ ]; }
         constexpr const_reference operator[] ( ssize_type const _index_ ) const noexcept { return data_[ _index_ ]; }
 
-        constexpr bool operator== ( string_view const & _other_ ) const noexcept { return data_ == _other_.data_ && size_ == _other_.size_; }
-        constexpr bool operator!= ( string_view const & _other_ ) const noexcept { return !operator==( _other_ ); }
+        constexpr bool operator== ( generic_string_view const & _other_ ) const noexcept { return data_ == _other_.data_ && size_ == _other_.size_; }
+        constexpr bool operator!= ( generic_string_view const & _other_ ) const noexcept { return !operator==( _other_ ); }
 
         constexpr ssize_type operator++ (     ) noexcept { --data_; return ++size_; } // extends view on  left side
         constexpr ssize_type operator++ ( int ) noexcept {          return ++size_; } // extends view on right side
@@ -60,26 +60,26 @@ struct string_view
         constexpr ssize_type operator-- (     ) noexcept { ++data_; return --size_; } // shrinks view on  left side
         constexpr ssize_type operator-- ( int ) noexcept {          return --size_; } // shrinks view on right side
 
-        UTI_NODISCARD constexpr bool equal_to             ( string_view const & _other_ ) const noexcept ;
-        UTI_NODISCARD constexpr bool equal_to_insensitive ( string_view const & _other_ ) const noexcept ;
+        UTI_NODISCARD constexpr bool equal_to             ( generic_string_view const & _other_ ) const noexcept ;
+        UTI_NODISCARD constexpr bool equal_to_insensitive ( generic_string_view const & _other_ ) const noexcept ;
 
-        UTI_NODISCARD constexpr bool starts_with             ( string_view const & _prefix_ ) const noexcept ;
-        UTI_NODISCARD constexpr bool starts_with_insensitive ( string_view const & _prefix_ ) const noexcept ;
-        UTI_NODISCARD constexpr bool   ends_with             ( string_view const & _suffix_ ) const noexcept ;
-        UTI_NODISCARD constexpr bool   ends_with_insensitive ( string_view const & _suffix_ ) const noexcept ;
+        UTI_NODISCARD constexpr bool starts_with             ( generic_string_view const & _prefix_ ) const noexcept ;
+        UTI_NODISCARD constexpr bool starts_with_insensitive ( generic_string_view const & _prefix_ ) const noexcept ;
+        UTI_NODISCARD constexpr bool   ends_with             ( generic_string_view const & _suffix_ ) const noexcept ;
+        UTI_NODISCARD constexpr bool   ends_with_insensitive ( generic_string_view const & _suffix_ ) const noexcept ;
 
         constexpr ssize_type trim       () noexcept ;
         constexpr ssize_type trim_left  () noexcept ;
         constexpr ssize_type trim_right () noexcept ;
 
-        UTI_NODISCARD constexpr string_view trimmed       () const noexcept ;
-        UTI_NODISCARD constexpr string_view trimmed_left  () const noexcept ;
-        UTI_NODISCARD constexpr string_view trimmed_right () const noexcept ;
+        UTI_NODISCARD constexpr generic_string_view trimmed       () const noexcept ;
+        UTI_NODISCARD constexpr generic_string_view trimmed_left  () const noexcept ;
+        UTI_NODISCARD constexpr generic_string_view trimmed_right () const noexcept ;
 
-        UTI_NODISCARD constexpr string_view substr ( ssize_type const _start_, ssize_type const _len_ ) const noexcept ;
+        UTI_NODISCARD constexpr generic_string_view substr ( ssize_type const _start_, ssize_type const _len_ ) const noexcept ;
 
-        UTI_NODISCARD constexpr string_view chop_left  ( ssize_type _count_ ) noexcept ;
-        UTI_NODISCARD constexpr string_view chop_right ( ssize_type _count_ ) noexcept ;
+        UTI_NODISCARD constexpr generic_string_view chop_left  ( ssize_type _count_ ) noexcept ;
+        UTI_NODISCARD constexpr generic_string_view chop_right ( ssize_type _count_ ) noexcept ;
 
         constexpr void unchop_left  ( ssize_type _count_ ) noexcept ;
         constexpr void unchop_right ( ssize_type _count_ ) noexcept ;
@@ -88,22 +88,22 @@ struct string_view
         UTI_NODISCARD constexpr value_type chop_char_right () noexcept ;
 
         UTI_NODISCARD constexpr ssize_type index_of ( value_type  const & _val_, ssize_type const start ) const noexcept ;
-        UTI_NODISCARD constexpr ssize_type index_of ( string_view const & _val_, ssize_type const start ) const noexcept ;
+        UTI_NODISCARD constexpr ssize_type index_of ( generic_string_view const & _val_, ssize_type const start ) const noexcept ;
 
         UTI_NODISCARD constexpr bool contains ( value_type const & _val_ ) const noexcept ;
 
         UTI_NODISCARD constexpr ssize_type count ( value_type const & _val_ ) const noexcept ;
 
-        UTI_NODISCARD constexpr string_view chop_to_delimiter ( value_type  const & _delimiter_, bool _discard_delimiter_ ) noexcept ;
-        UTI_NODISCARD constexpr string_view chop_to_string    ( string_view const & _delimiter_, bool _discard_delimiter_ ) noexcept ;
+        UTI_NODISCARD constexpr generic_string_view chop_to_delimiter ( value_type  const & _delimiter_, bool _discard_delimiter_ ) noexcept ;
+        UTI_NODISCARD constexpr generic_string_view chop_to_string    ( generic_string_view const & _delimiter_, bool _discard_delimiter_ ) noexcept ;
 
-        UTI_NODISCARD constexpr string_view chop_to_first_of ( string_view const & _delims_, bool const _discard_delimiter_ ) noexcept ;
-
-        template< typename Predicate >
-        UTI_NODISCARD constexpr string_view chop_left_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) ) ;
+        UTI_NODISCARD constexpr generic_string_view chop_to_first_of ( generic_string_view const & _delims_, bool const _discard_delimiter_ ) noexcept ;
 
         template< typename Predicate >
-        UTI_NODISCARD constexpr string_view chop_right_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) ) ;
+        UTI_NODISCARD constexpr generic_string_view chop_left_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) ) ;
+
+        template< typename Predicate >
+        UTI_NODISCARD constexpr generic_string_view chop_right_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) ) ;
 
         template< typename Integer >
         UTI_NODISCARD constexpr Integer parse_int () const noexcept ;
@@ -165,25 +165,25 @@ UTI_NODISCARD constexpr CharType to_lower ( CharType chr ) noexcept
 
 
 template< typename CharType >
-constexpr string_view< CharType >::string_view () noexcept
+constexpr generic_string_view< CharType >::generic_string_view () noexcept
         : data_( nullptr ),
           size_(       0 )
 {}
 
 template< typename CharType >
-constexpr string_view< CharType >::string_view ( pointer _c_str_ ) noexcept
+constexpr generic_string_view< CharType >::generic_string_view ( pointer _c_str_ ) noexcept
         : data_(         _c_str_   ),
           size_( strlen( _c_str_ ) )
 {}
 
 template< typename CharType >
-constexpr string_view< CharType >::string_view ( pointer _data_, ssize_type _count_ ) noexcept
+constexpr generic_string_view< CharType >::generic_string_view ( pointer _data_, ssize_type _count_ ) noexcept
         : data_(  _data_ ),
           size_( _count_ )
 {}
 
 template< typename CharType >
-constexpr string_view< CharType >::string_view ( string_view && _other_ ) noexcept
+constexpr generic_string_view< CharType >::generic_string_view ( generic_string_view && _other_ ) noexcept
         : data_( UTI_MOVE( _other_.data_ ) ),
           size_( UTI_MOVE( _other_.size_ ) )
 {
@@ -192,8 +192,8 @@ constexpr string_view< CharType >::string_view ( string_view && _other_ ) noexce
 }
 
 template< typename CharType >
-constexpr string_view< CharType > &
-string_view< CharType >::operator= ( string_view && _other_ ) noexcept
+constexpr generic_string_view< CharType > &
+generic_string_view< CharType >::operator= ( generic_string_view && _other_ ) noexcept
 {
         data_ = UTI_MOVE( _other_.data_ ) ;
         size_ = UTI_MOVE( _other_.size_ ) ;
@@ -206,7 +206,7 @@ string_view< CharType >::operator= ( string_view && _other_ ) noexcept
 
 template< typename CharType >
 UTI_NODISCARD constexpr bool
-string_view< CharType >::equal_to ( string_view const & _other_ ) const noexcept
+generic_string_view< CharType >::equal_to ( generic_string_view const & _other_ ) const noexcept
 {
         if( size() != _other_.size() )
         {
@@ -228,7 +228,7 @@ string_view< CharType >::equal_to ( string_view const & _other_ ) const noexcept
 
 template< typename CharType >
 UTI_NODISCARD constexpr bool
-string_view< CharType >::equal_to_insensitive ( string_view const & _other_ ) const noexcept
+generic_string_view< CharType >::equal_to_insensitive ( generic_string_view const & _other_ ) const noexcept
 {
         if( size() != _other_.size() )
         {
@@ -250,7 +250,7 @@ string_view< CharType >::equal_to_insensitive ( string_view const & _other_ ) co
 
 template< typename CharType >
 UTI_NODISCARD constexpr bool
-string_view< CharType >::starts_with ( string_view const & _prefix_ ) const noexcept
+generic_string_view< CharType >::starts_with ( generic_string_view const & _prefix_ ) const noexcept
 {
         if( _prefix_.len() > len() ) return false;
 
@@ -270,7 +270,7 @@ string_view< CharType >::starts_with ( string_view const & _prefix_ ) const noex
 
 template< typename CharType >
 UTI_NODISCARD constexpr bool
-string_view< CharType >::starts_with_insensitive ( string_view const & _prefix_ ) const noexcept
+generic_string_view< CharType >::starts_with_insensitive ( generic_string_view const & _prefix_ ) const noexcept
 {
         if( _prefix_.len() > len() ) return false;
 
@@ -290,7 +290,7 @@ string_view< CharType >::starts_with_insensitive ( string_view const & _prefix_ 
 
 template< typename CharType >
 UTI_NODISCARD constexpr bool
-string_view< CharType >::ends_with ( string_view const & _suffix_ ) const noexcept
+generic_string_view< CharType >::ends_with ( generic_string_view const & _suffix_ ) const noexcept
 {
         if( _suffix_.len() > len() ) return false;
 
@@ -312,7 +312,7 @@ string_view< CharType >::ends_with ( string_view const & _suffix_ ) const noexce
 
 template< typename CharType >
 UTI_NODISCARD constexpr bool
-string_view< CharType >::ends_with_insensitive ( string_view const & _suffix_ ) const noexcept
+generic_string_view< CharType >::ends_with_insensitive ( generic_string_view const & _suffix_ ) const noexcept
 {
         if( _suffix_.len() > len() ) return false;
 
@@ -333,8 +333,8 @@ string_view< CharType >::ends_with_insensitive ( string_view const & _suffix_ ) 
 }
 
 template< typename CharType >
-constexpr typename string_view< CharType >::ssize_type
-string_view< CharType >::trim () noexcept
+constexpr typename generic_string_view< CharType >::ssize_type
+generic_string_view< CharType >::trim () noexcept
 {
         ssize_type count { 0 } ;
         count += trim_left();
@@ -343,8 +343,8 @@ string_view< CharType >::trim () noexcept
 }
 
 template< typename CharType >
-constexpr typename string_view< CharType >::ssize_type
-string_view< CharType >::trim_left () noexcept
+constexpr typename generic_string_view< CharType >::ssize_type
+generic_string_view< CharType >::trim_left () noexcept
 {
         ssize_type count { 0 } ;
         while( !empty() && ( front() ==  ' ' || front() == '\t' ) )
@@ -357,8 +357,8 @@ string_view< CharType >::trim_left () noexcept
 }
 
 template< typename CharType >
-constexpr typename string_view< CharType >::ssize_type
-string_view< CharType >::trim_right () noexcept
+constexpr typename generic_string_view< CharType >::ssize_type
+generic_string_view< CharType >::trim_right () noexcept
 {
         ssize_type count { 0 } ;
         while( !empty() && ( back() ==  ' ' || back() == '\t' ) )
@@ -370,17 +370,17 @@ string_view< CharType >::trim_right () noexcept
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr string_view< CharType >
-string_view< CharType >::trimmed () const noexcept
+UTI_NODISCARD constexpr generic_string_view< CharType >
+generic_string_view< CharType >::trimmed () const noexcept
 {
         return trimmed_right().trimmed_left();
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr string_view< CharType >
-string_view< CharType >::trimmed_left () const noexcept
+UTI_NODISCARD constexpr generic_string_view< CharType >
+generic_string_view< CharType >::trimmed_left () const noexcept
 {
-        string_view new_view( *this );
+        generic_string_view new_view( *this );
 
         new_view.trim_left();
 
@@ -388,10 +388,10 @@ string_view< CharType >::trimmed_left () const noexcept
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr string_view< CharType >
-string_view< CharType >::trimmed_right () const noexcept
+UTI_NODISCARD constexpr generic_string_view< CharType >
+generic_string_view< CharType >::trimmed_right () const noexcept
 {
-        string_view new_view( *this );
+        generic_string_view new_view( *this );
 
         new_view.trim_right();
 
@@ -399,10 +399,10 @@ string_view< CharType >::trimmed_right () const noexcept
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr string_view< CharType >
-string_view< CharType >::substr ( ssize_type const _start_, ssize_type const _len_ ) const noexcept
+UTI_NODISCARD constexpr generic_string_view< CharType >
+generic_string_view< CharType >::substr ( ssize_type const _start_, ssize_type const _len_ ) const noexcept
 {
-        string_view sub( *this );
+        generic_string_view sub( *this );
 
         ( void ) sub.chop_left( _start_ );
 
@@ -414,12 +414,12 @@ string_view< CharType >::substr ( ssize_type const _start_, ssize_type const _le
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr string_view< CharType >
-string_view< CharType >::chop_left ( ssize_type _count_ ) noexcept
+UTI_NODISCARD constexpr generic_string_view< CharType >
+generic_string_view< CharType >::chop_left ( ssize_type _count_ ) noexcept
 {
         if( _count_ > size() ) _count_ = size();
 
-        string_view chop( data_, _count_ );
+        generic_string_view chop( data_, _count_ );
 
         data_ += _count_ ;
         size_ -= _count_ ;
@@ -428,12 +428,12 @@ string_view< CharType >::chop_left ( ssize_type _count_ ) noexcept
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr string_view< CharType >
-string_view< CharType >::chop_right ( ssize_type _count_ ) noexcept
+UTI_NODISCARD constexpr generic_string_view< CharType >
+generic_string_view< CharType >::chop_right ( ssize_type _count_ ) noexcept
 {
         if( _count_ > size() ) _count_ = size();
 
-        string_view chop( &data_[ size() - _count_ ], _count_ );
+        generic_string_view chop( &data_[ size() - _count_ ], _count_ );
 
         size_ -= _count_ ;
 
@@ -442,7 +442,7 @@ string_view< CharType >::chop_right ( ssize_type _count_ ) noexcept
 
 template< typename CharType >
 constexpr void
-string_view< CharType >::unchop_left ( ssize_type _count_ ) noexcept
+generic_string_view< CharType >::unchop_left ( ssize_type _count_ ) noexcept
 {
         data_ -= _count_ ;
         size_ += _count_ ;
@@ -450,14 +450,14 @@ string_view< CharType >::unchop_left ( ssize_type _count_ ) noexcept
 
 template< typename CharType >
 constexpr void
-string_view< CharType >::unchop_right ( ssize_type _count_ ) noexcept
+generic_string_view< CharType >::unchop_right ( ssize_type _count_ ) noexcept
 {
         size_ += _count_ ;
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr typename string_view< CharType >::value_type
-string_view< CharType >::chop_char_left () noexcept
+UTI_NODISCARD constexpr typename generic_string_view< CharType >::value_type
+generic_string_view< CharType >::chop_char_left () noexcept
 {
         UTI_CEXPR_ASSERT( !empty(), "uti::string_view::chop_char_left: called on empty string_view" );
 
@@ -467,8 +467,8 @@ string_view< CharType >::chop_char_left () noexcept
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr typename string_view< CharType >::value_type
-string_view< CharType >::chop_char_right () noexcept
+UTI_NODISCARD constexpr typename generic_string_view< CharType >::value_type
+generic_string_view< CharType >::chop_char_right () noexcept
 {
         UTI_CEXPR_ASSERT( !empty(), "uti::string_view::chop_char_right: called on empty string_view" );
 
@@ -476,8 +476,8 @@ string_view< CharType >::chop_char_right () noexcept
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr typename string_view< CharType >::ssize_type
-string_view< CharType >::index_of ( value_type const & _val_, ssize_type const start ) const noexcept
+UTI_NODISCARD constexpr typename generic_string_view< CharType >::ssize_type
+generic_string_view< CharType >::index_of ( value_type const & _val_, ssize_type const start ) const noexcept
 {
         for( auto i = start; i < size(); ++i )
         {
@@ -490,10 +490,10 @@ string_view< CharType >::index_of ( value_type const & _val_, ssize_type const s
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr typename string_view< CharType >::ssize_type
-string_view< CharType >::index_of ( string_view const & _val_, ssize_type const start ) const noexcept
+UTI_NODISCARD constexpr typename generic_string_view< CharType >::ssize_type
+generic_string_view< CharType >::index_of ( generic_string_view const & _val_, ssize_type const start ) const noexcept
 {
-        string_view window( data_ + start, _val_.size() );
+        generic_string_view window( data_ + start, _val_.size() );
 
         bool found =  false ;
         ssize_type pos{ start } ;
@@ -517,14 +517,14 @@ string_view< CharType >::index_of ( string_view const & _val_, ssize_type const 
 
 template< typename CharType >
 UTI_NODISCARD constexpr bool
-string_view< CharType >::contains ( value_type const & _val_ ) const noexcept
+generic_string_view< CharType >::contains ( value_type const & _val_ ) const noexcept
 {
         return index_of( _val_, 0 ) >= 0;
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr typename string_view< CharType >::ssize_type
-string_view< CharType >::count ( value_type const & _val_ ) const noexcept
+UTI_NODISCARD constexpr typename generic_string_view< CharType >::ssize_type
+generic_string_view< CharType >::count ( value_type const & _val_ ) const noexcept
 {
         ssize_type count{ 0 } ;
 
@@ -539,10 +539,10 @@ string_view< CharType >::count ( value_type const & _val_ ) const noexcept
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr string_view< CharType >
-string_view< CharType >::chop_to_delimiter ( value_type const & _delimiter_, bool _discard_delimiter_ ) noexcept
+UTI_NODISCARD constexpr generic_string_view< CharType >
+generic_string_view< CharType >::chop_to_delimiter ( value_type const & _delimiter_, bool _discard_delimiter_ ) noexcept
 {
-        string_view chop( data_, 0 );
+        generic_string_view chop( data_, 0 );
 
         while( !empty() && data_[ 0 ] != _delimiter_ )
         {
@@ -559,10 +559,10 @@ string_view< CharType >::chop_to_delimiter ( value_type const & _delimiter_, boo
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr string_view< CharType >
-string_view< CharType >::chop_to_string ( string_view const & _delimiter_, bool _discard_delimiter_ ) noexcept
+UTI_NODISCARD constexpr generic_string_view< CharType >
+generic_string_view< CharType >::chop_to_string ( generic_string_view const & _delimiter_, bool _discard_delimiter_ ) noexcept
 {
-        string_view window( data_, _delimiter_.size() );
+        generic_string_view window( data_, _delimiter_.size() );
 
         bool found = false ;
         ssize_type pos( 0 );
@@ -579,7 +579,7 @@ string_view< CharType >::chop_to_string ( string_view const & _delimiter_, bool 
         }
         if( found )
         {
-                string_view chop( data_, pos );
+                generic_string_view chop( data_, pos );
                 data_ += pos;
                 size_ -= pos;
                 if( _discard_delimiter_ )
@@ -589,17 +589,17 @@ string_view< CharType >::chop_to_string ( string_view const & _delimiter_, bool 
                 }
                 return chop;
         }
-        string_view chop( *this );
+        generic_string_view chop( *this );
         this->data_ = nullptr ;
         this->size_ =       0 ;
         return chop;
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr string_view< CharType >
-string_view< CharType >::chop_to_first_of ( string_view const & _delims_, bool const _discard_delimiter_ ) noexcept
+UTI_NODISCARD constexpr generic_string_view< CharType >
+generic_string_view< CharType >::chop_to_first_of ( generic_string_view const & _delims_, bool const _discard_delimiter_ ) noexcept
 {
-        string_view chop( data_, 0 );
+        generic_string_view chop( data_, 0 );
 
         while( !empty() && !_delims_.contains( front() ) )
         {
@@ -617,10 +617,10 @@ string_view< CharType >::chop_to_first_of ( string_view const & _delims_, bool c
 
 template< typename CharType >
 template< typename Predicate >
-UTI_NODISCARD constexpr string_view< CharType >
-string_view< CharType >::chop_left_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) )
+UTI_NODISCARD constexpr generic_string_view< CharType >
+generic_string_view< CharType >::chop_left_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) )
 {
-        string_view chop( data_, 0 );
+        generic_string_view chop( data_, 0 );
 
         while( !empty() && _predicate_( front() ) )
         {
@@ -633,10 +633,10 @@ string_view< CharType >::chop_left_while ( Predicate _predicate_ ) noexcept( noe
 
 template< typename CharType >
 template< typename Predicate >
-UTI_NODISCARD constexpr string_view< CharType >
-string_view< CharType >::chop_right_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) )
+UTI_NODISCARD constexpr generic_string_view< CharType >
+generic_string_view< CharType >::chop_right_while ( Predicate _predicate_ ) noexcept( noexcept( _predicate_( value_type() ) ) )
 {
-        string_view chop( end(), 0 );
+        generic_string_view chop( end(), 0 );
 
         while( !empty() && _predicate_( back() ) )
         {
@@ -649,7 +649,7 @@ string_view< CharType >::chop_right_while ( Predicate _predicate_ ) noexcept( no
 template< typename CharType >
 template< typename Integer >
 UTI_NODISCARD constexpr Integer
-string_view< CharType >::parse_int () const noexcept
+generic_string_view< CharType >::parse_int () const noexcept
 {
         auto digits = trimmed();
 
@@ -677,14 +677,14 @@ string_view< CharType >::parse_int () const noexcept
 template< typename CharType >
 template< typename Float >
 UTI_NODISCARD constexpr Float
-string_view< CharType >::parse_float () const noexcept
+generic_string_view< CharType >::parse_float () const noexcept
 {
         return Float{ 0 };
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr typename string_view< CharType >::reference
-string_view< CharType >::at ( ssize_type const _index_ ) noexcept
+UTI_NODISCARD constexpr typename generic_string_view< CharType >::reference
+generic_string_view< CharType >::at ( ssize_type const _index_ ) noexcept
 {
         UTI_CEXPR_ASSERT( !empty() && 0 <= _index_ && _index_ < size(), "uti::string_view::at: index out of bounds" );
 
@@ -692,8 +692,8 @@ string_view< CharType >::at ( ssize_type const _index_ ) noexcept
 }
 
 template< typename CharType >
-UTI_NODISCARD constexpr typename string_view< CharType >::const_reference
-string_view< CharType >::at ( ssize_type const _index_ ) const noexcept
+UTI_NODISCARD constexpr typename generic_string_view< CharType >::const_reference
+generic_string_view< CharType >::at ( ssize_type const _index_ ) const noexcept
 {
         UTI_CEXPR_ASSERT( !empty() && 0 <= _index_ && _index_ < size(), "uti::string_view::at: index out of bounds" );
 

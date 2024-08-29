@@ -10,6 +10,7 @@
 #include <algo/mem.hpp>
 #include <iterator/meta.hpp>
 #include <iterator/base.hpp>
+#include <iterator/reverse_iterator.hpp>
 #include <container/view.hpp>
 #include <container/buffer.hpp>
 #include <meta/concepts.hpp>
@@ -41,8 +42,10 @@ public:
         using       reference = typename      _base::      reference ;
         using const_reference = typename      _base::const_reference ;
 
-        using       iterator = _random_access_iterator< T       > ;
-        using const_iterator = _random_access_iterator< T const > ;
+        using               iterator = iterator_base< T      , random_access_iterator_tag > ;
+        using         const_iterator = iterator_base< T const, random_access_iterator_tag > ;
+        using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
+        using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
         constexpr          vector (                             ) noexcept = default ;
         constexpr explicit vector ( ssize_type const _capacity_ )                    ;
@@ -101,6 +104,14 @@ public:
         UTI_NODISCARD constexpr       iterator  end ()       noexcept { return _view_base:: end(); }
         UTI_NODISCARD constexpr const_iterator  end () const noexcept { return _view_base:: end(); }
         UTI_NODISCARD constexpr const_iterator cend () const noexcept { return _view_base::cend(); }
+
+        UTI_NODISCARD constexpr       reverse_iterator  rbegin ()       noexcept { return _view_base:: rbegin() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rbegin () const noexcept { return _view_base:: rbegin() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crbegin () const noexcept { return _view_base::crbegin() ; }
+
+        UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return _view_base:: rend() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return _view_base:: rend() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return _view_base::crend() ; }
 protected:
         template< typename... Args >
         constexpr void _emplace ( Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > ) ;
@@ -286,7 +297,8 @@ vector< T, Alloc >::operator= ( vector && _other_ ) noexcept
         this->size_       = _other_.size_       ;
         this->_capacity() = _other_._capacity() ;
 
-        _other_._buffer() = _other_.begin_ = nullptr;
+        _other_._buffer() = nullptr;
+        _other_.begin_ = nullptr ;
         _other_.size_ = 0 ;
         _other_._capacity() = 0 ;
 
@@ -501,7 +513,7 @@ vector< T, Alloc >::insert ( ssize_type const _position_, value_type const & _va
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_, _view_base::end() ) ;
+                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_ - 1, _view_base::end() ) ;
         }
         else
         {
@@ -530,7 +542,7 @@ vector< T, Alloc >::insert ( ssize_type const _position_, value_type && _val_ )
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_, _view_base::end() ) ;
+                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_ - 1, _view_base::end() ) ;
         }
         else
         {

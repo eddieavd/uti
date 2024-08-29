@@ -29,22 +29,31 @@ public:
         using       reference = value_type       & ;
         using const_reference = value_type const & ;
 
-        using        iterator =       pointer ;
-        using  const_iterator = const_pointer ;
-
-        UTI_NODISCARD static constexpr block_type allocate ( ssize_type const _capacity_ )
+        UTI_NODISCARD constexpr block_type allocate ( ssize_type const _capacity_ ) const UTI_NOEXCEPT_UNLESS_BADALLOC
         {
                 auto ptr = alloc_typed_buffer< value_type >( _capacity_ ) ;
-                return ptr != nullptr ? block_type{ ptr, _capacity_ } : block_type{ ptr, 0 } ;
+
+                return ptr != nullptr ? block_type{     ptr, _capacity_ }
+                                      : block_type{ nullptr,          0 } ;
         }
-        UTI_NODISCARD static constexpr block_type reallocate ( block_type const & _block_, ssize_type const _new_capacity_ )
+        constexpr void reallocate ( block_type & _block_, ssize_type const _new_capacity_ ) const UTI_NOEXCEPT_UNLESS_BADALLOC
         {
-                auto ptr = realloc_typed_buffer( _block_.ptr, _new_capacity_ ) ;
-                return ptr != nullptr ? block_type{ ptr, _new_capacity_ } : block_type{ ptr, 0 } ;
+                auto ptr = realloc_typed_buffer( _block_.begin_, _new_capacity_ ) ;
+                if( ptr )
+                {
+                        _block_.size_ = _new_capacity_ ;
+                }
+                if( ptr != _block_.begin_ )
+                {
+                        _block_.begin_ = ptr ;
+                }
         }
-        static constexpr void deallocate ( block_type const & _block_ ) noexcept
+        constexpr void deallocate ( block_type & _block_ ) const noexcept
         {
-                dealloc_typed_buffer( _block_.ptr );
+                dealloc_typed_buffer( _block_.begin_ );
+
+                _block_. begin_ = nullptr ;
+                _block_.size_ =       0 ;
         }
 };
 

@@ -104,6 +104,10 @@ struct incrementable_traits< T >
 } ;
 
 
+////////////////////////////////////////////////////////////////////////////////
+///     iterator_traits
+////////////////////////////////////////////////////////////////////////////////
+
 template< typename > struct iterator_traits ;
 
 
@@ -111,11 +115,6 @@ template< typename T >
 using iter_difference_t = conditional_t< ::uti::_is_primary_template< iterator_traits< remove_cvref_t< T > > >::value,
                                          incrementable_traits< remove_cvref_t< T > >,
                                          iterator_traits< remove_cvref_t< T > > >::difference_type ;
-
-
-////////////////////////////////////////////////////////////////////////////////
-///     iterator_traits
-////////////////////////////////////////////////////////////////////////////////
 
 template< typename T >
 using _with_reference = T & ;
@@ -144,8 +143,7 @@ struct       forward_iterator_tag : public         input_iterator_tag {} ;
 struct bidirectional_iterator_tag : public       forward_iterator_tag {} ;
 struct random_access_iterator_tag : public bidirectional_iterator_tag {} ;
 struct    contiguous_iterator_tag : public random_access_iterator_tag {} ;
-
-struct prefix_array_iterator_tag : public random_access_iterator_tag {} ;
+struct  prefix_array_iterator_tag : public random_access_iterator_tag {} ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -517,13 +515,25 @@ template< typename T >
 using _has_input_iterator_category = _has_iterator_category_convertible_to< T, input_iterator_tag > ;
 
 template< typename T >
+static constexpr bool _has_input_iterator_category_v = _has_input_iterator_category< T >::value ;
+
+template< typename T >
 using _has_forward_iterator_category = _has_iterator_category_convertible_to< T, forward_iterator_tag > ;
+
+template< typename T >
+static constexpr bool _has_forward_iterator_category_v = _has_forward_iterator_category< T >::value ;
 
 template< typename T >
 using _has_bidirectional_iterator_category = _has_iterator_category_convertible_to< T, bidirectional_iterator_tag > ;
 
 template< typename T >
+static constexpr bool _has_bidirectional_iterator_category_v = _has_bidirectional_iterator_category< T >::value ;
+
+template< typename T >
 using _has_random_access_iterator_category = _has_iterator_category_convertible_to< T, random_access_iterator_tag > ;
+
+template< typename T >
+static constexpr bool _has_random_access_iterator_category_v = _has_random_access_iterator_category< T >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 

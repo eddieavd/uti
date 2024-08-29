@@ -7,31 +7,32 @@
 #pragma once
 
 #include <type/traits.hpp>
+#include <iterator/meta.hpp>
 
 
 namespace uti
 {
 
 
-template< typename T, typename... Args >
-constexpr void construct ( T * ptr, Args&&... args )
-        noexcept( is_nothrow_constructible_v< T, Args... > )
+template< meta::iterator Iter, typename... Args >
+constexpr void construct ( Iter iter, Args&&... args )
+        noexcept( is_nothrow_constructible_v< iter_value_t< Iter >, Args... > )
 {
-                ::new ( ( void * ) ptr ) T( UTI_FWD( args )... ) ;
+        ::new ( ( void * ) iter ) iter_value_t< Iter >( UTI_FWD( args )... ) ;
 }
 
-template< typename T >
-constexpr void destroy ( T * ptr )
-        noexcept( is_nothrow_destructible_v< T > )
+template< meta::iterator Iter, typename... Args >
+constexpr void destroy ( Iter iter )
+        noexcept( is_nothrow_destructible_v< iter_value_t< Iter > > )
 {
-                ptr->~T();
+        iter->~iter_value_t< Iter >() ;
 }
 
-template< typename T >
-constexpr void memclr ( T * begin, T * end )
+template< meta::forward_iterator Iter >
+constexpr void memclr ( Iter begin, Iter const & end )
 {
-        u8_t * mem = static_cast< u8_t * >( begin ) ;
-        u8_t * fin = static_cast< u8_t * >(   end ) ;
+        u8_t * mem = static_cast< u8_t * >( static_cast< void * >( begin ) ) ;
+        u8_t * fin = static_cast< u8_t * >( static_cast< void * >(   end ) ) ;
 
         while( mem != fin )
         {
@@ -40,8 +41,8 @@ constexpr void memclr ( T * begin, T * end )
         }
 }
 
-template< typename T >
-constexpr void memset ( T * begin, T const * end, T const & val )
+template< meta::forward_iterator Iter >
+constexpr void memset ( Iter begin, Iter const & end, iter_value_t< Iter > const & val )
 {
         while( begin != end )
         {

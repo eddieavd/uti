@@ -7,6 +7,9 @@
 #pragma once
 
 #include <util/assert.hpp>
+#include <iterator/meta.hpp>
+#include <iterator/base.hpp>
+#include <iterator/reverse_iterator.hpp>
 #include <container/base.hpp>
 #include <container/meta.hpp>
 
@@ -31,8 +34,10 @@ public:
         using       reference = typename _base::      reference ;
         using const_reference = typename _base::const_reference ;
 
-        using        iterator = typename _base::       iterator ;
-        using  const_iterator = typename _base:: const_iterator ;
+        using               iterator = iterator_base< value_type      , random_access_iterator_tag > ;
+        using         const_iterator = iterator_base< value_type const, random_access_iterator_tag > ;
+        using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
+        using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
         constexpr view () noexcept = default ;
 
@@ -86,6 +91,14 @@ public:
         UTI_NODISCARD constexpr       iterator  end ()       noexcept { return begin_ + size_ ; }
         UTI_NODISCARD constexpr const_iterator  end () const noexcept { return begin_ + size_ ; }
         UTI_NODISCARD constexpr const_iterator cend () const noexcept { return end(); }
+
+        UTI_NODISCARD constexpr       reverse_iterator  rbegin ()       noexcept { return  --end() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rbegin () const noexcept { return  --end() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crbegin () const noexcept { return rbegin() ; }
+
+        UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return --begin() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return --begin() ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return    rend() ; }
 
         template< typename Self >
         UTI_NODISCARD constexpr

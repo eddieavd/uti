@@ -6,11 +6,13 @@
 
 #pragma once
 
-#include "iterator/meta.hpp"
 #include <util/assert.hpp>
 #include <algo/mem.hpp>
 #include <meta/concepts.hpp>
 #include <type/sequence.hpp>
+#include <iterator/meta.hpp>
+#include <iterator/base.hpp>
+#include <iterator/reverse_iterator.hpp>
 #include <container/view.hpp>
 #include <container/buffer.hpp>
 #include <allocator/meta.hpp>
@@ -60,8 +62,10 @@ public:
         using       reference = typename      _base::      reference ;
         using const_reference = typename      _base::const_reference ;
 
-        using        iterator = typename      _base::       iterator ;
-        using  const_iterator = typename      _base:: const_iterator ;
+        using               iterator = iterator_base< T      , random_access_iterator_tag > ;
+        using         const_iterator = iterator_base< T const, random_access_iterator_tag > ;
+        using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
+        using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
         constexpr          segment_tree (                             )     noexcept       = default ;
         constexpr explicit segment_tree ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
@@ -136,11 +140,19 @@ public:
 
         UTI_NODISCARD constexpr       iterator  begin ()       noexcept { return _view_base::begin() ; }
         UTI_NODISCARD constexpr const_iterator  begin () const noexcept { return _view_base::begin() ; }
-        UTI_NODISCARD constexpr const_iterator cbegin () const noexcept { return begin() ; }
+        UTI_NODISCARD constexpr const_iterator cbegin () const noexcept { return             begin() ; }
 
         UTI_NODISCARD constexpr       iterator  end ()       noexcept { return _view_base::end() ; }
         UTI_NODISCARD constexpr const_iterator  end () const noexcept { return _view_base::end() ; }
-        UTI_NODISCARD constexpr const_iterator cend () const noexcept { return end() ; }
+        UTI_NODISCARD constexpr const_iterator cend () const noexcept { return             end() ; }
+
+        UTI_NODISCARD constexpr       iterator  rbegin ()       noexcept { return _view_base::rbegin() ; }
+        UTI_NODISCARD constexpr const_iterator  rbegin () const noexcept { return _view_base::rbegin() ; }
+        UTI_NODISCARD constexpr const_iterator crbegin () const noexcept { return             rbegin() ; }
+
+        UTI_NODISCARD constexpr       iterator  rend ()       noexcept { return _view_base::rend() ; }
+        UTI_NODISCARD constexpr const_iterator  rend () const noexcept { return _view_base::rend() ; }
+        UTI_NODISCARD constexpr const_iterator crend () const noexcept { return             rend() ; }
 
         UTI_NODISCARD constexpr       bool    empty () const noexcept { return _view_base::   empty()     ; }
         UTI_NODISCARD constexpr ssize_type     size () const noexcept { return _view_base::    size()     ; }
@@ -324,7 +336,8 @@ segment_tree< T, Compare, Alloc >::operator= ( segment_tree && _other_ ) noexcep
         this->size_       = _other_.size_       ;
         this->_capacity() = _other_._capacity() ;
 
-        _other_._buffer() = _other_.begin_ = nullptr ;
+        _other_._buffer() = nullptr ;
+        _other_.begin_ = nullptr ;
         _other_.size_ = 0 ;
         _other_._capacity() = 0 ;
 
@@ -412,7 +425,7 @@ segment_tree< T, Compare, Alloc >::insert ( ssize_type const _position_, value_t
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_, _view_base::end() ) ;
+                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_ - 1, _view_base::end() ) ;
                 _view_base::at( _position_ ) = _val_ ;
         }
         else
@@ -444,7 +457,7 @@ segment_tree< T, Compare, Alloc >::insert ( ssize_type const _position_, value_t
 
         if constexpr( is_trivially_relocatable_v< value_type > )
         {
-                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_, _view_base::end() ) ;
+                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_ - 1, _view_base::end() ) ;
                 _view_base::at( _position_ ) = _val_ ;
         }
         else
