@@ -32,7 +32,10 @@ _move_if_noexcept ( T & _val_ ) noexcept
         return UTI_MOVE( _val_ );
 }
 
-////////////////////////////////////////////////////////////////////////////////
+
+namespace meta
+{
+
 
 template< typename T > using has_value_type      = T::     value_type ;
 template< typename T > using has_size_type       = T::      size_type ;
@@ -63,6 +66,17 @@ template< typename T > inline constexpr bool is_container_v = is_container< T >:
 template< typename T > using is_range_container = conjunction< is_container< T >, integral_constant< is_detected_v< has_range, T > > > ;
 
 template< typename T > inline constexpr bool is_range_container_v = is_range_container< T >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T > using is_simple_container = integral_constant< is_detected_v< has_value_type, T > &&
+                                                                      is_detected_v< has_begin     , T > &&
+                                                                      is_detected_v< has_end       , T > > ;
+
+template< typename T > inline constexpr bool is_simple_container_v = is_simple_container< T >::value ;
+
+template< typename T >
+concept simple_container = is_simple_container_v< T > ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -133,6 +147,9 @@ template< typename T, bool = is_container_v< T > > struct inner_value_type      
 template< typename T                             > struct inner_value_type< T, true > : inner_value_type< typename T::value_type > {} ;
 
 template< typename T > using inner_value_type_t = typename inner_value_type< T >::type ;
+
+
+} // namespace meta
 
 
 } // namespace uti

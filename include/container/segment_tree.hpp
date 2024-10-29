@@ -34,7 +34,7 @@ constexpr auto  sum     = []( auto const & lhs, auto const & rhs ) { return     
 } // namespace compare
 
 
-template< typename T, auto Compare = compare::_default, typename Alloc = allocator< T > >
+template< typename T, auto Compare = compare::_default, typename Alloc = allocator< T, malloc_resource > >
 class segment_tree : public buffer< T, Alloc >, public view< T >
 {
         using       _self =  segment_tree               ;
@@ -87,10 +87,28 @@ public:
 
         constexpr bool operator== ( segment_tree const & _other_ ) const noexcept ;
 
+        constexpr segment_tree & operator+= ( segment_tree const & _other_ ) noexcept ;
+        constexpr segment_tree & operator-= ( segment_tree const & _other_ ) noexcept ;
+
+        constexpr segment_tree operator- () const noexcept ;
+
+        friend constexpr segment_tree operator+ ( segment_tree const & _lhs_, segment_tree const & _rhs_ ) noexcept
+        {
+                auto res = _lhs_ ;
+                res += _rhs_ ;
+                return res ;
+        }
+        friend constexpr segment_tree operator- ( segment_tree const & _lhs_, segment_tree const & _rhs_ ) noexcept
+        {
+                auto res = _lhs_ ;
+                res -= _rhs_ ;
+                return res ;
+        }
+
         UTI_NODISCARD constexpr
         decltype( auto ) range ( auto&&... _coords_ ) const noexcept
                 requires( sizeof...( _coords_ ) % 2 == 0 &&
-                          is_n_dim_container_v< _self, sizeof...( _coords_ ) / 2 > )
+                          meta::is_n_dim_container_v< _self, sizeof...( _coords_ ) / 2 > )
         {
                 constexpr auto Dim = sizeof...( _coords_ ) / 2 ;
 
@@ -354,7 +372,7 @@ segment_tree< T, Compare, Alloc >::~segment_tree () noexcept
 
 template< typename T, auto Compare, typename Alloc >
 constexpr bool
-segment_tree< T, Compare,Alloc >::operator== ( segment_tree const & _other_ ) const noexcept
+segment_tree< T, Compare, Alloc >::operator== ( segment_tree const & _other_ ) const noexcept
 {
         if( this == &_other_ ) return true ;
 
@@ -365,6 +383,50 @@ segment_tree< T, Compare,Alloc >::operator== ( segment_tree const & _other_ ) co
                 if( _view_base::at( i ) != _other_.at( i ) ) return false ;
         }
         return true ;
+}
+
+template< typename T, auto Compare, typename Alloc >
+constexpr
+segment_tree< T, Compare, Alloc > &
+segment_tree< T, Compare, Alloc >::operator+= ( segment_tree const & _other_ ) noexcept
+{
+        if( _other_.size() == size() )
+        {
+                for( ssize_type i = 0; i < size(); ++i )
+                {
+                        _view_base::at( i ) += _other_.at( i ) ;
+                }
+        }
+        return *this ;
+}
+
+template< typename T, auto Compare, typename Alloc >
+constexpr
+segment_tree< T, Compare, Alloc > &
+segment_tree< T, Compare, Alloc >::operator-= ( segment_tree const & _other_ ) noexcept
+{
+        if( _other_.size() == size() )
+        {
+                for( ssize_type i = 0; i < size(); ++i )
+                {
+                        _view_base::at( i ) -= _other_.at( i ) ;
+                }
+        }
+        return *this ;
+}
+
+template< typename T, auto Compare, typename Alloc >
+constexpr
+segment_tree< T, Compare, Alloc >
+segment_tree< T, Compare, Alloc >::operator- () const noexcept
+{
+        segment_tree negative = *this ;
+
+        for( auto & val : negative )
+        {
+                val = -val ;
+        }
+        return negative ;
 }
 
 template< typename T, auto Compare, typename Alloc >
@@ -386,8 +448,11 @@ constexpr void
 segment_tree< T, Compare, Alloc >::emplace_back ( auto&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         reserve() ;
-        _emplace( UTI_FWD( _args_ )... ) ;
-        _update( size() - 1 ) ;
+        if( size() < capacity() )
+        {
+                _emplace( UTI_FWD( _args_ )... ) ;
+                _update( size() - 1 ) ;
+        }
 }
 
 template< typename T, auto Compare, typename Alloc >

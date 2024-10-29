@@ -1005,6 +1005,29 @@ inline constexpr bool is_scalar_v = is_scalar< T >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template< typename T, bool = is_enum_v< T > >
+struct _underlying_type_impl ;
+
+template< typename T >
+struct _underlying_type_impl< T, false > {} ;
+
+template< typename T >
+struct _underlying_type_impl< T, true > : type_identity< __underlying_type( T ) > {} ;
+
+template< typename T >
+struct underlying_type : _underlying_type_impl< T, is_enum_v< T > > {} ;
+
+template< typename T >
+using underlying_type_t = typename underlying_type< T >::type ;
+
+template< typename T >
+UTI_NODISCARD constexpr underlying_type_t< T > to_underlying ( T const & _enum_ ) noexcept
+{
+        return static_cast< underlying_type_t< T > >( _enum_ ) ;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 namespace _detail
 {
 
@@ -1513,6 +1536,75 @@ using _test_for_primary_template = enable_if_t< is_same_v< T, typename T::_prima
 
 template< typename T >
 using _is_primary_template = _is_valid_expansion< _test_for_primary_template, T > ;
+
+
+////////////////////////////////////////////////////////////////////////////////
+///     sfinae helpers
+////////////////////////////////////////////////////////////////////////////////
+
+template< bool CanCopy, bool CanMove > struct _sfinae_ctor_base {} ;
+
+template<>
+struct _sfinae_ctor_base< false, false >
+{
+        _sfinae_ctor_base             (                            ) = default ;
+        _sfinae_ctor_base             ( _sfinae_ctor_base const &  ) = delete  ;
+        _sfinae_ctor_base             ( _sfinae_ctor_base       && ) = delete  ;
+        _sfinae_ctor_base & operator= ( _sfinae_ctor_base const &  ) = default ;
+        _sfinae_ctor_base & operator= ( _sfinae_ctor_base       && ) = default ;
+} ;
+
+template<>
+struct _sfinae_ctor_base< false, true >
+{
+        _sfinae_ctor_base             (                            ) = default ;
+        _sfinae_ctor_base             ( _sfinae_ctor_base const &  ) = delete  ;
+        _sfinae_ctor_base             ( _sfinae_ctor_base       && ) = default ;
+        _sfinae_ctor_base & operator= ( _sfinae_ctor_base const &  ) = default ;
+        _sfinae_ctor_base & operator= ( _sfinae_ctor_base       && ) = default ;
+} ;
+
+template<>
+struct _sfinae_ctor_base< true, false >
+{
+        _sfinae_ctor_base             (                            ) = default ;
+        _sfinae_ctor_base             ( _sfinae_ctor_base const &  ) = default ;
+        _sfinae_ctor_base             ( _sfinae_ctor_base       && ) = delete  ;
+        _sfinae_ctor_base & operator= ( _sfinae_ctor_base const &  ) = default ;
+        _sfinae_ctor_base & operator= ( _sfinae_ctor_base       && ) = default ;
+} ;
+
+template< bool CanCopy, bool CanMove > struct _sfinae_assign_base {} ;
+
+template<>
+struct _sfinae_assign_base< false, false >
+{
+        _sfinae_assign_base             (                              ) = default ;
+        _sfinae_assign_base             ( _sfinae_assign_base const &  ) = default ;
+        _sfinae_assign_base             ( _sfinae_assign_base       && ) = default ;
+        _sfinae_assign_base & operator= ( _sfinae_assign_base const &  ) = delete  ;
+        _sfinae_assign_base & operator= ( _sfinae_assign_base       && ) = delete  ;
+} ;
+
+template<>
+struct _sfinae_assign_base< false, true >
+{
+        _sfinae_assign_base             (                              ) = default ;
+        _sfinae_assign_base             ( _sfinae_assign_base const &  ) = default ;
+        _sfinae_assign_base             ( _sfinae_assign_base       && ) = default ;
+        _sfinae_assign_base & operator= ( _sfinae_assign_base const &  ) = delete  ;
+        _sfinae_assign_base & operator= ( _sfinae_assign_base       && ) = delete  ;
+} ;
+
+template<>
+struct _sfinae_assign_base< true, false >
+{
+        _sfinae_assign_base             (                              ) = default ;
+        _sfinae_assign_base             ( _sfinae_assign_base const &  ) = default ;
+        _sfinae_assign_base             ( _sfinae_assign_base       && ) = default ;
+        _sfinae_assign_base & operator= ( _sfinae_assign_base const &  ) = delete  ;
+        _sfinae_assign_base & operator= ( _sfinae_assign_base       && ) = delete  ;
+} ;
 
 
 } // namespace uti

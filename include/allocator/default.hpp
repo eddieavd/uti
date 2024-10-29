@@ -7,13 +7,14 @@
 #pragma once
 
 #include <allocator/meta.hpp>
+#include <allocator/resource.hpp>
 
 
 namespace uti
 {
 
 
-template< typename T >
+template< typename T, typename Resource >
 class allocator
 {
 public:
@@ -22,40 +23,55 @@ public:
         using      ssize_type = ssize_t    ;
         using difference_type = ssize_type ;
 
-        using      block_type = block_t< value_type > ;
-
         using         pointer = value_type       * ;
         using   const_pointer = value_type const * ;
         using       reference = value_type       & ;
         using const_reference = value_type const & ;
 
-        UTI_NODISCARD constexpr block_type allocate ( ssize_type const _capacity_ ) const UTI_NOEXCEPT_UNLESS_BADALLOC
-        {
-                auto ptr = alloc_typed_buffer< value_type >( _capacity_ ) ;
+        using          block_type = block_t< value_type > ;
+        using       resource_type = Resource ;
+        using resource_block_type = typename resource_type::block_type ;
 
-                return ptr != nullptr ? block_type{     ptr, _capacity_ }
-                                      : block_type{ nullptr,          0 } ;
-        }
-        constexpr void reallocate ( block_type & _block_, ssize_type const _new_capacity_ ) const UTI_NOEXCEPT_UNLESS_BADALLOC
-        {
-                auto ptr = realloc_typed_buffer( _block_.begin_, _new_capacity_ ) ;
-                if( ptr )
-                {
-                        _block_.size_ = _new_capacity_ ;
-                }
-                if( ptr != _block_.begin_ )
-                {
-                        _block_.begin_ = ptr ;
-                }
-        }
-        constexpr void deallocate ( block_type & _block_ ) const noexcept
-        {
-                dealloc_typed_buffer( _block_.begin_ );
+        using _resource_traits = resource_traits< Resource > ;
 
-                _block_. begin_ = nullptr ;
-                _block_.size_ =       0 ;
+        UTI_NODISCARD UTI_DEEP_INLINE static constexpr block_type allocate ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+        {
+                return _resource_traits::allocate( _capacity_ * sizeof( value_type ), alignof( value_type ) ) ;
         }
-};
+        UTI_DEEP_INLINE static constexpr void reallocate ( block_type & _block_, ssize_type const _new_capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+        {
+                resource_block_type block( _block_ ) ;
+
+                _resource_traits::reallocate( block, _new_capacity_ * sizeof( value_type ), alignof( value_type ) ) ;
+
+                _block_ = block ;
+        }
+        UTI_DEEP_INLINE static constexpr bool realloc_inplace ( block_type & _block_, ssize_type const _new_capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+                requires( is_detected_v< has_inplace_realloc, resource_type, typename resource_type::value_type > )
+        {
+                resource_block_type block( _block_ ) ;
+
+                if( _resource_traits::realloc_inplace( block, _new_capacity_ * sizeof( value_type ) ) )
+                {
+                        _block_ = block ;
+                        return true ;
+                }
+                return false ;
+        }
+        UTI_DEEP_INLINE static constexpr bool realloc_inplace ( block_type &, ssize_type const ) UTI_NOEXCEPT_UNLESS_BADALLOC
+                requires( !is_detected_v< has_inplace_realloc, resource_type, typename resource_type::value_type > )
+        {
+                return false ;
+        }
+        UTI_DEEP_INLINE static constexpr void deallocate ( block_type & _block_ ) noexcept
+        {
+                resource_block_type block( _block_ ) ;
+
+                _resource_traits::deallocate( block ) ;
+
+                _block_ = block ;
+        }
+} ;
 
 
 } // namespace uti

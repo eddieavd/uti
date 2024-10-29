@@ -11,13 +11,14 @@
 #include <container/base.hpp>
 #include <allocator/meta.hpp>
 #include <allocator/default.hpp>
+#include <allocator/resource.hpp>
 
 
 namespace uti
 {
 
 
-template< typename T, typename Alloc = allocator< T > >
+template< typename T, typename Alloc = allocator< T, malloc_resource > >
 class buffer
 {
         using _self =  buffer              ;
@@ -53,6 +54,8 @@ public:
 
         constexpr bool operator== ( buffer const & _other_ ) const noexcept ;
 
+        constexpr operator bool () const noexcept { return static_cast< bool >( block_ ) ; }
+
         constexpr ~buffer () noexcept ;
 
         constexpr ssize_type reserve ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
@@ -73,7 +76,7 @@ public:
         constexpr       pointer data ()       noexcept { return _buffer() ; }
         constexpr const_pointer data () const noexcept { return _buffer() ; }
 
-        constexpr ssize_type max_size () const noexcept { return _alloc_traits::max_size( alloc_ ) ; }
+        constexpr ssize_type max_size () const noexcept { return _alloc_traits::max_size() ; }
 
         constexpr pointer       & _begin ()       noexcept { return _buffer() ; }
         constexpr pointer const & _begin () const noexcept { return _buffer() ; }
@@ -86,8 +89,7 @@ public:
                 rhs = UTI_MOVE( tmp ) ;
         }
 protected:
-        block_type     block_ { nullptr, 0 } ;
-        allocator_type alloc_ {            } ;
+        block_type block_ { nullptr, 0 } ;
 
         constexpr iterator       & _buffer ()       noexcept { return block_.begin_ ; }
         constexpr iterator const & _buffer () const noexcept { return block_.begin_ ; }
@@ -103,7 +105,7 @@ buffer< T, Alloc >::buffer ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_B
 {
         if( 0 <= _capacity_ && _capacity_ < max_size() )
         {
-                block_ = _alloc_traits::allocate( alloc_, _capacity_ ) ;
+                block_ = _alloc_traits::allocate( _capacity_ ) ;
         }
 }
 
@@ -171,7 +173,7 @@ buffer< T, Alloc >::reserve ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_
 {
         if( _capacity_ <= _capacity() ) return _capacity();
 
-        _alloc_traits::reallocate( alloc_, block_, _capacity_ ) ;
+        _alloc_traits::reallocate( block_, _capacity_ ) ;
 
         return _capacity();
 }
@@ -180,7 +182,7 @@ template< typename T, typename Alloc >
 constexpr bool
 buffer< T, Alloc >::realloc_inplace ( ssize_type const _capacity_ ) noexcept
 {
-        if( _alloc_traits::realloc_inplace( alloc_, block_, _capacity_ ) )
+        if( _alloc_traits::realloc_inplace( block_, _capacity_ ) )
         {
                 _capacity() = _capacity_;
                 return true;
@@ -192,7 +194,7 @@ template< typename T, typename Alloc >
 constexpr void
 buffer< T, Alloc >::deallocate () noexcept
 {
-        if( _buffer() ) _alloc_traits::deallocate( alloc_, block_ );
+        if( _buffer() ) _alloc_traits::deallocate( block_ );
 }
 
 
