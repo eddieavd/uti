@@ -19,7 +19,7 @@ namespace uti
 {
 
 
-template< typename T, typename Alloc = allocator< T > >
+template< typename T, typename Alloc = allocator< T, malloc_resource > >
 class prefix_array : public vector< T, Alloc >
 {
         using _self = prefix_array       ;
@@ -64,7 +64,7 @@ public:
         constexpr prefix_array & operator+= ( prefix_array const & _other_ ) noexcept ;
         constexpr prefix_array & operator-= ( prefix_array const & _other_ ) noexcept ;
 
-        constexpr prefix_array operator- () noexcept ;
+        constexpr prefix_array operator- () const noexcept ;
 
         friend constexpr prefix_array operator+ ( prefix_array const & _lhs_, prefix_array const & _rhs_ ) noexcept
         {
@@ -83,7 +83,7 @@ public:
 
         UTI_NODISCARD constexpr
         decltype( auto ) element_at ( ssize_type const _x_, auto... _idxs_ ) const noexcept
-                requires( is_n_dim_container_v< _self, sizeof...( _idxs_ ) + 1 > )
+                requires( meta::is_n_dim_container_v< _self, sizeof...( _idxs_ ) + 1 > )
         {
                 if constexpr( sizeof...( _idxs_ ) == 0 )
                 {
@@ -102,7 +102,7 @@ public:
         UTI_NODISCARD constexpr
         decltype( auto ) range ( auto&&... _coords_ ) const noexcept
                 requires( sizeof...( _coords_ ) % 2 == 0 &&
-                          is_n_dim_container_v< _self, sizeof...( _coords_ ) / 2 > )
+                          meta::is_n_dim_container_v< _self, sizeof...( _coords_ ) / 2 > )
         {
                 constexpr auto Dim = sizeof...( _coords_ ) / 2 ;
 
@@ -168,7 +168,7 @@ private:
 };
 
 
-template< typename T, typename Alloc = allocator< T > >
+template< typename T, typename Alloc = allocator< T, malloc_resource > >
 prefix_array ( prefix_array< T, Alloc >::ssize_type const, T const & ) -> prefix_array< T, Alloc > ;
 
 
@@ -263,7 +263,7 @@ prefix_array< T, Alloc >::operator-= ( prefix_array const & _other_ ) noexcept
 template< typename T, typename Alloc >
 constexpr
 prefix_array< T, Alloc >
-prefix_array< T, Alloc >::operator- () noexcept
+prefix_array< T, Alloc >::operator- () const noexcept
 {
         auto prefix = *this ;
 

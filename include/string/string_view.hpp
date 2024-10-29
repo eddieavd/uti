@@ -8,6 +8,7 @@
 
 #include <util/assert.hpp>
 #include <type/traits.hpp>
+#include <algo/mem.hpp>
 
 #define SV_FMT "%.*s"
 #define SV_ARG(sv) (int) (sv).size(), (sv).data()
@@ -145,23 +146,6 @@ private:
         pointer    data_ ;
         ssize_type size_ ;
 };
-
-
-template< typename CharType >
-UTI_NODISCARD constexpr ssize_t strlen ( CharType const * str ) noexcept
-{
-        ssize_t len { -1 };
-        while( str[ ++len ] != '\0' ) {}
-        return len;
-}
-
-
-template< typename CharType >
-UTI_NODISCARD constexpr CharType to_lower ( CharType chr ) noexcept
-{
-        if( 'A' <= chr && chr <= 'Z' ) return chr + 0x20;
-        return chr;
-}
 
 
 template< typename CharType >

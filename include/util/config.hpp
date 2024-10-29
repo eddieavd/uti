@@ -175,7 +175,9 @@
 #       define UTI_FORCEINLINE inline
 #endif
 
+#ifndef UTI_DEEP_INLINE
 #define UTI_DEEP_INLINE UTI_FORCEINLINE UTI_FLATTEN
+#endif
 
 #if defined( __clang__ ) && UTI_HAS_ATTRIBUTE( optnone )
 #       define UTI_NOOPT [[ clang::optnone ]]

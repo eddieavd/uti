@@ -25,7 +25,9 @@ public:
         using iterator_category =   IterCat ;
 
         constexpr iterator_base (                       ) noexcept requires _has_forward_iterator_category_v< _self > : ptr_( nullptr ) {}
-        constexpr iterator_base ( pointer const & _ptr_ ) noexcept : ptr_(   _ptr_ ) {}
+        constexpr iterator_base ( pointer const & _ptr_ ) noexcept                                                    : ptr_(   _ptr_ ) {}
+
+        constexpr iterator_base & operator= ( pointer const & _ptr_ ) noexcept { ptr_ = _ptr_ ; return *this ; }
 
         constexpr iterator_base             ( nullptr_t ) noexcept : ptr_ ( nullptr ) {}
         constexpr iterator_base & operator= ( nullptr_t ) noexcept { ptr_ = nullptr ; return *this ; }
@@ -34,6 +36,11 @@ public:
         constexpr iterator_base & operator= ( iterator_base const &  ) noexcept = default ;
         constexpr iterator_base             ( iterator_base       && ) noexcept = default ;
         constexpr iterator_base & operator= ( iterator_base       && ) noexcept = default ;
+
+        constexpr u64_t operator& ( u64_t const _mask_ ) const noexcept
+        {
+                return ( ( u64_t ) ptr_ ) & _mask_ ;
+        }
 
         constexpr iterator_base ( iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >, add_lvalue_reference_t< remove_const_t< T > > > const & _other_ )
                 noexcept requires( is_const_v< T > ) : ptr_( _other_.ptr_ ) {} ;
@@ -90,6 +97,16 @@ public:
                 requires _has_input_iterator_category_v< _self >
         {
                 return _lhs_.ptr_ != _rhs_.ptr_ ;
+        }
+        friend constexpr bool operator== ( iterator_base const & _iter_, nullptr_t ) noexcept
+                requires _has_forward_iterator_category_v< _self >
+        {
+                return _iter_.ptr_ == nullptr ;
+        }
+        friend constexpr bool operator!= ( iterator_base const & _iter_, nullptr_t ) noexcept
+                requires _has_forward_iterator_category_v< _self >
+        {
+                return _iter_.ptr_ != nullptr ;
         }
         friend constexpr void swap ( iterator_base & _lhs_, iterator_base & _rhs_ ) noexcept
                 requires _has_input_iterator_category_v< _self >
