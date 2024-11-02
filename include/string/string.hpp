@@ -112,6 +112,8 @@ public:
 
         constexpr void insert ( value_type const & _char_, ssize_type _position_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
+        constexpr ssize_type append ( const_pointer _cstr_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
         template< meta::forward_iterator Iter >
                 requires meta::convertible_to< iter_value_t< Iter >, value_type >
         constexpr ssize_type append ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
@@ -425,6 +427,14 @@ generic_string< CharType, Allocator >::insert ( value_type const & _char_, ssize
         at( _position_ ) = _char_ ;
 
         _set_size( sz + 1 ) ;
+}
+
+template< meta::trivial CharType, typename Allocator >
+constexpr
+generic_string< CharType, Allocator >::ssize_type
+generic_string< CharType, Allocator >::append ( const_pointer _cstr_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        return append( _cstr_, _cstr_ + ::uti::strlen( _cstr_ ) ) ;
 }
 
 template< meta::trivial CharType, typename Allocator >
