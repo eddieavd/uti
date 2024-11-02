@@ -7,7 +7,6 @@
 #include "gbench_uti.hpp"
 
 #include <container/vector.hpp>
-#include <allocator/static_bump.hpp>
 
 
 using namespace uti::bench ;
@@ -16,11 +15,11 @@ using namespace uti::bench ;
 using stdvecint = std::vector<         int > ;
 using stdvecstr = std::vector< std::string > ;
 
-using utivecint = uti::vector<         int, uti::allocator<         int > > ;
-using utivecstr = uti::vector< std::string, uti::allocator< std::string > > ;
+using utivecint = uti::vector<         int, uti::allocator<         int, uti::malloc_resource > > ;
+using utivecstr = uti::vector< std::string, uti::allocator< std::string, uti::malloc_resource > > ;
 
-using utivecintstat = uti::vector<         int, uti::static_bump_allocator<         int, UTI_STATIC_MEM_SIZE > > ;
-using utivecstrstat = uti::vector< std::string, uti::static_bump_allocator< std::string, UTI_STATIC_MEM_SIZE > > ;
+using utivecintstat = uti::vector<         int, uti::allocator<         int, uti::static_bump_resource< 8 * 1024 * 1024 > > > ;
+using utivecstrstat = uti::vector< std::string, uti::allocator< std::string, uti::static_bump_resource< 8 * 1024 * 1024 > > > ;
 
 
 BENCHMARK( bm_push_back_trivial< stdvecint     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );

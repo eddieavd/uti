@@ -115,6 +115,9 @@ concept floating_point = is_floating_point_v< T > ;
 template< typename T >
 concept arithmetic = is_arithmetic_v< T > ;
 
+template< typename T >
+concept trivial = is_trivial_v< T > ;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template< typename Lhs, typename Rhs >

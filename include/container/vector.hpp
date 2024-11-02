@@ -15,6 +15,10 @@
 #include <container/buffer.hpp>
 #include <meta/concepts.hpp>
 
+#ifdef UTI_HAS_STL
+#include <initializer_list>
+#endif // UTI_HAS_STL
+
 
 namespace uti
 {
@@ -47,8 +51,8 @@ public:
         using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
         using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
-        constexpr          vector (                             ) noexcept = default ;
-        constexpr explicit vector ( ssize_type const _capacity_ )                    ;
+                 constexpr vector (                             ) noexcept = default ;
+        explicit constexpr vector ( ssize_type const _capacity_ )                    ;
 
         constexpr vector ( ssize_type const _count_, value_type const & _val_ ) ;
 
@@ -59,6 +63,10 @@ public:
 
         template< meta::prefix_array_iterator Iter >
         constexpr vector ( Iter _begin_, Iter const & _end_ ) ;
+
+#ifdef UTI_HAS_STL
+        constexpr vector ( std::initializer_list< value_type > _list_ ) ;
+#endif // UTI_HAS_STL
 
         constexpr vector             ( vector const &  _other_ )          ;
         constexpr vector             ( vector       && _other_ ) noexcept ;
@@ -231,6 +239,22 @@ vector< T, Alloc >::vector ( Iter _begin_, Iter const & _end_ )
                 ++_begin_ ;
         }
 }
+
+#ifdef UTI_HAS_STL
+
+template< typename T, typename Alloc >
+constexpr
+vector< T, Alloc >::vector ( std::initializer_list< value_type > _list_ )
+        : _buff_base( _list_.size() )
+        , _view_base( _buff_base::begin(), _buff_base::begin() )
+{
+        for( auto & val : _list_ )
+        {
+                _emplace( UTI_MOVE( val ) ) ;
+        }
+}
+
+#endif // UTI_HAS_STL
 
 template< typename T, typename Alloc >
 constexpr

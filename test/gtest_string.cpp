@@ -11,28 +11,28 @@ TEST( StringTest, DefaultConstruct )
 {
         uti::string str ;
 
-        EXPECT_EQ( str.    size(),    0 ) ;
-        EXPECT_EQ( str.capacity(),    0 ) ;
-        EXPECT_EQ( str.   empty(), true ) ;
+        EXPECT_EQ( str.    size(),                         0 ) ;
+        EXPECT_EQ( str.capacity(), uti::string::sso_capacity ) ;
+        EXPECT_EQ( str.   empty(),                      true ) ;
 }
 
 TEST( StringTest, ReserveConstruct )
 {
-        for( uti::ssize_t i = 0; i <= UTI_SSO_CAP; ++i )
+        for( uti::ssize_t i = 0; i <= uti::string::sso_capacity; ++i )
         {
                 uti::string str( i ) ;
 
-                EXPECT_EQ( str.    size(),           0 ) ;
-                EXPECT_EQ( str.capacity(), UTI_SSO_CAP ) ;
-                EXPECT_EQ( str.   empty(),        true ) ;
+                EXPECT_EQ( str.    size(),                         0 ) ;
+                EXPECT_EQ( str.capacity(), uti::string::sso_capacity ) ;
+                EXPECT_EQ( str.   empty(),                      true ) ;
         }
-        for( uti::ssize_t i = UTI_SSO_CAP + 1; i < 1024; ++i )
+        for( uti::ssize_t i = uti::string::sso_capacity + 1; i < 1024; ++i )
         {
                 uti::string str( i ) ;
 
-                EXPECT_EQ( str.    size(),    0 ) ;
-                EXPECT_EQ( str.capacity(),    i ) ;
-                EXPECT_EQ( str.   empty(), true ) ;
+                EXPECT_EQ( str.    size(),     0 ) ;
+                EXPECT_EQ( str.capacity(), i + 1 ) ;
+                EXPECT_EQ( str.   empty(),  true ) ;
         }
 }
 
@@ -138,13 +138,13 @@ TEST( StringTest, Move )
         EXPECT_EQ( str2. size(),  len2 ) ;
         EXPECT_EQ( str2.empty(), false ) ;
 
-        EXPECT_EQ( src1.    size(),    0 ) ;
-        EXPECT_EQ( src1.capacity(),    0 ) ;
-        EXPECT_EQ( src1.   empty(), true ) ;
+        EXPECT_EQ( src1.    size(),                         0 ) ;
+        EXPECT_EQ( src1.capacity(), uti::string::sso_capacity ) ;
+        EXPECT_EQ( src1.   empty(),                      true ) ;
 
-        EXPECT_EQ( src2.    size(),    0 ) ;
-        EXPECT_EQ( src2.capacity(),    0 ) ;
-        EXPECT_EQ( src2.   empty(), true ) ;
+        EXPECT_EQ( src2.    size(),                         0 ) ;
+        EXPECT_EQ( src2.capacity(), uti::string::sso_capacity ) ;
+        EXPECT_EQ( src2.   empty(),                      true ) ;
 
         str1 = UTI_MOVE( src22 ) ;
         str2 = UTI_MOVE( src11 ) ;
@@ -155,13 +155,13 @@ TEST( StringTest, Move )
         EXPECT_EQ( str2. size(),  len1 ) ;
         EXPECT_EQ( str2.empty(), false ) ;
 
-        EXPECT_EQ( src11.    size(),    0 ) ;
-        EXPECT_EQ( src11.capacity(),    0 ) ;
-        EXPECT_EQ( src11.   empty(), true ) ;
+        EXPECT_EQ( src11.    size(),                         0 ) ;
+        EXPECT_EQ( src11.capacity(), uti::string::sso_capacity ) ;
+        EXPECT_EQ( src11.   empty(),                      true ) ;
 
-        EXPECT_EQ( src22.    size(),    0 ) ;
-        EXPECT_EQ( src22.capacity(),    0 ) ;
-        EXPECT_EQ( src22.   empty(), true ) ;
+        EXPECT_EQ( src22.    size(),                         0 ) ;
+        EXPECT_EQ( src22.capacity(), uti::string::sso_capacity ) ;
+        EXPECT_EQ( src22.   empty(),                      true ) ;
 }
 
 TEST( StringTest, PushBack )
@@ -269,11 +269,11 @@ TEST( StringTest, Insert )
         auto len2 = str4.size() ;
         auto len3 = str5.size() ;
 
-        str1.insert( 0, 'x' ) ;
-        str2.insert( 0, 'x' ) ;
-        str3.insert( 0, 'x' ) ;
-        str4.insert( 0, 'x' ) ;
-        str5.insert( 0, 'x' ) ;
+        str1.insert( 'x', 0 ) ;
+        str2.insert( 'x', 0 ) ;
+        str3.insert( 'x', 0 ) ;
+        str4.insert( 'x', 0 ) ;
+        str5.insert( 'x', 0 ) ;
 
         EXPECT_EQ( str1.front(), 'x' ) ;
         EXPECT_EQ( str2.front(), 'x' ) ;
@@ -287,11 +287,11 @@ TEST( StringTest, Insert )
         EXPECT_EQ( str4.size(), len2 + 1 ) ;
         EXPECT_EQ( str5.size(), len3 + 1 ) ;
 
-        str1.insert( 99, 'y' ) ;
-        str2.insert( 99, 'y' ) ;
-        str3.insert( 99, 'y' ) ;
-        str4.insert( 99, 'y' ) ;
-        str5.insert( 99, 'y' ) ;
+        str1.insert( 'y', 99 ) ;
+        str2.insert( 'y', 99 ) ;
+        str3.insert( 'y', 99 ) ;
+        str4.insert( 'y', 99 ) ;
+        str5.insert( 'y', 99 ) ;
 
         EXPECT_EQ( str1.back(), 'y' ) ;
         EXPECT_EQ( str2.back(), 'y' ) ;
@@ -305,11 +305,11 @@ TEST( StringTest, Insert )
         EXPECT_EQ( str4.size(), len2 + 2 ) ;
         EXPECT_EQ( str5.size(), len3 + 2 ) ;
 
-        str1.insert( str1.size() / 2, 'z' ) ;
-        str2.insert( str2.size() / 2, 'z' ) ;
-        str3.insert( str3.size() / 2, 'z' ) ;
-        str4.insert( str4.size() / 2, 'z' ) ;
-        str5.insert( str5.size() / 2, 'z' ) ;
+        str1.insert( 'z', str1.size() / 2 ) ;
+        str2.insert( 'z', str2.size() / 2 ) ;
+        str3.insert( 'z', str3.size() / 2 ) ;
+        str4.insert( 'z', str4.size() / 2 ) ;
+        str5.insert( 'z', str5.size() / 2 ) ;
 
         EXPECT_EQ( str1.at( str1.size() / 2 ), 'z' ) ;
         EXPECT_EQ( str2.at( str2.size() / 2 ), 'z' ) ;

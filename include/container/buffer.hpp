@@ -41,8 +41,8 @@ public:
         using        iterator = iterator_base< value_type      , random_access_iterator_tag > ;
         using  const_iterator = iterator_base< value_type const, random_access_iterator_tag > ;
 
-        constexpr          buffer (                             )     noexcept       = default ;
-        constexpr explicit buffer ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+                 constexpr buffer (                             )     noexcept       = default ;
+        explicit constexpr buffer ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
         constexpr buffer ( iterator const _begin_, ssize_type const _cap_ ) noexcept
                 : block_ { _begin_, _cap_ } {}

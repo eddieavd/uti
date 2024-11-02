@@ -25,17 +25,15 @@ namespace uti
 {
 
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 class generic_string ;
 
 using string = generic_string< char, allocator< char, malloc_resource > > ;
 
 
-template< typename CharType, typename Allocator = allocator< CharType, malloc_resource > >
+template< meta::trivial CharType, typename Allocator = allocator< CharType, malloc_resource > >
 class generic_string
 {
-        static_assert( is_trivial_v< CharType >, "uti::string: bruh" ) ;
-
         static constexpr ssize_t sso_cap { UTI_SSO_CAP } ;
 
         using allocator_type = Allocator                          ;
@@ -63,6 +61,8 @@ class generic_string
                 stack_string stack_ ;
         } ;
 public:
+        static constexpr ssize_t sso_capacity { sso_cap } ;
+
         using      value_type =   CharType ;
         using       size_type =  size_t    ;
         using      ssize_type = ssize_t    ;
@@ -89,6 +89,10 @@ public:
                 requires meta::convertible_to< iter_value_t< Iter >, value_type >
         constexpr generic_string ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
+        template< meta::forward_iterator Iter >
+                requires meta::convertible_to< iter_value_t< Iter >, value_type >
+        constexpr generic_string ( Iter _begin_, ssize_type _len_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
         template< meta::simple_container T >
                 requires meta::convertible_to< typename T::value_type, value_type >
         constexpr generic_string ( T const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
@@ -101,8 +105,14 @@ public:
 
         constexpr ~generic_string () noexcept { reset() ; }
 
-        constexpr ssize_type reserve            ( ssize_type _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
-        constexpr ssize_type reserve_additional ( ssize_type _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC { return reserve( size() + _capacity_ ) ; }
+        constexpr ssize_type reserve ( ssize_type _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+        constexpr ssize_type reserve (                       ) UTI_NOEXCEPT_UNLESS_BADALLOC { return reserve( capacity() * 2 ) ; }
+
+        constexpr void push_back ( value_type const & _char_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        constexpr void insert ( value_type const & _char_, ssize_type _position_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        constexpr ssize_type append ( const_pointer _cstr_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
         template< meta::forward_iterator Iter >
                 requires meta::convertible_to< iter_value_t< Iter >, value_type >
@@ -125,6 +135,8 @@ public:
         UTI_NODISCARD constexpr bool          empty () const noexcept { return !ptr_ || ( size() == 0 ) ; }
         UTI_NODISCARD constexpr bool           null () const noexcept { return !ptr_  ; }
 
+        UTI_NODISCARD constexpr pointer data () const noexcept { return ptr_ ; }
+
         constexpr void clear () noexcept ;
         constexpr void reset () noexcept ;
 
@@ -144,10 +156,12 @@ public:
         UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return --begin() ; }
         UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return    rend() ; }
 
+        /// UB if called on empty string
         UTI_NODISCARD constexpr       reference  front ()       noexcept { return at( 0 ) ; }
         UTI_NODISCARD constexpr const_reference  front () const noexcept { return at( 0 ) ; }
         UTI_NODISCARD constexpr const_reference cfront () const noexcept { return at( 0 ) ; }
 
+        /// UB if called on empty string
         UTI_NODISCARD constexpr       reference  back ()       noexcept { return at( size() - 1 ) ; }
         UTI_NODISCARD constexpr const_reference  back () const noexcept { return at( size() - 1 ) ; }
         UTI_NODISCARD constexpr const_reference cback () const noexcept { return at( size() - 1 ) ; }
@@ -164,7 +178,7 @@ private:
 } ;
 
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr void
 generic_string< CharType, Allocator >::_init_small () noexcept
 {
@@ -174,15 +188,15 @@ generic_string< CharType, Allocator >::_init_small () noexcept
         rep_.stack_.size_ = sso_cap ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr bool
 generic_string< CharType, Allocator >::_is_small () const noexcept
 {
-        return ptr_ == static_cast< const_pointer >( static_cast< void const * >( &rep_ ) ) ;
 //      return ptr_ == rep_.stack_.data_ ;
+        return ptr_ == static_cast< const_pointer >( static_cast< void const * >( &rep_ ) ) ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr void
 generic_string< CharType, Allocator >::_set_size ( ssize_type _size_ ) noexcept
 {
@@ -199,7 +213,7 @@ generic_string< CharType, Allocator >::_set_size ( ssize_type _size_ ) noexcept
 }
 
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr
 generic_string< CharType, Allocator >::generic_string ( ssize_type _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
@@ -208,58 +222,85 @@ generic_string< CharType, Allocator >::generic_string ( ssize_type _capacity_ ) 
         reserve( _capacity_ ) ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr
 generic_string< CharType, Allocator >::generic_string ( const_pointer _cstr_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
+        _init_small() ;
+
         append( _cstr_, _cstr_ + ::uti::strlen( _cstr_ ) ) ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr
 generic_string< CharType, Allocator >::generic_string ( value_type _char_, ssize_type _count_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         _init_small() ;
 
         reserve( _count_ ) ;
-        ::uti::memset( begin(), end(), _char_ ) ;
+        for( ssize_type i = 0; i < _count_; ++i )
+        {
+                at( i ) = _char_ ;
+        }
         _set_size( _count_ ) ;
         at( size() ) = value_type( 0 ) ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 template< meta::forward_iterator Iter >
         requires meta::convertible_to< iter_value_t< Iter >, CharType >
 constexpr
 generic_string< CharType, Allocator >::generic_string ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
+        _init_small() ;
+
         append( _begin_, _end_ ) ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
+template< meta::forward_iterator Iter >
+        requires meta::convertible_to< iter_value_t< Iter >, CharType >
+constexpr
+generic_string< CharType, Allocator >::generic_string ( Iter _begin_, ssize_type _len_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        _init_small() ;
+
+        reserve( _len_ ) ;
+
+        for( ssize_type i = 0; i < _len_; ++i )
+        {
+                push_back( *_begin_++ ) ;
+        }
+}
+
+template< meta::trivial CharType, typename Allocator >
 template< meta::simple_container T >
         requires meta::convertible_to< typename T::value_type, CharType >
 constexpr
 generic_string< CharType, Allocator >::generic_string ( T const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
+        _init_small() ;
+
         append( _other_.begin(), _other_.end() ) ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr
 generic_string< CharType, Allocator >::generic_string ( generic_string const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
+        _init_small() ;
+
         append( _other_ ) ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr
 generic_string< CharType, Allocator >::generic_string ( generic_string && _other_ ) noexcept
 {
+        _init_small() ;
+
         if( _other_._is_small() )
         {
-                _init_small() ;
-
                 append( _other_ ) ;
         }
         else
@@ -273,7 +314,7 @@ generic_string< CharType, Allocator >::generic_string ( generic_string && _other
         _other_._init_small() ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr
 generic_string< CharType, Allocator > &
 generic_string< CharType, Allocator >::operator= ( generic_string const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
@@ -284,7 +325,7 @@ generic_string< CharType, Allocator >::operator= ( generic_string const & _other
         return *this ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr
 generic_string< CharType, Allocator > &
 generic_string< CharType, Allocator >::operator= ( generic_string && _other_ ) noexcept
@@ -308,7 +349,7 @@ generic_string< CharType, Allocator >::operator= ( generic_string && _other_ ) n
         return *this ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr
 generic_string< CharType, Allocator >::ssize_type
 generic_string< CharType, Allocator >::reserve ( ssize_type _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
@@ -325,7 +366,7 @@ generic_string< CharType, Allocator >::reserve ( ssize_type _capacity_ ) UTI_NOE
 
                 if( block.size_ >= _capacity_ + 1 )
                 {
-                        auto sz = size() ;
+                        ssize_type sz = size() ;
                         ::uti::copy( begin(), end(), block.begin_ ) ;
 
                         ptr_ = block.begin_ ;
@@ -341,9 +382,9 @@ generic_string< CharType, Allocator >::reserve ( ssize_type _capacity_ ) UTI_NOE
         {
                 block_type block { ptr_, rep_.heap_.capacity_ } ;
 
-                _alloc_traits::reallocate( block, _capacity_ ) ;
+                _alloc_traits::reallocate( block, _capacity_ + 1 ) ;
 
-                if( block.size_ >= _capacity_ )
+                if( block.size_ >= _capacity_ + 1 )
                 {
                         ptr_ = block.begin_ ;
                         rep_.heap_.capacity_ = block.size_ ;
@@ -354,7 +395,49 @@ generic_string< CharType, Allocator >::reserve ( ssize_type _capacity_ ) UTI_NOE
         return capacity() ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
+constexpr void
+generic_string< CharType, Allocator >::push_back ( value_type const & _char_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        if( null() || ( size() >= capacity() ) )
+        {
+                reserve() ;
+        }
+        at( size() ) = _char_ ;
+        _set_size( size() + 1 ) ;
+        at( size() ) = value_type( 0 ) ;
+}
+
+template< meta::trivial CharType, typename Allocator >
+constexpr void
+generic_string< CharType, Allocator >::insert ( value_type const & _char_, ssize_type _position_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        if( null() || size() >= capacity() )
+        {
+                reserve() ;
+        }
+        ssize_type sz = size() ;
+
+        if( _position_ >= sz ) return push_back( _char_ ) ;
+
+        for( ssize_type i = sz; i > _position_; --i )
+        {
+                at( i ) = at( i - 1 ) ;
+        }
+        at( _position_ ) = _char_ ;
+
+        _set_size( sz + 1 ) ;
+}
+
+template< meta::trivial CharType, typename Allocator >
+constexpr
+generic_string< CharType, Allocator >::ssize_type
+generic_string< CharType, Allocator >::append ( const_pointer _cstr_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        return append( _cstr_, _cstr_ + ::uti::strlen( _cstr_ ) ) ;
+}
+
+template< meta::trivial CharType, typename Allocator >
 template< meta::forward_iterator Iter >
         requires meta::convertible_to< iter_value_t< Iter >, CharType >
 constexpr
@@ -383,7 +466,7 @@ generic_string< CharType, Allocator >::append ( Iter _begin_, Iter const _end_ )
         return sz + len ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 template< meta::simple_container T >
         requires meta::convertible_to< typename T::value_type, CharType >
 constexpr
@@ -393,14 +476,14 @@ generic_string< CharType, Allocator >::append ( T const & _other_ ) UTI_NOEXCEPT
         return append( _other_.begin(), _other_.end() ) ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr void
 generic_string< CharType, Allocator >::clear () noexcept
 {
         _set_size( 0 ) ;
 }
 
-template< typename CharType, typename Allocator >
+template< meta::trivial CharType, typename Allocator >
 constexpr void
 generic_string< CharType, Allocator >::reset () noexcept
 {
@@ -414,27 +497,3 @@ generic_string< CharType, Allocator >::reset () noexcept
 
 
 } // namespace uti
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

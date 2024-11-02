@@ -14,6 +14,10 @@
 #include <type/sequence.hpp>
 #include <meta/concepts.hpp>
 
+#ifdef UTI_HAS_STL
+#include <initializer_list>
+#endif // UTI_HAS_STL
+
 
 namespace uti
 {
@@ -43,8 +47,8 @@ public:
         using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
         using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
-        constexpr          prefix_array (                             ) noexcept = default ;
-        constexpr explicit prefix_array ( ssize_type const _capacity_ )                    ;
+                 constexpr prefix_array (                             ) noexcept = default ;
+        explicit constexpr prefix_array ( ssize_type const _capacity_ )                    ;
 
         constexpr prefix_array ( ssize_type const _count_, value_type const & _val_ ) ;
 
@@ -53,6 +57,10 @@ public:
 
         template< meta::prefix_array_iterator Iter >
         constexpr prefix_array ( Iter _begin_, Iter const & _end_ ) ;
+
+#ifdef UTI_HAS_STL
+        constexpr prefix_array ( std::initializer_list< value_type > _list_ ) ;
+#endif // UTI_HAS_STL
 
         constexpr prefix_array             ( prefix_array const &  _other_ )          = default ;
         constexpr prefix_array             ( prefix_array       && _other_ ) noexcept = default ;
@@ -213,6 +221,27 @@ constexpr
 prefix_array< T, Alloc >::prefix_array ( Iter _begin_, Iter const & _end_ )
         : _base( iterator_base< value_type, random_access_iterator_tag >( _begin_ ),
                  iterator_base< value_type, random_access_iterator_tag >(   _end_ ) ) {}
+
+#ifdef UTI_HAS_STL
+
+template< typename T, typename Alloc >
+constexpr
+prefix_array< T, Alloc >::prefix_array ( std::initializer_list< value_type > _list_ )
+        : _base( _list_.size() )
+{
+        auto list_iter = _list_.begin() ;
+
+        value_type last = *list_iter ;
+
+        while( list_iter != _list_.end() )
+        {
+                _base::_emplace( last ) ;
+                ++list_iter ;
+                last += *list_iter ;
+        }
+}
+
+#endif // UTI_HAS_STL
 
 template< typename T, typename Alloc >
 constexpr

@@ -67,8 +67,8 @@ public:
         using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
         using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
-        constexpr          segment_tree (                             )     noexcept       = default ;
-        constexpr explicit segment_tree ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+                 constexpr segment_tree (                             )     noexcept       = default ;
+        explicit constexpr segment_tree ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
         constexpr segment_tree ( ssize_type const _count_, value_type const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
@@ -239,8 +239,7 @@ segment_tree< T, Compare, Alloc >::segment_tree ( Iter _begin_, Iter const & _en
 
         while( _begin_ != _end_ )
         {
-                _emplace( *_begin_ ) ;
-                ++_begin_ ;
+                _emplace( *_begin_++ ) ;
         }
         _view_base::_size() = real_size ;
 }
@@ -354,10 +353,10 @@ segment_tree< T, Compare, Alloc >::operator= ( segment_tree && _other_ ) noexcep
         this->size_       = _other_.size_       ;
         this->_capacity() = _other_._capacity() ;
 
-        _other_._buffer() = nullptr ;
-        _other_.begin_ = nullptr ;
-        _other_.size_ = 0 ;
-        _other_._capacity() = 0 ;
+        _other_._buffer()   = nullptr ;
+        _other_.begin_      = nullptr ;
+        _other_.size_       =       0 ;
+        _other_._capacity() =       0 ;
 
         return *this ;
 }
@@ -787,7 +786,7 @@ typename
 segment_tree< T, Compare, Alloc >::value_type
 segment_tree< T, Compare, Alloc >::_range ( ssize_type _x1_, ssize_type _x2_ ) const noexcept
 {
-        UTI_CEXPR_ASSERT( 0 <= _x1_ <= _x2_ < size(), "uti::segment_tree::_range: index out of bounds" ) ;
+        UTI_CEXPR_ASSERT( 0 <= _x1_ && _x1_ <= _x2_ && _x2_ < size(), "uti::segment_tree::_range: index out of bounds" ) ;
 
         auto cap = capacity() ;
 
