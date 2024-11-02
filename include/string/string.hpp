@@ -418,7 +418,7 @@ generic_string< CharType, Allocator >::insert ( value_type const & _char_, ssize
 
         if( _position_ >= sz ) return push_back( _char_ ) ;
 
-        for( ssize_type i = sz; i >= _position_; --i )
+        for( ssize_type i = sz; i > _position_; --i )
         {
                 at( i ) = at( i - 1 ) ;
         }
