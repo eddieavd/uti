@@ -37,7 +37,7 @@ endif()
 
 add_executable( uti main.cpp )
 
-target_include_directories( uti PUBLIC include )
+target_include_directories( uti PUBLIC uti )
 
 if( UTI_USE_LIBCXX )
         target_link_libraries( uti c++ c++abi )
