@@ -7,6 +7,9 @@
 #pragma once
 
 #include <type/traits.hpp>
+#include <iterator/meta.hpp>
+#include <iterator/base.hpp>
+#include <iterator/reverse_iterator.hpp>
 
 
 namespace uti
@@ -27,8 +30,10 @@ public:
         using       reference = value_type       & ;
         using const_reference = value_type const & ;
 
-        using        iterator =       pointer ;
-        using  const_iterator = const_pointer ;
+        using               iterator = iterator_base< value_type      , random_access_iterator_tag > ;
+        using         const_iterator = iterator_base< value_type const, random_access_iterator_tag > ;
+        using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
+        using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 };
 
 

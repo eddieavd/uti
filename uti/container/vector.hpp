@@ -241,19 +241,11 @@ vector< T, Alloc >::vector ( Iter _begin_, Iter const & _end_ )
 }
 
 #ifdef UTI_HAS_STL
-
 template< typename T, typename Alloc >
 constexpr
 vector< T, Alloc >::vector ( std::initializer_list< value_type > _list_ )
-        : _buff_base( _list_.size() )
-        , _view_base( _buff_base::begin(), _buff_base::begin() )
-{
-        for( auto & val : _list_ )
-        {
-                _emplace( UTI_MOVE( val ) ) ;
-        }
-}
-
+        : vector( _list_.begin(), _list_.end() )
+{}
 #endif // UTI_HAS_STL
 
 template< typename T, typename Alloc >

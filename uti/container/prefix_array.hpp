@@ -223,24 +223,11 @@ prefix_array< T, Alloc >::prefix_array ( Iter _begin_, Iter const & _end_ )
                  iterator_base< value_type, random_access_iterator_tag >(   _end_ ) ) {}
 
 #ifdef UTI_HAS_STL
-
 template< typename T, typename Alloc >
 constexpr
 prefix_array< T, Alloc >::prefix_array ( std::initializer_list< value_type > _list_ )
-        : _base( _list_.size() )
-{
-        auto list_iter = _list_.begin() ;
-
-        value_type last = *list_iter ;
-
-        while( list_iter != _list_.end() )
-        {
-                _base::_emplace( last ) ;
-                ++list_iter ;
-                last += *list_iter ;
-        }
-}
-
+        : prefix_array( _list_.begin(), _list_.end() )
+{}
 #endif // UTI_HAS_STL
 
 template< typename T, typename Alloc >
