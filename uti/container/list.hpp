@@ -172,6 +172,10 @@ public:
 
         constexpr list () noexcept = default ;
 
+        template< meta::forward_iterator Iter >
+                requires meta::convertible_to< iter_value_t< Iter >, value_type >
+        constexpr list ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
 #ifdef UTI_HAS_STL
         constexpr list ( std::initializer_list< value_type > _list_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 #endif // UTI_HAS_STL
@@ -225,15 +229,22 @@ private:
 } ;
 
 
+template< typename T, typename Resource >
+template< meta::forward_iterator Iter >
+        requires meta::convertible_to< iter_value_t< Iter >, T >
+constexpr list< T, Resource >::list ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        for( ; _begin_ != _end_; ++_begin_ )
+        {
+                emplace_back( *_begin_ ) ;
+        }
+}
+
 #ifdef UTI_HAS_STL
 template< typename T, typename Resource >
 constexpr list< T, Resource >::list ( std::initializer_list< T > _list_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
-{
-        for( auto & val : _list_ )
-        {
-                emplace_back( UTI_MOVE( val ) ) ;
-        }
-}
+        : list( _list_.begin(), _list_.end() )
+{}
 #endif // UTI_HAS_STL
 
 template< typename T, typename Resource >

@@ -186,7 +186,7 @@ struct static_bump_resource
                 }
         }
 
-        static constexpr bool realloc_inplace ( block_type & _block_, ssize_type const _bytes_ ) noexcept
+        UTI_NODISCARD static constexpr bool realloc_inplace ( block_type & _block_, ssize_type const _bytes_ ) noexcept
         {
                 if( _can_realloc_inplace( _block_, _bytes_ ) )
                 {
