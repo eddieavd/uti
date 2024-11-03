@@ -11,7 +11,9 @@
 #include <container/view.hpp>
 #include <allocator/meta.hpp>
 
+#ifdef UTI_HAS_STL
 #include <initializer_list>
+#endif // UTI_HAS_STL
 
 
 namespace uti
@@ -44,6 +46,7 @@ public:
 
         constexpr array ( value_type const & _val_ ) noexcept( is_nothrow_copy_assignable_v< value_type > ) ;
 
+#ifdef UTI_HAS_STL
         constexpr array ( std::initializer_list< value_type > _list_ ) : _view_base( data, data + capacity_ )
         {
                 if constexpr( is_trivially_copy_constructible_v< value_type > )
@@ -63,14 +66,15 @@ public:
 
                 }
         }
+#endif // UTI_HAS_STL
 
         constexpr array             ( array const & _other_ ) noexcept( is_nothrow_copy_assignable_v< value_type > ) ;
         constexpr array & operator= ( array const & _other_ ) noexcept( is_nothrow_copy_assignable_v< value_type > &&
-                                                                        is_nothrow_destructible_v      < value_type > ) ;
+                                                                        is_nothrow_destructible_v   < value_type > ) ;
 
         constexpr array             ( array && _other_ ) noexcept( is_nothrow_move_assignable_v< value_type > ) ;
         constexpr array & operator= ( array && _other_ ) noexcept( is_nothrow_move_assignable_v< value_type > &&
-                                                                   is_nothrow_destructible_v      < value_type > ) ;
+                                                                   is_nothrow_destructible_v   < value_type > ) ;
 
         constexpr ~array () noexcept = default ;
 
@@ -106,6 +110,17 @@ array< T, Capacity >::array ( array const & _other_ ) noexcept( is_nothrow_copy_
 }
 
 template< typename T, ssize_t Capacity >
+constexpr
+array< T, Capacity >::array ( array && _other_ ) noexcept( is_nothrow_move_assignable_v< value_type > )
+        : _view_base( data, capacity_ )
+{
+        for( ssize_type i = 0; i < capacity_; ++i )
+        {
+                _view_base::at( i ) = UTI_MOVE( _other_.at( i ) );
+        }
+}
+
+template< typename T, ssize_t Capacity >
 constexpr array< T, Capacity > &
 array< T, Capacity >::operator= ( array const & _other_ ) noexcept( is_nothrow_copy_assignable_v< value_type > &&
                                                                     is_nothrow_destructible_v   < value_type > )
@@ -115,17 +130,6 @@ array< T, Capacity >::operator= ( array const & _other_ ) noexcept( is_nothrow_c
                 _view_base::at( i ) = _other_.at( i );
         }
         return *this ;
-}
-
-template< typename T, ssize_t Capacity >
-constexpr
-array< T, Capacity >::array ( array && _other_ ) noexcept( is_nothrow_move_assignable_v< value_type > )
-        : _view_base( data, capacity_ )
-{
-        for( ssize_type i = 0; i < capacity_; ++i )
-        {
-                _view_base::at( i ) = UTI_MOVE( _other_.at( i ) );
-        }
 }
 
 template< typename T, ssize_t Capacity >

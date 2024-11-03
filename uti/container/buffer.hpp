@@ -38,8 +38,10 @@ public:
         using       reference = typename _base::      reference ;
         using const_reference = typename _base::const_reference ;
 
-        using        iterator = iterator_base< value_type      , random_access_iterator_tag > ;
-        using  const_iterator = iterator_base< value_type const, random_access_iterator_tag > ;
+        using               iterator = typename _base::              iterator ;
+        using         const_iterator = typename _base::        const_iterator ;
+        using       reverse_iterator = typename _base::      reverse_iterator ;
+        using const_reverse_iterator = typename _base::const_reverse_iterator ;
 
                  constexpr buffer (                             )     noexcept       = default ;
         explicit constexpr buffer ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;

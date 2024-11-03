@@ -52,7 +52,7 @@ constexpr void _advance_impl ( Iter & _iter_, DistType _dist_, random_access_ite
 } // namespace _detail
 
 
-template< typename Iter, typename DistType >
+template< meta::input_iterator Iter, typename DistType >
 constexpr void advance ( Iter & _iter_, DistType _dist_ ) noexcept
 {
         _detail::_advance_impl( _iter_, _dist_, typename iterator_traits< Iter >::iterator_category{} ) ;

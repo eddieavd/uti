@@ -269,15 +269,13 @@ struct static_freelist_resource
         using ssize_type = ssize_t ;
 
         static constexpr ssize_type memsize { MemSize } ;
-
 private:
         struct alignas( 64 ) mem
         {
                 value_type mem_ [ memsize ] ;
         } ;
 
-        inline static mem      mem_ ;
-        inline static int freelist_ ;
+        inline static mem mem_ ;
 } ;
 
 

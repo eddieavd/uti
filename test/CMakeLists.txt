@@ -26,7 +26,7 @@ target_link_libraries(
 target_include_directories(
         gtest_uti
         PUBLIC
-        ${CMAKE_HOME_DIRECTORY}/include
+        ${CMAKE_HOME_DIRECTORY}/uti
 )
 
 include( GoogleTest )
