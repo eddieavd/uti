@@ -48,6 +48,12 @@
 #       define UTI_NOEXCEPT_UNLESS_BADALLOC
 #endif
 
+#if UTI_TARGET_ANDROID || UTI_TARGET_MAC || UTI_TARGET_IOS
+#       define UTI_NOEXCEPT_UNLESS_BADALLOC_AND(...) noexcept( __VA_ARGS__ )
+#else
+#       define UTI_NOEXCEPT_UNLESS_BADALLOC_AND(...)
+#endif
+
 
 // shamelessly stolen from
 // https://github.com/psiha/build/blob/master/include/psi/build/disable_warnings.hpp
