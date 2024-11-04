@@ -46,7 +46,7 @@ public:
 
                 _block_ = block ;
         }
-        UTI_DEEP_INLINE static constexpr bool realloc_inplace ( block_type & _block_, ssize_type const _new_capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+        UTI_NODISCARD UTI_DEEP_INLINE static constexpr bool realloc_inplace ( block_type & _block_, ssize_type const _new_capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
                 requires( is_detected_v< has_inplace_realloc, resource_type, typename resource_type::value_type > )
         {
                 resource_block_type block( _block_ ) ;
@@ -58,7 +58,7 @@ public:
                 }
                 return false ;
         }
-        UTI_DEEP_INLINE static constexpr bool realloc_inplace ( block_type &, ssize_type const ) UTI_NOEXCEPT_UNLESS_BADALLOC
+        UTI_NODISCARD UTI_DEEP_INLINE static constexpr bool realloc_inplace ( block_type &, ssize_type const ) UTI_NOEXCEPT_UNLESS_BADALLOC
                 requires( !is_detected_v< has_inplace_realloc, resource_type, typename resource_type::value_type > )
         {
                 return false ;
