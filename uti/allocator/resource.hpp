@@ -210,9 +210,6 @@ struct static_bump_resource
 
         UTI_NODISCARD static constexpr       iterator  begin () noexcept { return mem_.mem_ ; }
         UTI_NODISCARD static constexpr const_iterator cbegin () noexcept { return begin()   ; }
-
-        UTI_NODISCARD static constexpr       iterator  end () noexcept { return end_  ; }
-        UTI_NODISCARD static constexpr const_iterator cend () noexcept { return end() ; }
 private:
         struct alignas( 64 ) mem
         {
@@ -221,6 +218,9 @@ private:
 
         inline static mem      mem_ ;
         inline static iterator end_ { mem_.mem_ } ;
+
+        UTI_NODISCARD static constexpr       iterator  _end () noexcept { return end_   ; }
+        UTI_NODISCARD static constexpr const_iterator _cend () noexcept { return _end() ; }
 
         static constexpr void _align_end ( ssize_type const _align_ ) noexcept
         {
@@ -238,7 +238,7 @@ private:
                 return _iter_ ;
         }
 
-        static constexpr ssize_type _mem_available (                          ) noexcept { return memsize - ::uti::distance( cbegin(), cend() ) ; }
+        static constexpr ssize_type _mem_available (                          ) noexcept { return memsize - ::uti::distance( cbegin(), _cend() ) ; }
         static constexpr ssize_type _mem_available ( ssize_type const _align_ ) noexcept
         {
                 const_iterator aligned_end = _aligned_to( end_, _align_ ) ;
@@ -246,7 +246,7 @@ private:
                 return memsize - ::uti::distance( cbegin(), aligned_end ) ;
         }
 
-        static constexpr bool _is_last_block ( block_type const & _block_ ) noexcept { return _block_.cbegin() + _block_.size_ == cend() ; }
+        static constexpr bool _is_last_block ( block_type const & _block_ ) noexcept { return _block_.cbegin() + _block_.size_ == _cend() ; }
 
         static constexpr bool _can_realloc_inplace ( block_type const & _block_, ssize_type const _new_capacity_ ) noexcept
         {
@@ -258,24 +258,6 @@ private:
                 end_ += _new_capacity_ - _block_.size_ ;
                 _block_.size_ = _new_capacity_ ;
         }
-} ;
-
-
-template< ssize_t MemSize, ssize_t Id = 0 >
-struct static_freelist_resource
-{
-        using value_type =    u8_t ;
-        using  size_type =  size_t ;
-        using ssize_type = ssize_t ;
-
-        static constexpr ssize_type memsize { MemSize } ;
-private:
-        struct alignas( 64 ) mem
-        {
-                value_type mem_ [ memsize ] ;
-        } ;
-
-        inline static mem mem_ ;
 } ;
 
 

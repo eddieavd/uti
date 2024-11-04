@@ -183,7 +183,6 @@ constexpr void
 generic_string< CharType, Allocator >::_init_small () noexcept
 {
         rep_.stack_ = {} ;
-//      ptr_ = rep_.stack_.data_ ;
         ptr_ = static_cast< pointer >( static_cast< void * >( &rep_ ) ) ;
         rep_.stack_.size_ = sso_cap ;
 }
@@ -192,8 +191,9 @@ template< meta::trivial CharType, typename Allocator >
 constexpr bool
 generic_string< CharType, Allocator >::_is_small () const noexcept
 {
-//      return ptr_ == rep_.stack_.data_ ;
-        return ptr_ == static_cast< const_pointer >( static_cast< void const * >( &rep_ ) ) ;
+        return ptr_ == static_cast< const_iterator >(
+                           static_cast< const_pointer >(
+                               static_cast< void const * >( &rep_ ) ) ) ;
 }
 
 template< meta::trivial CharType, typename Allocator >

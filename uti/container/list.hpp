@@ -103,6 +103,18 @@ public:
         constexpr list_iterator             ( list_iterator       && ) noexcept = default ;
         constexpr list_iterator & operator= ( list_iterator       && ) noexcept = default ;
 
+        constexpr list_iterator ( list_iterator< remove_const_t< node_type > > const & _other_ ) noexcept
+                requires is_const_v< node_type > : ptr_( _other_.ptr_ ) {}
+
+        constexpr list_iterator & operator= ( list_iterator< remove_const_t< node_type > > const & _other_ ) noexcept
+                requires is_const_v< node_type > { ptr_ = _other_.ptr_ ; }
+
+        constexpr list_iterator ( list_iterator< remove_const_t< node_type > > && _other_ ) noexcept
+                requires is_const_v< node_type > : ptr_( _other_.ptr_ ) {}
+
+        constexpr list_iterator & operator= ( list_iterator< remove_const_t< node_type > > && _other_ ) noexcept
+                requires is_const_v< node_type > { ptr_ = _other_.ptr_ ; }
+
         constexpr ~list_iterator () noexcept = default ;
 
         constexpr operator pointer ()       noexcept { return ptr_ ; }
@@ -172,6 +184,8 @@ public:
 
         constexpr list () noexcept = default ;
 
+        explicit constexpr list ( value_type const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
         template< meta::forward_iterator Iter >
                 requires meta::convertible_to< iter_value_t< Iter >, value_type >
         constexpr list ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
@@ -198,9 +212,17 @@ public:
 
         template< typename... Args >
                 requires meta::constructible_from< value_type, Args... >
-        constexpr void insert ( const_iterator _position_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+        constexpr void insert ( iterator _position_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        constexpr void pop_back  () noexcept ;
+        constexpr void pop_front () noexcept ;
+
+        constexpr void erase ( iterator _position_ ) noexcept ;
 
         constexpr void clear () noexcept ;
+
+        UTI_NODISCARD constexpr ssize_type  size () const noexcept { return size_      ; }
+        UTI_NODISCARD constexpr       bool empty () const noexcept { return size_ == 0 ; }
 
         UTI_NODISCARD constexpr       iterator  begin ()       noexcept { return head_   ; }
         UTI_NODISCARD constexpr const_iterator  begin () const noexcept { return head_   ; }
@@ -217,6 +239,14 @@ public:
         UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return nullptr ; }
         UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return nullptr ; }
         UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return rend()  ; }
+
+        UTI_NODISCARD constexpr       reference  front ()       noexcept { return *begin() ; }
+        UTI_NODISCARD constexpr const_reference  front () const noexcept { return *begin() ; }
+        UTI_NODISCARD constexpr const_reference cfront () const noexcept { return  front() ; }
+
+        UTI_NODISCARD constexpr       reference  back ()       noexcept { return tail_->data_ ; }
+        UTI_NODISCARD constexpr const_reference  back () const noexcept { return tail_->data_ ; }
+        UTI_NODISCARD constexpr const_reference cback () const noexcept { return       back() ; }
 private:
         node_type * head_ { nullptr } ;
         node_type * tail_ { nullptr } ;
@@ -226,8 +256,17 @@ private:
                 requires meta::constructible_from< value_type, Args... >
         constexpr node_pointer _new_node ( node_pointer _prev_, node_pointer _next_, Args&&... _args_ )
                 UTI_NOEXCEPT_UNLESS_BADALLOC_AND( meta::nothrow_constructible_from< value_type, Args... > ) ;
+
+        constexpr void _destroy_node ( node_pointer _node_ ) const noexcept ;
 } ;
 
+
+template< typename T, typename Resource >
+constexpr list< T, Resource >::list ( value_type const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        head_ = tail_ = _new_node( nullptr, nullptr, _val_ ) ;
+        ++size_ ;
+}
 
 template< typename T, typename Resource >
 template< meta::forward_iterator Iter >
@@ -323,14 +362,88 @@ template< typename T, typename Resource >
 template< typename... Args >
         requires meta::constructible_from< T, Args... >
 constexpr void
-list< T, Resource >::insert ( const_iterator _position_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+list< T, Resource >::insert ( iterator _position_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
-        node_pointer node = _new_node( _position_.ptr_->prev_, _position_, UTI_FWD( _args_ )... ) ;
+        if( !head_ )
+        {
+                emplace_back( UTI_FWD( _args_ )... ) ;
+                return ;
+        }
+        else if( _position_ == head_ )
+        {
+                emplace_front( UTI_FWD( _args_ )... ) ;
+                return ;
+        }
+        else
+        {
+                node_pointer node = _new_node( _position_.ptr_->prev_, _position_.ptr_, UTI_FWD( _args_ )... ) ;
 
-        _position_.ptr_->prev_->next_ = node ;
-        _position_.ptr_->prev_ = node ;
+                _position_.ptr_->prev_->next_ = node ;
+                _position_.ptr_->prev_ = node ;
 
-        ++size_ ;
+                ++size_ ;
+        }
+}
+
+template< typename T, typename Resource >
+constexpr void
+list< T, Resource >::pop_back () noexcept
+{
+        if( !tail_ ) return ;
+
+        auto node = tail_ ;
+
+        tail_ = tail_->prev_ ;
+        tail_->next_ = nullptr ;
+
+        _destroy_node( node ) ;
+        --size_ ;
+}
+
+template< typename T, typename Resource >
+constexpr void
+list< T, Resource >::pop_front () noexcept
+{
+        if( !head_ ) return ;
+
+        auto node = head_ ;
+
+        head_ = head_->next_ ;
+        head_->prev_ = nullptr ;
+
+        _destroy_node( node ) ;
+        --size_ ;
+}
+
+template< typename T, typename Resource >
+constexpr void
+list< T, Resource >::erase ( iterator _position_ ) noexcept
+{
+        node_pointer node = _position_.ptr_ ;
+
+        if( !node ) return ;
+
+        if( node == head_ && node == tail_ )
+        {
+                head_ = tail_ = nullptr ;
+        }
+        else if( node == head_ )
+        {
+                head_ = head_->next_ ;
+                head_->prev_ = nullptr ;
+        }
+        else if( node == tail_ )
+        {
+                tail_ = tail_->prev_ ;
+                tail_->next_ = nullptr ;
+        }
+        else
+        {
+                node->prev_->next_ = node->next_ ;
+                node->next_->prev_ = node->prev_ ;
+        }
+        _destroy_node( node ) ;
+        --size_ ;
 }
 
 template< typename T, typename Resource >
@@ -341,16 +454,23 @@ list< T, Resource >::clear () noexcept
         {
                 auto ptr = head_ ;
                 head_ = head_->next_ ;
-                
-                if constexpr( !is_trivially_destructible_v< value_type > )
-                {
-                        ::uti::destroy( &ptr->data_ ) ;
-                }
-                block_type block{ ptr, sizeof( node_type ) } ;
-                _alloc_traits::deallocate( block ) ;
+
+                _destroy_node( ptr ) ;
         }
         head_ = tail_ = nullptr ;
         size_ = 0 ;
+}
+
+template< typename T, typename Resource >
+constexpr void
+list< T, Resource >::_destroy_node ( node_pointer _node_ ) const noexcept
+{
+        if constexpr( !is_trivially_destructible_v< value_type > )
+        {
+                ::uti::destroy( &_node_->data_ ) ;
+        }
+        block_type block{ _node_, sizeof( node_type ) } ;
+        _alloc_traits::deallocate( block ) ;
 }
 
 template< typename T, typename Resource >

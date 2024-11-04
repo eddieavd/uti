@@ -116,6 +116,22 @@ public:
                 _rhs_.ptr_ = _tmp_ ;
         }
 
+        friend constexpr bool operator== ( iterator_base const & _lhs_,
+                                           iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >,
+                                           add_lvalue_reference_t< remove_const_t< T > > > const & _rhs_ ) noexcept
+                requires is_const_v< T >
+        {
+                return _lhs_.ptr_ == _rhs_.ptr_ ;
+        }
+
+        friend constexpr bool operator== ( iterator_base const & _lhs_,
+                                           iterator_base< T const, IterCat, DiffType, T const *, T const & > const & _rhs_ ) noexcept
+                requires( !is_const_v< T > )
+        {
+                return _lhs_.ptr_ == _rhs_.ptr_ ;
+        }
+
+
         friend constexpr bool operator< ( iterator_base const & _lhs_, iterator_base const & _rhs_ ) noexcept
                 requires _has_random_access_iterator_category_v< _self >
         {
@@ -135,6 +151,36 @@ public:
                 requires _has_random_access_iterator_category_v< _self >
         {
                 return _lhs_.ptr_ >= _rhs_.ptr_ ;
+        }
+
+        friend constexpr bool operator< ( iterator_base const & _lhs_,
+                                          iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >,
+                                          add_lvalue_reference_t< remove_const_t< T > > > const & _rhs_ ) noexcept
+                requires is_const_v< T >
+        {
+                return _lhs_.ptr_ < _rhs_.ptr_ ;
+        }
+
+        friend constexpr bool operator> ( iterator_base const & _lhs_,
+                                          iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >,
+                                          add_lvalue_reference_t< remove_const_t< T > > > const & _rhs_ ) noexcept
+                requires is_const_v< T >
+        {
+                return _lhs_.ptr_ > _rhs_.ptr_ ;
+        }
+
+        friend constexpr bool operator< ( iterator_base const & _lhs_,
+                                          iterator_base< T const, IterCat, DiffType, T const *, T const & > const & _rhs_ ) noexcept
+                requires( !is_const_v< T > )
+        {
+                return _lhs_.ptr_ < _rhs_.ptr_ ;
+        }
+
+        friend constexpr bool operator> ( iterator_base const & _lhs_,
+                                          iterator_base< T const, IterCat, DiffType, T const *, T const & > const & _rhs_ ) noexcept
+                requires( !is_const_v< T > )
+        {
+                return _lhs_.ptr_ > _rhs_.ptr_ ;
         }
 
         friend constexpr iterator_base operator+ ( iterator_base const & _iter_, difference_type const _diff_ ) noexcept
