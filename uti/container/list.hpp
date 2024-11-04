@@ -232,9 +232,9 @@ public:
         UTI_NODISCARD constexpr const_iterator  end () const noexcept { return nullptr ; }
         UTI_NODISCARD constexpr const_iterator cend () const noexcept { return end()   ; }
 
-        UTI_NODISCARD constexpr       reverse_iterator  rbegin ()       noexcept { return tail_    ; }
-        UTI_NODISCARD constexpr const_reverse_iterator  rbegin () const noexcept { return tail_    ; }
-        UTI_NODISCARD constexpr const_reverse_iterator crbegin () const noexcept { return rbegin() ; }
+        UTI_NODISCARD constexpr       reverse_iterator  rbegin ()       noexcept { return iterator( tail_ ) ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rbegin () const noexcept { return iterator( tail_ ) ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crbegin () const noexcept { return   rbegin(       ) ; }
 
         UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return nullptr ; }
         UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return nullptr ; }
