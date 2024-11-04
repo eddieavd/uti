@@ -244,9 +244,9 @@ public:
         UTI_NODISCARD constexpr const_reference  front () const noexcept { return *begin() ; }
         UTI_NODISCARD constexpr const_reference cfront () const noexcept { return  front() ; }
 
-        UTI_NODISCARD constexpr       reference  back ()       noexcept { return tail_->data_ ; }
-        UTI_NODISCARD constexpr const_reference  back () const noexcept { return tail_->data_ ; }
-        UTI_NODISCARD constexpr const_reference cback () const noexcept { return       back() ; }
+        UTI_NODISCARD constexpr       reference  back ()       noexcept { return *rbegin() ; }
+        UTI_NODISCARD constexpr const_reference  back () const noexcept { return *rbegin() ; }
+        UTI_NODISCARD constexpr const_reference cback () const noexcept { return    back() ; }
 private:
         node_type * head_ { nullptr } ;
         node_type * tail_ { nullptr } ;
