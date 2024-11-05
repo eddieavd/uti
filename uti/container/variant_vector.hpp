@@ -75,6 +75,9 @@ constexpr ssize_t index_of ( ssize_t _start_ = 0 ) noexcept
         }
 }
 
+template< typename T >
+using iterator_type_for = iterator_base< T, random_access_iterator_tag > ;
+
 
 template< typename T >
 using iterator_type_for = iterator_base< T, random_access_iterator_tag > ;
