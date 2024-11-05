@@ -173,9 +173,9 @@ public:
         using const_reference = value_type const & ;
 
         using         node_pointer = node_type       * ;
-        using   node_const_pointer = node_type const * ;
+        using   const_node_pointer = node_type const * ;
         using       node_reference = node_type       & ;
-        using node_const_reference = node_type const & ;
+        using const_node_reference = node_type const & ;
 
         using               iterator = list_iterator< node_type       > ;
         using         const_iterator = list_iterator< node_type const > ;

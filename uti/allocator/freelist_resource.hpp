@@ -11,7 +11,7 @@
 #include <container/list.hpp>
 
 #ifndef   UTI_FREELIST_CAP
-#define   UTI_FREELIST_CAP 32
+#define   UTI_FREELIST_CAP 64
 #endif // UTI_FREELIST_CAP
 
 #ifndef   UTI_FREELIST_TAG

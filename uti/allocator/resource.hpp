@@ -58,7 +58,7 @@ public:
                 return resource_type::realloc_inplace( _block_, _bytes_ ) ;
         }
         UTI_NODISCARD UTI_DEEP_INLINE static constexpr
-        bool realloc_inplace ( block_type &, ssize_type, ssize_type const ) noexcept
+        bool realloc_inplace ( block_type &, ssize_type ) noexcept
                 requires( !is_detected_v< has_inplace_realloc, resource_type, value_type > )
         {
                 return false ;
