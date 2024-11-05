@@ -27,6 +27,20 @@ public:
         constexpr iterator_base (                       ) noexcept requires _has_forward_iterator_category_v< _self > : ptr_( nullptr ) {}
         constexpr iterator_base ( pointer const & _ptr_ ) noexcept                                                    : ptr_(   _ptr_ ) {}
 
+        template< typename T1 >
+                requires( !meta::same_as< remove_const_t< T >, remove_const_t< T1 > > && meta::same_as< remove_const_t< T >, u8_t > && !is_const_v< T1 > )
+        constexpr iterator_base ( T1 * _ptr_ ) noexcept : ptr_( static_cast< u8_t * >( static_cast< void * >( _ptr_ ) ) ) {}
+
+        template< typename T1 >
+                requires( !meta::same_as< remove_const_t< T >, remove_const_t< T1 > > && meta::same_as< T, u8_t const > )
+        constexpr iterator_base ( T1 const * _ptr_ ) noexcept : ptr_( static_cast< u8_t const * >( static_cast< void const * >( _ptr_ ) ) ) {}
+
+        constexpr iterator_base ( u8_t * _ptr_ ) noexcept requires( !meta::same_as< remove_const_t< T >, u8_t > )
+                : ptr_( static_cast< T * >( static_cast< void * >( _ptr_ ) ) ) {}
+
+        constexpr iterator_base ( u8_t const * _ptr_ ) noexcept requires( !meta::same_as< remove_const_t< T >, u8_t > && is_const_v< T > )
+                : ptr_( static_cast< T const * >( static_cast< void const * >( _ptr_ ) ) ) {}
+
         constexpr iterator_base & operator= ( pointer const & _ptr_ ) noexcept { ptr_ = _ptr_ ; return *this ; }
 
         constexpr iterator_base             ( nullptr_t ) noexcept : ptr_ ( nullptr ) {}
@@ -42,30 +56,112 @@ public:
                 return ( ( u64_t ) ptr_ ) & _mask_ ;
         }
 
+        ////////////////////////////////////////////////////////////////////////////////
+        /// non-const to const
+        ////////////////////////////////////////////////////////////////////////////////
+
         constexpr iterator_base ( iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >, add_lvalue_reference_t< remove_const_t< T > > > const & _other_ )
                 noexcept requires( is_const_v< T > ) : ptr_( _other_.ptr_ ) {} ;
 
         constexpr iterator_base & operator= ( iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >, add_lvalue_reference_t< remove_const_t< T > > > const & _other_ )
-                noexcept requires( is_const_v< T > ) { ptr_ = _other_.ptr_ ; }
+                noexcept requires( is_const_v< T > ) { ptr_ = _other_.ptr_ ; return *this ; }
 
         constexpr iterator_base ( iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >, add_lvalue_reference_t< remove_const_t< T > > > && _other_ )
                 noexcept requires( is_const_v< T > ) : ptr_( _other_.ptr_ ) {} ;
 
         constexpr iterator_base & operator= ( iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >, add_lvalue_reference_t< remove_const_t< T > > > && _other_ )
-                noexcept requires( is_const_v< T > ) { ptr_ = _other_.ptr_ ; }
+                noexcept requires( is_const_v< T > ) { ptr_ = _other_.ptr_ ; return *this ; }
 
+        ////////////////////////////////////////////////////////////////////////////////
+        /// u8_t to whatever
+        ////////////////////////////////////////////////////////////////////////////////
 
-        constexpr iterator_base ( iterator_base< T const, IterCat, DiffType, add_pointer_t< T const >, add_lvalue_reference_t< T const > > const & _other_ )
-                noexcept requires( !is_const_v< T > ) : ptr_( _other_.ptr_ ) {}
+        constexpr iterator_base ( iterator_base< u8_t, IterCat, DiffType, u8_t *, u8_t & > const & _other_ )
+                noexcept requires( !meta::same_as< remove_const_t< T >, u8_t > )
+                : ptr_( static_cast< pointer >( static_cast< void * >( _other_.ptr_ ) ) ) {}
 
-        constexpr iterator_base & operator= ( iterator_base< T const, IterCat, DiffType, add_pointer_t< T const >, add_lvalue_reference_t< T const > > const & _other_ )
-                noexcept requires( !is_const_v< T > ) { ptr_ = _other_.ptr_ ; }
+        constexpr iterator_base & operator= ( iterator_base< u8_t, IterCat, DiffType, u8_t *, u8_t & > const & _other_ ) noexcept
+                requires( !meta::same_as< remove_const_t< T >, u8_t > )
+        { ptr_ = static_cast< pointer >( static_cast< void * >( _other_.ptr_ ) ) ; return *this ; }
 
-        constexpr iterator_base ( iterator_base< T const, IterCat, DiffType, add_pointer_t< T const >, add_lvalue_reference_t< T const > > && _other_ )
-                noexcept requires( !is_const_v< T > ) : ptr_( _other_.ptr_ ) {}
+        constexpr iterator_base ( iterator_base< u8_t, IterCat, DiffType, u8_t *, u8_t & > && _other_ )
+                noexcept requires( !meta::same_as< remove_const_t< T >, u8_t > )
+                : ptr_( static_cast< pointer >( static_cast< void * >( _other_.ptr_ ) ) ) {}
 
-        constexpr iterator_base & operator= ( iterator_base< T const, IterCat, DiffType, add_pointer_t< T const >, add_lvalue_reference_t< T const > > && _other_ )
-                noexcept requires( !is_const_v< T > ) { ptr_ = _other_.ptr_ ; }
+        constexpr iterator_base & operator= ( iterator_base< u8_t, IterCat, DiffType, u8_t *, u8_t & > && _other_ ) noexcept
+                requires( !meta::same_as< remove_const_t< T >, u8_t > )
+        { ptr_ = static_cast< pointer >( static_cast< void * >( _other_.ptr_ ) ) ; return *this ; }
+
+        ////////////////////////////////////////////////////////////////////////////////
+        /// u8_t const to whatever const
+        ////////////////////////////////////////////////////////////////////////////////
+
+        constexpr iterator_base ( iterator_base< u8_t const, IterCat, DiffType, u8_t const *, u8_t const & > const & _other_ )
+                noexcept requires( !meta::same_as< remove_const_t< T >, u8_t > && is_const_v< T > )
+                : ptr_( static_cast< pointer >( static_cast< void const * >( _other_.ptr_ ) ) ) {}
+
+        constexpr iterator_base & operator= ( iterator_base< u8_t const, IterCat, DiffType, u8_t const *, u8_t const & > const & _other_ )
+                noexcept requires( !meta::same_as< remove_const_t< T >, u8_t > && is_const_v< T > )
+        { ptr_( static_cast< pointer >( static_cast< void const * >( _other_.ptr_ ) ) ) ; return *this ; }
+
+        constexpr iterator_base ( iterator_base< u8_t const, IterCat, DiffType, u8_t const *, u8_t const & > && _other_ )
+                noexcept requires( !meta::same_as< remove_const_t< T >, u8_t > && is_const_v< T > )
+                : ptr_( static_cast< pointer >( static_cast< void const * >( _other_.ptr_ ) ) ) {}
+
+        constexpr iterator_base & operator= ( iterator_base< u8_t const, IterCat, DiffType, u8_t const *, u8_t const & > && _other_ )
+                noexcept requires( !meta::same_as< remove_const_t< T >, u8_t > && is_const_v< T > )
+        { ptr_( static_cast< pointer >( static_cast< void const * >( _other_.ptr_ ) ) ) ; return *this ; }
+
+        ////////////////////////////////////////////////////////////////////////////////
+        /// whatever to u8_t
+        ////////////////////////////////////////////////////////////////////////////////
+
+        template< typename T1 >
+                requires( !meta::same_as< remove_const_t< T >, remove_const_t< T1 > > && meta::same_as< T, u8_t > && !is_const_v< T1 > )
+        constexpr iterator_base ( iterator_base< T1, IterCat, DiffType, T1 *, T1 & > const & _other_ ) noexcept
+                : ptr_( static_cast< pointer >( static_cast< void * >( _other_.ptr_ ) ) ) {}
+
+        template< typename T1 >
+                requires( !meta::same_as< remove_const_t< T >, remove_const_t< T1 > > && meta::same_as< T, u8_t > && !is_const_v< T1 > )
+        constexpr iterator_base & operator= ( iterator_base< T1, IterCat, DiffType, T1 *, T1 & > const & _other_ ) noexcept
+        { ptr_( static_cast< pointer >( static_cast< void * >( _other_.ptr_ ) ) ) ; return *this ; }
+
+        template< typename T1 >
+                requires( !meta::same_as< remove_const_t< T >, remove_const_t< T1 > > && meta::same_as< T, u8_t > && !is_const_v< T1 > )
+        constexpr iterator_base ( iterator_base< T1, IterCat, DiffType, T1 *, T1 & > && _other_ ) noexcept
+                : ptr_( static_cast< pointer >( static_cast< void * >( _other_.ptr_ ) ) ) {}
+
+        template< typename T1 >
+                requires( !meta::same_as< remove_const_t< T >, remove_const_t< T1 > > && meta::same_as< T, u8_t > && !is_const_v< T1 > )
+        constexpr iterator_base & operator= ( iterator_base< T1, IterCat, DiffType, T1 *, T1 & > && _other_ ) noexcept
+        { ptr_( static_cast< pointer >( static_cast< void * >( _other_.ptr_ ) ) ) ; return *this ; }
+
+        ////////////////////////////////////////////////////////////////////////////////
+        /// whatever to u8_t const
+        ////////////////////////////////////////////////////////////////////////////////
+
+        template< typename T1 >
+                requires( !meta::same_as< remove_const_t< T >, remove_const_t< T1 > > && meta::same_as< T, u8_t const > )
+        constexpr iterator_base ( iterator_base< T1, IterCat, DiffType, T1 *, T1 & > const & _other_ ) noexcept
+                : ptr_( static_cast< pointer >( static_cast< void const * >( _other_.ptr_ ) ) ) {}
+
+        template< typename T1 >
+                requires( !meta::same_as< remove_const_t< T >, remove_const_t< T1 > > && meta::same_as< T, u8_t const > )
+        constexpr iterator_base & operator= ( iterator_base< T1, IterCat, DiffType, T1 *, T1 & > const & _other_ ) noexcept
+        { ptr_( static_cast< pointer >( static_cast< void const * >( _other_.ptr_ ) ) ) ; return *this ; }
+
+        template< typename T1 >
+                requires( !meta::same_as< remove_const_t< T >, remove_const_t< T1 > > && meta::same_as< T, u8_t const > )
+        constexpr iterator_base ( iterator_base< T1, IterCat, DiffType, T1 *, T1 & > && _other_ ) noexcept
+                : ptr_( static_cast< pointer >( static_cast< void const * >( _other_.ptr_ ) ) ) {}
+
+        template< typename T1 >
+                requires( !meta::same_as< remove_const_t< T >, remove_const_t< T1 > > && meta::same_as< T, u8_t const > )
+        constexpr iterator_base & operator= ( iterator_base< T1, IterCat, DiffType, T1 *, T1 & > && _other_ ) noexcept
+        { ptr_( static_cast< pointer >( static_cast< void const * >( _other_.ptr_ ) ) ) ; return *this ; }
+
+        ////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////
 
         constexpr ~iterator_base () noexcept = default ;
 
@@ -130,7 +226,6 @@ public:
         {
                 return _lhs_.ptr_ == _rhs_.ptr_ ;
         }
-
 
         friend constexpr bool operator< ( iterator_base const & _lhs_, iterator_base const & _rhs_ ) noexcept
                 requires _has_random_access_iterator_category_v< _self >
@@ -201,6 +296,14 @@ public:
         }
         friend constexpr difference_type operator- ( iterator_base const & _lhs_, iterator_base const & _rhs_ ) noexcept
                 requires _has_random_access_iterator_category_v< _self >
+        {
+                return _lhs_.ptr_ - _rhs_.ptr_ ;
+        }
+
+        friend constexpr difference_type operator- ( iterator_base const & _lhs_,
+                                                   iterator_base< remove_const_t< T >, IterCat, DiffType, add_pointer_t< remove_const_t< T > >,
+                                                   add_lvalue_reference_t< remove_const_t< T > > > const & _rhs_ ) noexcept
+                requires is_const_v< T >
         {
                 return _lhs_.ptr_ - _rhs_.ptr_ ;
         }
