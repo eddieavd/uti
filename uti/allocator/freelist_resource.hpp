@@ -11,7 +11,7 @@
 #include <container/list.hpp>
 
 #ifndef   UTI_FREELIST_CAP
-#define   UTI_FREELIST_CAP 32
+#define   UTI_FREELIST_CAP 64
 #endif // UTI_FREELIST_CAP
 
 #ifndef   UTI_FREELIST_TAG
@@ -196,6 +196,12 @@ struct static_freelist_resource
                 }
                 _block_.begin_ = nullptr ;
                 _block_. size_ =       0 ;
+        }
+
+        static constexpr void reset () noexcept
+        {
+                freelist_.clear() ;
+                freelist_.push_back( block_type{ mem_.mem_, memsize } ) ;
         }
 
         UTI_NODISCARD static constexpr ssize_type capacity () noexcept { return memsize ; }

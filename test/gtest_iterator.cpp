@@ -102,3 +102,61 @@ TEST( IteratorTest, ContainerIterators )
         static_assert( uti::meta::random_access_iterator<   r_segtree_iter > ) ;
         static_assert( uti::meta::random_access_iterator< c_r_segtree_iter > ) ;
 }
+
+TEST( IteratorTest, Convertibility )
+{
+        using iter_u8  = uti::iterator_base< uti::  u8_t, uti::random_access_iterator_tag > ;
+        using iter_u64 = uti::iterator_base< uti:: u64_t, uti::random_access_iterator_tag > ;
+        using iter_str = uti::iterator_base< uti::string, uti::random_access_iterator_tag > ;
+
+        using const_iter_u8  = uti::iterator_base< uti::  u8_t const, uti::random_access_iterator_tag > ;
+        using const_iter_u64 = uti::iterator_base< uti:: u64_t const, uti::random_access_iterator_tag > ;
+        using const_iter_str = uti::iterator_base< uti::string const, uti::random_access_iterator_tag > ;
+
+        /// self
+        {
+                static_assert(  uti::is_convertible_v<       iter_u8,       iter_u8 > ) ;
+                static_assert(  uti::is_convertible_v<       iter_u8, const_iter_u8 > ) ;
+                static_assert( !uti::is_convertible_v< const_iter_u8,       iter_u8 > ) ;
+                static_assert(  uti::is_convertible_v< const_iter_u8, const_iter_u8 > ) ;
+
+                static_assert(  uti::is_convertible_v<       iter_u64,       iter_u64 > ) ;
+                static_assert(  uti::is_convertible_v<       iter_u64, const_iter_u64 > ) ;
+                static_assert( !uti::is_convertible_v< const_iter_u64,       iter_u64 > ) ;
+                static_assert(  uti::is_convertible_v< const_iter_u64, const_iter_u64 > ) ;
+
+                static_assert(  uti::is_convertible_v<       iter_u64,       iter_u64 > ) ;
+                static_assert(  uti::is_convertible_v<       iter_u64, const_iter_u64 > ) ;
+                static_assert( !uti::is_convertible_v< const_iter_u64,       iter_u64 > ) ;
+                static_assert(  uti::is_convertible_v< const_iter_u64, const_iter_u64 > ) ;
+        }
+        /// to and from u8
+        {
+                static_assert(  uti::is_convertible_v<       iter_u64,       iter_u8 > ) ;
+                static_assert(  uti::is_convertible_v<       iter_u64, const_iter_u8 > ) ;
+                static_assert( !uti::is_convertible_v< const_iter_u64,       iter_u8 > ) ;
+                static_assert(  uti::is_convertible_v< const_iter_u64, const_iter_u8 > ) ;
+
+                static_assert(  uti::is_convertible_v<       iter_u8,       iter_u64 > ) ;
+                static_assert(  uti::is_convertible_v<       iter_u8, const_iter_u64 > ) ;
+                static_assert( !uti::is_convertible_v< const_iter_u8,       iter_u64 > ) ;
+                static_assert(  uti::is_convertible_v< const_iter_u8, const_iter_u64 > ) ;
+
+                static_assert(  uti::is_convertible_v<       iter_str,       iter_u8 > ) ;
+                static_assert(  uti::is_convertible_v<       iter_str, const_iter_u8 > ) ;
+                static_assert( !uti::is_convertible_v< const_iter_str,       iter_u8 > ) ;
+                static_assert(  uti::is_convertible_v< const_iter_str, const_iter_u8 > ) ;
+
+                static_assert(  uti::is_convertible_v<       iter_u8,       iter_str > ) ;
+                static_assert(  uti::is_convertible_v<       iter_u8, const_iter_str > ) ;
+                static_assert( !uti::is_convertible_v< const_iter_u8,       iter_str > ) ;
+                static_assert(  uti::is_convertible_v< const_iter_u8, const_iter_str > ) ;
+        }
+        /// between different types
+        {
+                static_assert( !uti::is_convertible_v<       iter_u64,       iter_str > ) ;
+                static_assert( !uti::is_convertible_v<       iter_u64, const_iter_str > ) ;
+                static_assert( !uti::is_convertible_v< const_iter_u64,       iter_str > ) ;
+                static_assert( !uti::is_convertible_v< const_iter_u64, const_iter_str > ) ;
+        }
+}

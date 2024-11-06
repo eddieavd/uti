@@ -58,7 +58,7 @@ public:
                 return resource_type::realloc_inplace( _block_, _bytes_ ) ;
         }
         UTI_NODISCARD UTI_DEEP_INLINE static constexpr
-        bool realloc_inplace ( block_type &, ssize_type, ssize_type const ) noexcept
+        bool realloc_inplace ( block_type &, ssize_type ) noexcept
                 requires( !is_detected_v< has_inplace_realloc, resource_type, value_type > )
         {
                 return false ;
@@ -81,6 +81,11 @@ public:
                 requires( !is_detected_v< has_capacity, resource_type > )
         {
                 return i64_t_max ;
+        }
+        UTI_DEEP_INLINE static constexpr
+        void reset () noexcept
+        {
+                resource_type::reset() ;
         }
 } ;
 
@@ -132,6 +137,7 @@ struct malloc_resource
                 _block_.begin_ = nullptr ;
                 _block_. size_ =       0 ;
         }
+        static constexpr void reset () noexcept {}
 } ;
 
 
@@ -204,6 +210,11 @@ struct static_bump_resource
                 }
                 _block_.begin_ = nullptr ;
                 _block_. size_ =       0 ;
+        }
+
+        static constexpr void reset () noexcept
+        {
+                end_ = mem_.mem_ ;
         }
 
         UTI_NODISCARD static constexpr ssize_type capacity () noexcept { return memsize ; }

@@ -173,9 +173,9 @@ public:
         using const_reference = value_type const & ;
 
         using         node_pointer = node_type       * ;
-        using   node_const_pointer = node_type const * ;
+        using   const_node_pointer = node_type const * ;
         using       node_reference = node_type       & ;
-        using node_const_reference = node_type const & ;
+        using const_node_reference = node_type const & ;
 
         using               iterator = list_iterator< node_type       > ;
         using         const_iterator = list_iterator< node_type const > ;
@@ -193,6 +193,11 @@ public:
 #ifdef UTI_HAS_STL
         constexpr list ( std::initializer_list< value_type > _list_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 #endif // UTI_HAS_STL
+
+        constexpr list             ( list const &  ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+        constexpr list             ( list       && )     noexcept                 ;
+        constexpr list & operator= ( list const &  ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+        constexpr list & operator= ( list       && )     noexcept                 ;
 
         constexpr ~list () noexcept { clear() ; }
 
@@ -213,6 +218,14 @@ public:
         template< typename... Args >
                 requires meta::constructible_from< value_type, Args... >
         constexpr void insert ( iterator _position_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        template< meta::forward_iterator Iter >
+                requires meta::convertible_to< iter_value_t< Iter >, value_type >
+        constexpr void append ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        template< meta::simple_container Other >
+                requires meta::convertible_to< typename Other::value_type, value_type >
+        constexpr void append ( Other const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
         constexpr void pop_back  () noexcept ;
         constexpr void pop_front () noexcept ;
@@ -285,6 +298,52 @@ constexpr list< T, Resource >::list ( std::initializer_list< T > _list_ ) UTI_NO
         : list( _list_.begin(), _list_.end() )
 {}
 #endif // UTI_HAS_STL
+
+template< typename T, typename Resource >
+constexpr
+list< T, Resource >::list ( list const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+        : list( _other_.begin(), _other_.end() )
+{}
+
+template< typename T, typename Resource >
+constexpr
+list< T, Resource >::list ( list && _other_ ) noexcept
+        : head_( _other_.head_ )
+        , tail_( _other_.tail_ )
+        , size_( _other_.size_ )
+{
+        _other_.head_ = _other_.tail_ = nullptr ;
+        _other_.size_ = 0 ;
+}
+
+template< typename T, typename Resource >
+constexpr
+list< T, Resource > &
+list< T, Resource >::operator= ( list const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        clear() ;
+
+        append( _other_.begin(), _other_.end() ) ;
+
+        return *this ;
+}
+
+template< typename T, typename Resource >
+constexpr
+list< T, Resource > &
+list< T, Resource >::operator= ( list && _other_ ) noexcept
+{
+        clear() ;
+
+        head_ = _other_.head_ ;
+        tail_ = _other_.tail_ ;
+        size_ = _other_.size_ ;
+
+        _other_.head_ = _other_.tail_ = nullptr ;
+        _other_.size_ = 0 ;
+
+        return *this ;
+}
 
 template< typename T, typename Resource >
 constexpr void
@@ -383,6 +442,27 @@ list< T, Resource >::insert ( iterator _position_, Args&&... _args_ ) UTI_NOEXCE
 
                 ++size_ ;
         }
+}
+
+template< typename T, typename Resource >
+template< meta::forward_iterator Iter >
+        requires meta::convertible_to< iter_value_t< Iter >, T >
+constexpr void
+list< T, Resource >::append ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        for( ; _begin_ != _end_; ++_begin_ )
+        {
+                emplace_back( *_begin_ ) ;
+        }
+}
+
+template< typename T, typename Resource >
+template< meta::simple_container Other >
+        requires meta::convertible_to< typename Other::value_type, T >
+constexpr void
+list< T, Resource >::append ( Other const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        append( _other_.begin(), _other_.end() ) ;
 }
 
 template< typename T, typename Resource >
