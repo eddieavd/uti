@@ -43,6 +43,21 @@ constexpr size_t max_align_of () noexcept
         }
 } ;
 
+template< typename T, typename... Ts >
+constexpr size_t min_align_of () noexcept
+{
+        if constexpr( sizeof...( Ts ) == 0 )
+        {
+                return alignof( T ) ;
+        }
+        else
+        {
+                size_t align_rest = max_align_of< Ts... >() ;
+
+                return alignof( T ) < align_rest ? alignof( T ) : align_rest ;
+        }
+} ;
+
 template< typename T, typename T1, typename... Ts >
 constexpr ssize_t index_of ( ssize_t _start_ = 0 ) noexcept
 {
@@ -60,6 +75,7 @@ constexpr ssize_t index_of ( ssize_t _start_ = 0 ) noexcept
         }
 }
 
+
 template< typename T >
 using iterator_type_for = iterator_base< T, random_access_iterator_tag > ;
 
@@ -73,25 +89,24 @@ class variant_vector
         using value_types = meta::type_list< Ts... > ;
 
         static constexpr ssize_t max_align { _detail::max_align_of< Ts... >() } ;
+        static constexpr ssize_t min_align { _detail::min_align_of< Ts... >() } ;
 public:
         using           resource_type = Resource ;
         using        _resource_traits = uti::resource_traits< resource_type > ;
-//      using          allocator_type = uti::allocator<    u8_t, resource_type > ;
-//      using           _alloc_traits = uti::allocator_traits< allocator_type > ;
-        using internal_allocator_type = uti::allocator< ssize_t, resource_type > ;
         using              block_type = typename _resource_traits::block_type ;
+        using internal_allocator_type = uti::allocator< ssize_t, resource_type > ;
 
         using       size_type =  size_t    ;
         using      ssize_type = ssize_t    ;
         using difference_type = ssize_type ;
 
-        using       pointer = typename block_type::      pointer ;
-        using const_pointer = typename block_type::const_pointer ;
+        using       byte_pointer = typename block_type::      pointer ;
+        using const_byte_pointer = typename block_type::const_pointer ;
 
-        using               iterator = typename block_type::      iterator ;
-        using         const_iterator = typename block_type::const_iterator ;
-        using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
-        using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
+        using               byte_iterator = typename block_type::      iterator ;
+        using         const_byte_iterator = typename block_type::const_iterator ;
+        using       reverse_byte_iterator = ::uti::reverse_iterator<       byte_iterator > ;
+        using const_reverse_byte_iterator = ::uti::reverse_iterator< const_byte_iterator > ;
 
         constexpr variant_vector () noexcept = default ;
 
@@ -131,6 +146,7 @@ public:
         constexpr void clear () noexcept ;
 
         UTI_NODISCARD constexpr ssize_type capacity_bytes () const noexcept { return storage_.size_ ; }
+        UTI_NODISCARD constexpr ssize_type     size_bytes () const noexcept { return _find_end( size_ - 1 ) - storage_.begin() ; }
 
         UTI_NODISCARD constexpr ssize_type  size () const noexcept { return size_      ; }
         UTI_NODISCARD constexpr       bool empty () const noexcept { return size_ == 0 ; }
@@ -142,8 +158,8 @@ public:
         template< typename T > UTI_NODISCARD constexpr _detail::iterator_type_for< T       > get_ptr ( ssize_type _idx_ )       noexcept ;
         template< typename T > UTI_NODISCARD constexpr _detail::iterator_type_for< T const > get_ptr ( ssize_type _idx_ ) const noexcept ;
 
-        template< typename Visitor >
-        constexpr void visit ( ssize_type _idx_, Visitor&& _visitor_ ) noexcept
+        template< typename Visitor, typename Self >
+        constexpr void visit ( this Self && self, ssize_type _idx_, Visitor&& _visitor_ ) noexcept
         {
                 [ & ]< ssize_type... Idxs >( uti::index_sequence< Idxs... > )
                 {
@@ -153,29 +169,9 @@ public:
                                 using type = meta::list::at_t< Idxs, value_types > ;
                                 if constexpr( meta::invocable< Visitor, type > )
                                 {
-                                        if( types_[ _idx_ ] == Idxs )
+                                        if( UTI_FWD( self ).types_[ _idx_ ] == Idxs )
                                         {
-                                                _visitor_( get< type >( _idx_ ) ) ;
-                                        }
-                                }
-                        }() ) ;
-                }( uti::make_index_sequence< sizeof...( Ts ) >{} ) ;
-        }
-
-        template< typename Visitor >
-        constexpr void visit ( ssize_type _idx_, Visitor&& _visitor_ ) const noexcept
-        {
-                [ & ]< ssize_type... Idxs >( uti::index_sequence< Idxs... > )
-                {
-                        ( ...,
-                        [ & ]
-                        {
-                                using type = meta::list::at_t< Idxs, value_types > ;
-                                if constexpr( meta::invocable< Visitor, type > )
-                                {
-                                        if( types_[ _idx_ ] == Idxs )
-                                        {
-                                                _visitor_( get< type >( _idx_ ) ) ;
+                                                _visitor_( UTI_FWD( self ).template get< type >( _idx_ ) ) ;
                                         }
                                 }
                         }() ) ;
@@ -201,14 +197,14 @@ private:
                 requires meta::one_of< T, Ts... >
         constexpr bool _can_fit ( ssize_type _count_ ) const noexcept ;
 
-        constexpr       iterator _find_end ( ssize_type _idx_ )       noexcept ;
-        constexpr const_iterator _find_end ( ssize_type _idx_ ) const noexcept ;
+        constexpr       byte_iterator _find_end ( ssize_type _idx_ )       noexcept ;
+        constexpr const_byte_iterator _find_end ( ssize_type _idx_ ) const noexcept ;
 
-        template< typename T > constexpr       iterator _align_for (       iterator _ptr_ )       noexcept ;
-        template< typename T > constexpr const_iterator _align_for ( const_iterator _ptr_ ) const noexcept ;
+        template< typename T > constexpr       byte_iterator _align_for (       byte_iterator _ptr_ )       noexcept ;
+        template< typename T > constexpr const_byte_iterator _align_for ( const_byte_iterator _ptr_ ) const noexcept ;
 
         template< typename T >
-        constexpr ssize_type _padding_for ( const_iterator _ptr_ ) const noexcept ;
+        constexpr ssize_type _padding_for ( const_byte_iterator _ptr_ ) const noexcept ;
 } ;
 
 
@@ -219,14 +215,43 @@ variant_vector< Resource, Ts... >::_reserve ( ssize_type _bytes_ )
         if( !storage_ )
         {
                 storage_ = _resource_traits::allocate( _bytes_, max_align ) ;
+                return ;
+        }
+        if( storage_.size_ >= _bytes_ ) return ;
+
+        if constexpr( conjunction_v< is_trivially_relocatable< Ts >... > )
+        {
+                _resource_traits::reallocate( storage_, _bytes_, max_align ) ;
         }
         else
         {
-                if( storage_.size_ >= _bytes_ ) return ;
+                if( _resource_traits::realloc_inplace( storage_, _bytes_ ) ) return ;
 
-                /// TODO: handle nontrivial types
+                block_type new_block = _resource_traits::allocate( _bytes_, max_align ) ;
 
-                _resource_traits::reallocate( storage_, _bytes_, max_align ) ;
+                if( !new_block ) return ;
+
+                for( ssize_type i = 0; i < size_; ++i )
+                {
+                        visit( i, [ & ]( auto const & elem )
+                            {
+                                using type = remove_cvref_t< decltype( elem ) > ;
+                                using iter = _detail::iterator_type_for< type > ;
+
+                                if constexpr( !is_trivially_relocatable_v< type > )
+                                {
+                                        ::uti::construct< iter >( new_block.begin() + offsets_[ i ], UTI_MOVE( elem ) ) ;
+                                        ::uti::destroy( &elem ) ;
+                                }
+                                else
+                                {
+                                        ::uti::copy( storage_.begin() + offsets_[ i ], _find_end( i ), new_block.begin() + offsets_[ i ] ) ;
+//                                      ::uti::copy( &elem, &elem + 1, new_block.begin() + offsets_[ i ] ) ;
+                                }
+                            }
+                        ) ;
+                }
+                storage_ = new_block ;
         }
 }
 
@@ -236,8 +261,8 @@ template< typename T >
 constexpr bool
 variant_vector< Resource, Ts... >::_can_fit ( ssize_type _count_ ) const noexcept
 {
-        const_iterator     end = _find_end( size_ - 1 ) ;
-        const_iterator aligned = _align_for< T >( end ) ;
+        const_byte_iterator     end = _find_end( size_ - 1 ) ;
+        const_byte_iterator aligned = _align_for< T >( end ) ;
 
         size_type free_space = storage_.end() - aligned ;
 
@@ -250,10 +275,10 @@ variant_vector< Resource, Ts... >::_can_fit ( ssize_type _count_ ) const noexcep
 
 template< typename Resource, typename... Ts >
 constexpr
-variant_vector< Resource, Ts... >::iterator
+variant_vector< Resource, Ts... >::byte_iterator
 variant_vector< Resource, Ts... >::_find_end ( ssize_type _idx_ ) noexcept
 {
-        iterator elem_start = storage_.begin() + offsets_[ _idx_ ] ;
+        byte_iterator elem_start = storage_.begin() + offsets_[ _idx_ ] ;
 
         ssize_type elem_size { 0 } ;
 
@@ -264,10 +289,10 @@ variant_vector< Resource, Ts... >::_find_end ( ssize_type _idx_ ) noexcept
 
 template< typename Resource, typename... Ts >
 constexpr
-variant_vector< Resource, Ts... >::const_iterator
+variant_vector< Resource, Ts... >::const_byte_iterator
 variant_vector< Resource, Ts... >::_find_end ( ssize_type _idx_ ) const noexcept
 {
-        const_iterator elem_start = storage_.begin() + offsets_[ _idx_ ] ;
+        const_byte_iterator elem_start = storage_.begin() + offsets_[ _idx_ ] ;
 
         ssize_type elem_size { 0 } ;
 
@@ -279,8 +304,8 @@ variant_vector< Resource, Ts... >::_find_end ( ssize_type _idx_ ) const noexcept
 template< typename Resource, typename... Ts >
 template< typename T >
 constexpr
-variant_vector< Resource, Ts... >::iterator
-variant_vector< Resource, Ts... >::_align_for ( iterator _ptr_ ) noexcept
+variant_vector< Resource, Ts... >::byte_iterator
+variant_vector< Resource, Ts... >::_align_for ( byte_iterator _ptr_ ) noexcept
 {
         ssize_type align = alignof( T ) ;
         ssize_type  mask = align - 1 ;
@@ -295,8 +320,8 @@ variant_vector< Resource, Ts... >::_align_for ( iterator _ptr_ ) noexcept
 template< typename Resource, typename... Ts >
 template< typename T >
 constexpr
-variant_vector< Resource, Ts... >::const_iterator
-variant_vector< Resource, Ts... >::_align_for ( const_iterator _ptr_ ) const noexcept
+variant_vector< Resource, Ts... >::const_byte_iterator
+variant_vector< Resource, Ts... >::_align_for ( const_byte_iterator _ptr_ ) const noexcept
 {
         ssize_type align = alignof( T ) ;
         ssize_type  mask = align - 1 ;
@@ -312,9 +337,9 @@ template< typename Resource, typename... Ts >
 template< typename T >
 constexpr
 variant_vector< Resource, Ts... >::ssize_type
-variant_vector< Resource, Ts... >::_padding_for ( const_iterator _ptr_ ) const noexcept
+variant_vector< Resource, Ts... >::_padding_for ( const_byte_iterator _ptr_ ) const noexcept
 {
-        const_iterator aligned = _align_for< T >( _ptr_ ) ;
+        const_byte_iterator aligned = _align_for< T >( _ptr_ ) ;
 
         return aligned - _ptr_ ;
 }
@@ -375,7 +400,7 @@ variant_vector< Resource, Ts... >::emplace_back ( Args&&... _args_ )
 
                 dest = _align_for< T >( _find_end( size_ - 1 ) ) ;
 
-                offsets_.push_back( static_cast< const_iterator >( dest ) - storage_.begin() ) ;
+                offsets_.push_back( static_cast< const_byte_iterator >( dest ) - storage_.begin() ) ;
                 types_.push_back( _detail::index_of< T, Ts... >() ) ;
         }
         if( dest )
@@ -399,6 +424,9 @@ constexpr void
 variant_vector< Resource, Ts... >::reserve ( ssize_type _count_ )
 {
         _reserve( _count_ * sizeof( T ) ) ;
+
+        offsets_.reserve( _count_ ) ;
+        types_  .reserve( _count_ ) ;
 }
 
 template< typename Resource, typename... Ts >
@@ -407,11 +435,14 @@ template< typename T >
 constexpr void
 variant_vector< Resource, Ts... >::reserve_additional ( ssize_type _count_ )
 {
-        const_iterator    end = _find_end( size_ - 1 ) ;
-        ssize_type size_bytes = end - storage_.begin() ;
-        ssize_type    padding = _padding_for< T >( end ) ;
+        const_byte_iterator end = _find_end( size_ - 1 ) ;
+        ssize_type   size_bytes = end - storage_.begin() ;
+        ssize_type      padding = _padding_for< T >( end ) ;
 
         _reserve( size_bytes + padding + sizeof( T ) * _count_ ) ;
+
+        offsets_.reserve( size_ + _count_ ) ;
+        types_  .reserve( size_ + _count_ ) ;
 }
 
 template< typename Resource, typename... Ts >

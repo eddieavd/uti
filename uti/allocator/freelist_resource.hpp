@@ -198,6 +198,12 @@ struct static_freelist_resource
                 _block_. size_ =       0 ;
         }
 
+        static constexpr void reset () noexcept
+        {
+                freelist_.clear() ;
+                freelist_.push_back( block_type{ mem_.mem_, memsize } ) ;
+        }
+
         UTI_NODISCARD static constexpr ssize_type capacity () noexcept { return memsize ; }
 
         UTI_NODISCARD static constexpr       iterator  begin () noexcept { return mem_.mem_ ; }

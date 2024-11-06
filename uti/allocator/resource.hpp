@@ -82,6 +82,11 @@ public:
         {
                 return i64_t_max ;
         }
+        UTI_DEEP_INLINE static constexpr
+        void reset () noexcept
+        {
+                resource_type::reset() ;
+        }
 } ;
 
 
@@ -132,6 +137,7 @@ struct malloc_resource
                 _block_.begin_ = nullptr ;
                 _block_. size_ =       0 ;
         }
+        static constexpr void reset () noexcept {}
 } ;
 
 
@@ -204,6 +210,11 @@ struct static_bump_resource
                 }
                 _block_.begin_ = nullptr ;
                 _block_. size_ =       0 ;
+        }
+
+        static constexpr void reset () noexcept
+        {
+                end_ = mem_.mem_ ;
         }
 
         UTI_NODISCARD static constexpr ssize_type capacity () noexcept { return memsize ; }
