@@ -397,6 +397,8 @@ variant_vector< Resource, Ts... >::variant_vector ( Iter _begin_, Iter const _en
         offsets_.reserve( capacity * 2 ) ;
         types_  .reserve( capacity * 2 ) ;
 
+        reserve< iter_value_t< Iter > >( capacity ) ;
+
         for( ; _begin_ != _end_; ++_begin_ )
         {
                 emplace_back( *_begin_ ) ;
