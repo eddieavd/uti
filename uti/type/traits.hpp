@@ -1607,6 +1607,43 @@ struct _sfinae_assign_base< true, false >
 } ;
 
 
+////////////////////////////////////////////////////////////////////////////////
+///     forward_like
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T >
+constexpr add_const_t< T > & as_const ( T & t ) noexcept
+{
+        return t ;
+}
+
+template< typename T > struct                is_ref_to_const   : integral_constant< is_const_v< remove_reference_t< T > > > {} ;
+template< typename T > inline constexpr bool is_ref_to_const_v = is_ref_to_const< T >::value ;
+
+
+template< typename T, typename U >
+constexpr auto && forward_like ( U && u ) noexcept
+{
+        constexpr bool is_adding_const = is_const_v< remove_reference_t< T > > ;
+        if constexpr( is_lvalue_reference_v< T && > )
+        {
+                if constexpr( is_adding_const )
+                        return as_const( u ) ;
+                else
+                        return static_cast< U & >( u ) ;
+        }
+        else
+        {
+                if constexpr( is_adding_const )
+                        return UTI_MOVE( as_const( u ) ) ;
+                else
+                        return UTI_MOVE( u ) ;
+        }
+}
+
+template< typename T, typename U > using like = decltype( forward_like< T >( declval< U && >() ) ) ;
+
+
 } // namespace uti
 
 #endif // UTI_DOXYGEN_SKIP

@@ -4,10 +4,10 @@ project( uti VERSION 0.0.1 )
 
 option( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
-set( CMAKE_CXX_STANDARD          23   )
+set( CMAKE_CXX_STANDARD          26   )
 set( CMAKE_CXX_STANDARD_REQUIRED True )
 
-add_compile_options( -Wall -Wextra -pedantic -Werror -ftemplate-backtrace-limit=0 )
+add_compile_options( -Wall -Wextra -pedantic -Werror -ftemplate-backtrace-limit=0 -fconstexpr-backtrace-limit=0 )
 
 if( UTI_RELEASE )
         add_compile_options( -O3 )

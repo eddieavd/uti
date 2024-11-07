@@ -9,6 +9,8 @@
 #include <type/traits.hpp>
 #include <iterator/meta.hpp>
 
+#include <memory>
+
 
 namespace uti
 {
@@ -18,7 +20,8 @@ template< meta::iterator Iter, typename... Args >
 constexpr void construct ( Iter iter, Args&&... args )
         noexcept( is_nothrow_constructible_v< iter_value_t< Iter >, Args... > )
 {
-        ::new ( ( void * ) iter ) iter_value_t< Iter >( UTI_FWD( args )... ) ;
+        ::std::construct_at( static_cast< iter_value_t< Iter > * >( iter ), UTI_FWD( args )... ) ;
+//      ::new ( ( void * ) iter ) iter_value_t< Iter >( UTI_FWD( args )... ) ;
 }
 
 template< meta::iterator Iter, typename... Args >

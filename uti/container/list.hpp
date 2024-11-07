@@ -473,6 +473,7 @@ list< T, Resource >::pop_back () noexcept
 
         auto node = tail_ ;
 
+        if( head_ == tail_ ) head_ = nullptr ;
         tail_ = tail_->prev_ ;
         tail_->next_ = nullptr ;
 
@@ -488,6 +489,7 @@ list< T, Resource >::pop_front () noexcept
 
         auto node = head_ ;
 
+        if( tail_ == head_ ) tail_ = nullptr ;
         head_ = head_->next_ ;
         head_->prev_ = nullptr ;
 
@@ -563,7 +565,7 @@ list< T, Resource >::_new_node ( node_pointer _prev_, node_pointer _next_, Args&
 {
         node_pointer node = _alloc_traits::allocate( 1 ).begin() ;
 
-        ::uti::construct( node, _prev_, _next_, _args_... ) ;
+        ::uti::construct( node, _prev_, _next_, UTI_FWD( _args_ )... ) ;
 
         return node ;
 }
