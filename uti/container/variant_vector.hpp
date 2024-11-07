@@ -35,82 +35,13 @@ private:
 } ;
 
 
-template< typename T, typename... Ts >
-constexpr size_t max_align_of () noexcept
-{
-        if constexpr( sizeof...( Ts ) == 0 )
-        {
-                return alignof( T ) ;
-        }
-        else
-        {
-                size_t align_rest = max_align_of< Ts... >() ;
-
-                return alignof( T ) > align_rest ? alignof( T ) : align_rest ;
-        }
-} ;
-
-template< typename T, typename... Ts >
-constexpr size_t min_align_of () noexcept
-{
-        if constexpr( sizeof...( Ts ) == 0 )
-        {
-                return alignof( T ) ;
-        }
-        else
-        {
-                size_t align_rest = min_align_of< Ts... >() ;
-
-                return alignof( T ) < align_rest ? alignof( T ) : align_rest ;
-        }
-} ;
-
-template< typename T, typename... Ts >
-constexpr size_t max_size_of () noexcept
-{
-        if constexpr( sizeof...( Ts ) == 0 )
-        {
-                return sizeof( T ) ;
-        }
-        else
-        {
-                size_t size_rest = max_size_of< Ts... >() ;
-
-                return sizeof( T ) > size_rest ? sizeof( T ) : size_rest ;
-        }
-} ;
-
-template< typename T, typename... Ts >
-constexpr size_t min_size_of () noexcept
-{
-        if constexpr( sizeof...( Ts ) == 0 )
-        {
-                return sizeof( T ) ;
-        }
-        else
-        {
-                size_t size_rest = min_size_of< Ts... >() ;
-
-                return sizeof( T ) < size_rest ? sizeof( T ) : size_rest ;
-        }
-} ;
+template< typename T, typename... Ts > constexpr size_t max_align_of () noexcept ;
+template< typename T, typename... Ts > constexpr size_t min_align_of () noexcept ;
+template< typename T, typename... Ts > constexpr size_t max_size_of  () noexcept ;
+template< typename T, typename... Ts > constexpr size_t min_size_of  () noexcept ;
 
 template< typename T, typename T1, typename... Ts >
-constexpr ssize_t index_of ( ssize_t _start_ = 0 ) noexcept
-{
-        if constexpr( meta::same_as< T, T1 > )
-        {
-                return _start_ ;
-        }
-        else if constexpr( sizeof...( Ts ) == 0 )
-        {
-                return -1 ;
-        }
-        else
-        {
-                return index_of< T, Ts... >( _start_ + 1 ) ;
-        }
-}
+constexpr ssize_t index_of ( ssize_t _start_ = 0 ) noexcept ;
 
 
 template< typename T >
@@ -227,56 +158,29 @@ public:
         template< typename T > UTI_NODISCARD constexpr _detail::iterator_type_for< T       > get_ptr ( ssize_type _idx_ )       noexcept ;
         template< typename T > UTI_NODISCARD constexpr _detail::iterator_type_for< T const > get_ptr ( ssize_type _idx_ ) const noexcept ;
 
-        template< typename Visitor >
-        constexpr void visit ( ssize_type _idx_, Visitor&& _visitor_ ) noexcept
+        template< typename Visitor, typename Self >
+        constexpr void visit ( this Self && self, ssize_type _idx_, Visitor&& _visitor_ ) noexcept
         {
                 [ & ]< ssize_type... Idxs >( uti::index_sequence< Idxs... > )
                 {
                         ( ...,
                         [ & ]
                         {
-                                using type = meta::list::at_t< Idxs, value_types > ;
+                                using       raw_type =             meta::list::at_t< Idxs, value_types >   ;
+                                using effective_type = like< Self, meta::list::at_t< Idxs, value_types > > ;
 
-                                if constexpr( meta::invocable< Visitor, type, ssize_type > )
+                                if constexpr( meta::invocable< Visitor, effective_type, ssize_type > )
                                 {
-                                        if( types_[ _idx_ ] == Idxs )
+                                        if( UTI_FWD( self ).types_[ _idx_ ] == Idxs )
                                         {
-                                                _visitor_( get< type >( _idx_ ), _idx_ ) ;
+                                                _visitor_( UTI_FWD( self ).template get< raw_type >( _idx_ ), _idx_ ) ;
                                         }
                                 }
-                                else if constexpr( meta::invocable< Visitor, type > )
+                                else if constexpr( meta::invocable< Visitor, effective_type > )
                                 {
-                                        if( types_[ _idx_ ] == Idxs )
+                                        if( UTI_FWD( self ).types_[ _idx_ ] == Idxs )
                                         {
-                                                _visitor_( get< type >( _idx_ ) ) ;
-                                        }
-                                }
-                        }() ) ;
-                }( uti::make_index_sequence< sizeof...( Ts ) >{} ) ;
-        }
-
-        template< typename Visitor >
-        constexpr void visit ( ssize_type _idx_, Visitor&& _visitor_ ) const noexcept
-        {
-                [ & ]< ssize_type... Idxs >( uti::index_sequence< Idxs... > )
-                {
-                        ( ...,
-                        [ & ]
-                        {
-                                using type = meta::list::at_t< Idxs, value_types > ;
-
-                                if constexpr( meta::invocable< Visitor, add_const_t< type >, ssize_type > )
-                                {
-                                        if( types_[ _idx_ ] == Idxs )
-                                        {
-                                                _visitor_( get< type >( _idx_ ), _idx_ ) ;
-                                        }
-                                }
-                                else if constexpr( meta::invocable< Visitor, add_const_t< type > > )
-                                {
-                                        if( types_[ _idx_ ] == Idxs )
-                                        {
-                                                _visitor_( get< type >( _idx_ ) ) ;
+                                                _visitor_( UTI_FWD( self ).template get< raw_type >( _idx_ ) ) ;
                                         }
                                 }
                         }() ) ;
@@ -344,10 +248,14 @@ variant_vector< Resource, Ts... >::_reserve ( ssize_type _bytes_ ) UTI_NOEXCEPT_
 
                 if( !new_block ) return ;
 
-                for_each( [ & ]( auto const & elem, ssize_type idx )
+                /// the following for_each should take a non-const reference to the element
+                /// however if it does, something weird breaks and the entire contents turn to garbage
+                /// so for now we'll take the extra copy over the thing just not working
+
+                for_each( [ & ]( auto & elem, ssize_type idx )
                         {
-                                using type = remove_cvref_t< decltype( elem ) > ;
-                                using iter = _detail::iterator_type_for< type > ;
+                                using type = remove_reference_t< decltype( elem ) > ;
+                                using iter = _detail::iterator_type_for< remove_const_t< type > > ;
 
                                 if constexpr( !is_trivially_relocatable_v< type > )
                                 {
@@ -391,7 +299,7 @@ variant_vector< Resource, Ts... >::_find_end ( ssize_type _idx_ ) noexcept
 
         ssize_type elem_size { 0 } ;
 
-        visit( _idx_, [ & ]( auto const & elem ){ elem_size = sizeof( remove_cvref_t< decltype( elem ) > ) ; } ) ;
+        visit( _idx_, [ & ]( auto const & elem ){ elem_size = sizeof( remove_reference_t< decltype( elem ) > ) ; } ) ;
 
         return elem_start + elem_size ;
 }
@@ -405,7 +313,7 @@ variant_vector< Resource, Ts... >::_find_end ( ssize_type _idx_ ) const noexcept
 
         ssize_type elem_size { 0 } ;
 
-        visit( _idx_, [ & ]( auto const & elem ){ elem_size = sizeof( remove_cvref_t< decltype( elem ) > ) ; } ) ;
+        visit( _idx_, [ & ]( auto const & elem ){ elem_size = sizeof( remove_reference_t< decltype( elem ) > ) ; } ) ;
 
         return elem_start + elem_size ;
 }
@@ -512,7 +420,7 @@ variant_vector< Resource, Ts... >::variant_vector ( variant_vector const & _othe
                 _other_.for_each(
                         [ & ]( auto const & val, ssize_type idx )
                         {
-                                using type = remove_cvref_t< decltype( val ) > ;
+                                using type = remove_reference_t< decltype( val ) > ;
                                 using iter = _detail::iterator_type_for< type > ;
 
                                 if constexpr( !is_trivially_relocatable_v< type > )
@@ -764,12 +672,11 @@ variant_vector< Resource, Ts... >::clear () noexcept
         for_each(
                 []( auto & val )
                 {
-                        using type = remove_cvref_t< decltype( val ) > ;
-                        using iter = iterator_base< type, random_access_iterator_tag > ;
+                        using type = remove_reference_t< decltype( val ) > ;
 
                         if constexpr( !is_trivially_destructible_v< type > )
                         {
-                                ::uti::destroy< iter >( &val ) ;
+                                ::uti::destroy( &val ) ;
                         }
                 }
         ) ;
@@ -825,6 +732,91 @@ variant_vector< Resource, Ts... >::get_ptr ( ssize_type _idx_ ) const noexcept
         }
         return nullptr ;
 }
+
+
+namespace _detail
+{
+
+
+template< typename T, typename... Ts >
+constexpr size_t max_align_of () noexcept
+{
+        if constexpr( sizeof...( Ts ) == 0 )
+        {
+                return alignof( T ) ;
+        }
+        else
+        {
+                size_t align_rest = max_align_of< Ts... >() ;
+
+                return alignof( T ) > align_rest ? alignof( T ) : align_rest ;
+        }
+} ;
+
+template< typename T, typename... Ts >
+constexpr size_t min_align_of () noexcept
+{
+        if constexpr( sizeof...( Ts ) == 0 )
+        {
+                return alignof( T ) ;
+        }
+        else
+        {
+                size_t align_rest = min_align_of< Ts... >() ;
+
+                return alignof( T ) < align_rest ? alignof( T ) : align_rest ;
+        }
+} ;
+
+template< typename T, typename... Ts >
+constexpr size_t max_size_of () noexcept
+{
+        if constexpr( sizeof...( Ts ) == 0 )
+        {
+                return sizeof( T ) ;
+        }
+        else
+        {
+                size_t size_rest = max_size_of< Ts... >() ;
+
+                return sizeof( T ) > size_rest ? sizeof( T ) : size_rest ;
+        }
+} ;
+
+template< typename T, typename... Ts >
+constexpr size_t min_size_of () noexcept
+{
+        if constexpr( sizeof...( Ts ) == 0 )
+        {
+                return sizeof( T ) ;
+        }
+        else
+        {
+                size_t size_rest = min_size_of< Ts... >() ;
+
+                return sizeof( T ) < size_rest ? sizeof( T ) : size_rest ;
+        }
+} ;
+
+template< typename T, typename T1, typename... Ts >
+constexpr ssize_t index_of ( ssize_t _start_ ) noexcept
+{
+        if constexpr( meta::same_as< T, T1 > )
+        {
+                return _start_ ;
+        }
+        else if constexpr( sizeof...( Ts ) == 0 )
+        {
+                return -1 ;
+        }
+        else
+        {
+                return index_of< T, Ts... >( _start_ + 1 ) ;
+        }
+}
+
+
+} // namespace _detail
 
 
 } // namespace uti
