@@ -248,10 +248,6 @@ variant_vector< Resource, Ts... >::_reserve ( ssize_type _bytes_ ) UTI_NOEXCEPT_
 
                 if( !new_block ) return ;
 
-                /// the following for_each should take a non-const reference to the element
-                /// however if it does, something weird breaks and the entire contents turn to garbage
-                /// so for now we'll take the extra copy over the thing just not working
-
                 for_each( [ & ]( auto & elem, ssize_type idx )
                         {
                                 using type = remove_reference_t< decltype( elem ) > ;
@@ -283,11 +279,7 @@ variant_vector< Resource, Ts... >::_can_fit ( ssize_type _count_ ) const noexcep
 
         ssize_type free_space = storage_.end() - aligned ;
 
-        if( static_cast< ssize_type >( _count_ * sizeof( T ) ) <= free_space )
-        {
-                return true ;
-        }
-        return false ;
+        return static_cast< ssize_type >( _count_ * sizeof( T ) ) <= free_space ;
 }
 
 template< typename Resource, typename... Ts >
@@ -299,7 +291,7 @@ variant_vector< Resource, Ts... >::_find_end ( ssize_type _idx_ ) noexcept
 
         ssize_type elem_size { 0 } ;
 
-        visit( _idx_, [ & ]( auto const & elem ){ elem_size = sizeof( remove_reference_t< decltype( elem ) > ) ; } ) ;
+        visit( _idx_, [ & ]( auto const & elem ){ elem_size = sizeof( remove_cvref_t< decltype( elem ) > ) ; } ) ;
 
         return elem_start + elem_size ;
 }
@@ -313,7 +305,7 @@ variant_vector< Resource, Ts... >::_find_end ( ssize_type _idx_ ) const noexcept
 
         ssize_type elem_size { 0 } ;
 
-        visit( _idx_, [ & ]( auto const & elem ){ elem_size = sizeof( remove_reference_t< decltype( elem ) > ) ; } ) ;
+        visit( _idx_, [ & ]( auto const & elem ){ elem_size = sizeof( remove_cvref_t< decltype( elem ) > ) ; } ) ;
 
         return elem_start + elem_size ;
 }
@@ -365,6 +357,22 @@ template< typename T >
 constexpr
 variant_vector< Resource, Ts... >::variant_vector ( ssize_type _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
+        /// small memory layout optimization
+        /// since we use the same memory resource for the metadata and the main storage,
+        /// we can force the metadata vectors to reallocate when we want
+        /// and allocate main storage right after the metadata.
+        ///
+        /// by overallocating the metadata vectors,
+        /// we ensure that they won't have to reallocate for the first few push backs
+        /// which cause a reallocation of the main storage.
+        /// this increases the chances of the main storage being able to reallocate in place
+        /// depending on the state of our memory resource
+        ///
+        /// side note - u8_ts should be enough for the types metadata for all reasonable use-cases
+        /// and the offsets can be stored in a custom data structure
+        /// which dynamically picks the smalles type large enough to fit the current offset values.
+        /// with this taken into account, the memory overhead of the metadata will decrease
+        /// making the below optimization less costly
         if( sizeof( T ) < max_elem_size )
         {
                 offsets_.reserve( _capacity_ ) ;
@@ -386,8 +394,8 @@ variant_vector< Resource, Ts... >::variant_vector ( Iter _begin_, Iter const _en
 {
         ssize_type capacity = ::uti::distance( _begin_, _end_ ) ;
 
-        offsets_.reserve( capacity ) ;
-        types_  .reserve( capacity ) ;
+        offsets_.reserve( capacity * 2 ) ;
+        types_  .reserve( capacity * 2 ) ;
 
         for( ; _begin_ != _end_; ++_begin_ )
         {
@@ -517,6 +525,8 @@ variant_vector< Resource, Ts... >::emplace_back ( Args&&... _args_ ) UTI_NOEXCEP
                 _reserve( sizeof( T ) ) ;
                 dest = storage_.begin() ;
 
+                if( !dest ) return ;
+
                 offsets_.push_back( 0 ) ;
                 types_.push_back( _detail::index_of< T, Ts... >() ) ;
         }
@@ -547,6 +557,8 @@ template< meta::forward_iterator Iter >
 constexpr void
 variant_vector< Resource, Ts... >::append ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
+        reserve_additional< iter_value_t< Iter > >( ::uti::distance( _begin_, _end_ ) ) ;
+
         for( ; _begin_ != _end_; ++_begin_ )
         {
                 emplace_back( *_begin_ ) ;
@@ -602,29 +614,7 @@ variant_vector< Resource, Ts...>::insert ( ssize_type _position_, Args&&... _arg
         }
         else
         {
-/*
-                iter_t aligned_t = aligned ;
-
-                uti::vector< ssize_type, internal_allocator_type > new_offsets( size_ - _position_ ) ;
-
-                ssize_type pos = _position_ ;
-
-                const_byte_iterator new_next_begin = aligned ;
-
-                while( pos < size_ )
-                {
-                        ++new_next_begin ;
-                        visit( pos,
-                                [ & ]( auto const & elem )
-                                {
-                                        new_next_begin = _align_for< decltype( elem ) >( new_next_begin ) ;
-                                        new_offsets.push_back( new_next_begin - storage_.begin() ) ;
-                                        new_next_begin += sizeof( decltype( elem ) ) ;
-                                }
-                        ) ;
-                        ++pos ;
-                }
-*/
+                /// lord have mercy
         }
 }
 
@@ -632,6 +622,9 @@ template< typename Resource, typename... Ts >
 constexpr void
 variant_vector< Resource, Ts... >::reserve_bytes ( ssize_type _bytes_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
+        offsets_.reserve( _bytes_ / min_elem_size ) ;
+        types_  .reserve( _bytes_ / min_elem_size ) ;
+
         _reserve( _bytes_ ) ;
 }
 
