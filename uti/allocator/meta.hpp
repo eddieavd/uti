@@ -32,6 +32,51 @@ namespace uti
 {
 
 
+template< typename T > struct block_t ;
+
+
+template< typename T > UTI_NODISCARD inline constexpr
+block_t< T > alloc_block ( ssize_t count, ssize_t align = alignof( T ) ) noexcept ;
+
+template< typename T > inline constexpr
+void realloc_block ( block_t< T > & block, ssize_t new_size, ssize_t align = alignof( T ) ) noexcept ;
+
+template< typename T > inline constexpr
+void dealloc_block ( block_t< T > & block ) noexcept ;
+
+
+template< typename T >
+UTI_NODISCARD inline constexpr
+block_t< T > alloc_block ( ssize_t count, [[ maybe_unused ]] ssize_t align ) noexcept
+{
+        return block_t< T >{ new                               T[ count ], count } ;
+//      return block_t< T >{ new ( std::align_val_t( align ) ) T[ count ], count } ;
+}
+
+template< typename T >
+inline constexpr
+void realloc_block ( block_t< T > & block, ssize_t new_size, ssize_t align ) noexcept
+{
+        if( block.size_ >= new_size ) return ;
+
+        auto new_block = ::uti::alloc_block< T >( new_size, align ) ;
+        if( !new_block ) return ;
+
+        ::uti::copy( block.begin(), block.begin() + block.size_, new_block.begin() ) ;
+
+        ::uti::dealloc_block( block ) ;
+        block = new_block ;
+}
+
+template< typename T >
+inline constexpr
+void dealloc_block ( block_t< T > & block ) noexcept
+{
+        delete[] block.begin() ;
+
+        block = { nullptr, 0 } ;
+}
+
 UTI_NODISCARD inline constexpr
 u8_t * alloc_buffer ( ssize_t count ) noexcept
 {
