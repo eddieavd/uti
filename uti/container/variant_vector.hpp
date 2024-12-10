@@ -83,7 +83,7 @@ public:
 
         template< typename T >
                 requires meta::one_of< T, Ts... >
-        constexpr variant_vector ( ssize_type _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+        constexpr variant_vector ( type_identity< T >, ssize_type _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
         template< meta::forward_iterator Iter >
                 requires meta::one_of< iter_value_t< Iter >, Ts... >
@@ -355,7 +355,7 @@ template< typename Resource, typename... Ts >
 template< typename T >
         requires meta::one_of< T, Ts... >
 constexpr
-variant_vector< Resource, Ts... >::variant_vector ( ssize_type _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+variant_vector< Resource, Ts... >::variant_vector ( type_identity< T >, ssize_type _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         /// small memory layout optimization
         /// since we use the same memory resource for the metadata and the main storage,
@@ -401,7 +401,7 @@ variant_vector< Resource, Ts... >::variant_vector ( Iter _begin_, Iter const _en
 
         for( ; _begin_ != _end_; ++_begin_ )
         {
-                emplace_back( *_begin_ ) ;
+                emplace_back< iter_value_t< Iter > >( *_begin_ ) ;
         }
 }
 
@@ -430,7 +430,7 @@ variant_vector< Resource, Ts... >::variant_vector ( variant_vector const & _othe
                 _other_.for_each(
                         [ & ]( auto const & val, ssize_type idx )
                         {
-                                using type = remove_reference_t< decltype( val ) > ;
+                                using type = remove_cvref_t< decltype( val ) > ;
                                 using iter = _detail::iterator_type_for< type > ;
 
                                 if constexpr( !is_trivially_relocatable_v< type > )

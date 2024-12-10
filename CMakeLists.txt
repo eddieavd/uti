@@ -15,7 +15,7 @@ if( UTI_RELEASE )
 elseif( UTI_DEBUG )
         add_compile_options( -O0 )
         add_compile_definitions( UTI_DEBUG )
-#       add_link_options( -fsanitize=address -fsanitize=undefined )
+        add_link_options( -fsanitize=address -fsanitize=undefined )
 endif()
 
 if( UTI_HAS_STL )

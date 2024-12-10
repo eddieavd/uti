@@ -17,6 +17,7 @@
 #include <container/vector.hpp>
 #include <container/prefix_array.hpp>
 #include <container/segment_tree.hpp>
+#include <container/variant_vector.hpp>
 
 #include <string/string.hpp>
 

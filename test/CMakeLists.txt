@@ -18,6 +18,7 @@ add_executable(
         gtest_vector.cpp
         gtest_prefix.cpp
         gtest_segment.cpp
+        gtest_variant_vector.cpp
 )
 target_link_libraries(
         gtest_uti
