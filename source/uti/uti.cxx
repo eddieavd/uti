@@ -1,0 +1,15 @@
+//
+//
+//      uti
+//      uti.cxx
+//
+
+#include <cstdio>
+
+
+int main ()
+{
+        printf( "hello world!\n" ) ;
+
+        return 0 ;
+}
