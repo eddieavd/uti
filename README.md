@@ -52,6 +52,12 @@ side note: clang-18 frontend crashes when parsing some of the heavily-templated 
 ...
 include( FetchContent )
 
+# build tests by setting:
+set( UTI_TEST ON )
+
+# build benchmarks by setting:
+set( UTI_BENCH ON )
+
 FetchContent_Declare(
         uti
         GIT_REPOSITORY https://github.com/eddieavd/uti.git
@@ -61,4 +67,3 @@ FetchContent_MakeAvailable( uti )
 target_link_libraries( <your_target> PRIVATE uti::uti )
 ...
 ```
-
