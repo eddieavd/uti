@@ -27,9 +27,6 @@ set( UTI_TEST_FILES
 add_executable( uti.test ${UTI_TEST_FILES} )
 target_link_libraries( uti.test PRIVATE uti::uti snitch::snitch )
 
-add_executable( uti.manual uti.manual.cxx )
-target_link_libraries( uti.manual PRIVATE uti::uti )
-
 add_test(
         NAME uti.test
         COMMAND uti.test --verbosity high
