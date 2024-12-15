@@ -2,8 +2,8 @@
 # uti release build config
 
 --build-type=release
---opt=UTI_DEBUG,OFF
---opt=UTI_RELEASE,ON
---opt=UTI_HAS_STL,ON
---opt=UTI_TEST,ON
---opt=UTI_BENCH,ON
+# --opt=UTI_DEBUG,OFF
+# --opt=UTI_RELEASE,ON
+# --opt=UTI_HAS_STL,ON
+# --opt=UTI_TEST,ON
+# --opt=UTI_BENCH,ON
