@@ -14,7 +14,7 @@ set( UTI_COMPILE_OPTIONS -Wall -Wextra -pedantic
                          -fno-exceptions -fno-rtti
 )
 target_compile_options( uti INTERFACE -std=c++26 )
-target_compile_options( uti PRIVATE "${UTI_COMPILE_OPTIONS}" )
+target_compile_options( uti INTERFACE "${UTI_COMPILE_OPTIONS}" )
 
 if( CMAKE_BUILD_TYPE OR CMAKE_CONFIGURATION_TYPES )
         set( UTI_DEBUG_OPTIONS   -O0 -DUTI_DEBUG   )
