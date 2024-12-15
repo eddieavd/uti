@@ -16,8 +16,13 @@ FetchContent_MakeAvailable( snitch )
 
 set( UTI_TEST_FILES
         type.test.cxx
+        meta.test.cxx
+        algo.test.cxx
         iterator.test.cxx
+        allocator.test.cxx
         string.test.cxx
+        string_view.test.cxx
+        tuple.test.cxx
         vector.test.cxx
         prefix_array.test.cxx
         segment_tree.test.cxx
