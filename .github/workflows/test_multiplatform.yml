@@ -131,7 +131,7 @@ jobs:
         shell: cmake -P {0}
         run: |
           execute_process(
-            COMMAND ./test/gtest_uti
+            COMMAND ./test/uti/uti.test
             WORKING_DIRECTORY out
             RESULT_VARIABLE result
           )

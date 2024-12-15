@@ -136,7 +136,7 @@ jobs:
       - name: run benchmarks
 
         run: |
-          ./out/bench/gbench_uti --benchmark_format=json > benchmark.json
+          ./out/bench/uti/uti.bench --benchmark_format=json > benchmark.json
 
       - name: store benchmark results
 
