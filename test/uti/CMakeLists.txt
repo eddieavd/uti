@@ -32,21 +32,9 @@ set( UTI_TEST_FILES
 
 add_executable( uti.test ${UTI_TEST_FILES} )
 
-set( UTI_TEST_COMPILE_OPTIONS -std=c++26
-                              -Wall -Wextra -pedantic
-                              -ftemplate-backtrace-limit=0
-                              -fconstexpr-backtrace-limit=0
-                              -fno-exceptions -fno-rtti
-)
-target_compile_options( uti.test PRIVATE "${UTI_TEST_COMPILE_OPTIONS}" )
-
-if( CMAKE_BUILD_TYPE OR CMAKE_CONFIGURATION_TYPES )
-        set( UTI_DEBUG_OPTIONS   -O0 )
-        set( UTI_RELEASE_OPTIONS -O3 )
-
-        target_compile_options( uti.test PRIVATE "$<$<CONFIG:DEBUG>:${UTI_DEBUG_OPTIONS}>" )
-        target_compile_options( uti.test PRIVATE "$<$<CONFIG:RELEASE>:${UTI_RELEASE_OPTIONS}>" )
-endif()
+target_compile_options( uti.test PRIVATE -std=c++26               )
+target_compile_options( uti.test PRIVATE "${UTI_OPT_LVL}"         )
+target_compile_options( uti.test PRIVATE "${UTI_COMPILE_OPTIONS}" )
 
 target_link_libraries( uti.test PRIVATE uti::uti snitch::snitch )
 
