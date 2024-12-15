@@ -9,11 +9,14 @@
 #include "uti.test.hxx"
 
 
+using namespace uti::test ;
+
+
 template< typename T >
 using container_type = uti::vector< T > ;
 
 
-TEMPLATE_LIST_TEST_CASE( "vector::ctor_default", "[vector][ctor][ctor_default]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "vector::ctor_default", "[vector][ctor][ctor_default]", uti_test_types )
 {
         constexpr auto vector = []{ return container_type< TestType >() ; } ;
 
@@ -22,7 +25,7 @@ TEMPLATE_LIST_TEST_CASE( "vector::ctor_default", "[vector][ctor][ctor_default]",
         CONSTEXPR_CHECK( vector().capacity() ==    0 ) ;
 }
 
-TEMPLATE_LIST_TEST_CASE( "vector::ctor_reserve", "[vector][ctor][ctor_reserve]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "vector::ctor_reserve", "[vector][ctor][ctor_reserve]", uti_test_types )
 {
         constexpr auto vector = []{ return container_type< TestType >( CUSTOM_CAP ) ; } ;
 
@@ -55,7 +58,7 @@ TEMPLATE_LIST_TEST_CASE( "vector::ctor_fill", "[vector][ctor][ctor_fill]", trivi
         }
 }
 
-TEMPLATE_LIST_TEST_CASE( "vector::ctor_iter", "[vector][ctor][ctor_iter]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "vector::ctor_iter", "[vector][ctor][ctor_iter]", uti_test_types )
 {
         {
                 INFO( "vector::ctor_iter::c_style_array" ) ;
@@ -122,7 +125,7 @@ TEMPLATE_LIST_TEST_CASE( "vector::ctor_iter", "[vector][ctor][ctor_iter]", all_t
         }
 }
 
-TEMPLATE_LIST_TEST_CASE( "vector::ctor_copy", "[vector][ctor][ctor_copy]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "vector::ctor_copy", "[vector][ctor][ctor_copy]", uti_test_types )
 {
         constexpr auto vector = []{ container_type< TestType > vec( CUSTOM_CAP, {} ) ; return uti::vector( vec ) ; } ;
 
@@ -145,7 +148,7 @@ TEMPLATE_LIST_TEST_CASE( "vector::ctor_copy", "[vector][ctor][ctor_copy]", all_t
         }
 }
 
-TEMPLATE_LIST_TEST_CASE( "vector::ctor_move", "[vector][ctor][ctor_move]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "vector::ctor_move", "[vector][ctor][ctor_move]", uti_test_types )
 {
         constexpr auto moved_to   = []{ container_type< TestType > vec( CUSTOM_CAP, {} ) ; return uti::vector( UTI_MOVE( vec ) ) ; } ;
         constexpr auto moved_from = []{ container_type< TestType > vec( CUSTOM_CAP, {} ) ; uti::vector move( UTI_MOVE( vec ) ) ; return vec ; } ;
@@ -174,7 +177,7 @@ TEMPLATE_LIST_TEST_CASE( "vector::ctor_move", "[vector][ctor][ctor_move]", all_t
         }
 }
 
-TEMPLATE_LIST_TEST_CASE( "vector::assign_copy", "[vector][assign_copy]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "vector::assign_copy", "[vector][assign_copy]", uti_test_types )
 {
         static constexpr auto vec_src = []{ return container_type< TestType >( CUSTOM_CAP, {} ) ; } ;
 
@@ -214,7 +217,7 @@ TEMPLATE_LIST_TEST_CASE( "vector::assign_copy", "[vector][assign_copy]", all_tes
         }
 }
 
-TEMPLATE_LIST_TEST_CASE( "vector::assign_move", "[vector][assign_move]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "vector::assign_move", "[vector][assign_move]", uti_test_types )
 {
         container_type< TestType > vec0 ( CUSTOM_CAP, {} ) ;
         container_type< TestType > vec1 ( CUSTOM_CAP, {} ) ;
@@ -401,7 +404,7 @@ TEST_CASE( "vector::pop", "[vector][modify][pop]" )
         CONSTEXPR_CHECK( vec_pop_back_front(). back() == CUSTOM_CAP - 2 ) ;
 }
 
-TEMPLATE_LIST_TEST_CASE( "vector::reserve", "[vector][modify][reserve]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "vector::reserve", "[vector][modify][reserve]", uti_test_types )
 {
         static constexpr auto vec_src_1 = []{ return container_type< TestType >() ; } ;
         static constexpr auto vec_src_2 = []{ return container_type< TestType >( CUSTOM_CAP, {} ) ; } ;
@@ -428,7 +431,7 @@ TEMPLATE_LIST_TEST_CASE( "vector::reserve", "[vector][modify][reserve]", all_tes
         CONSTEXPR_CHECK( vec_2_res_2().capacity() == CUSTOM_CAP * 2 ) ;
 }
 
-TEMPLATE_LIST_TEST_CASE( "vector::shrink", "[vector][modify][shrink]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "vector::shrink", "[vector][modify][shrink]", uti_test_types )
 {
         {
                 container_type< TestType > vec( CUSTOM_CAP, {} ) ;
@@ -510,7 +513,7 @@ TEST_CASE( "vector::insert", "[vector][modify][insert]" )
         }
 }
 
-TEMPLATE_LIST_TEST_CASE( "vector::erase", "[vector][modify][erase]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "vector::erase", "[vector][modify][erase]", uti_test_types )
 {
         {
                 container_type< TestType > vecstr( CUSTOM_CAP, {} ) ;

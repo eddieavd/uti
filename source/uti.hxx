@@ -10,8 +10,11 @@
 #include <uti/util/assert.hxx>
 
 #include <uti/type/traits.hxx>
+#include <uti/type/common_type.hxx>
+#include <uti/type/common_ref.hxx>
 #include <uti/type/sequence.hxx>
 #include <uti/type/invoke.hxx>
+#include <uti/type/ref_wrap.hxx>
 
 #include <uti/meta/concepts.hxx>
 #include <uti/meta/list.hxx>

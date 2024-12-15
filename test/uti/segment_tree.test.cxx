@@ -13,6 +13,9 @@
 #define CUSTOM_CAP 4
 
 
+using namespace uti::test ;
+
+
 template< typename T >
 using container_type = uti::segment_tree< T, uti::compare::sum > ;
 

@@ -9,6 +9,9 @@
 #include "uti.test.hxx"
 
 
+using namespace uti::test ;
+
+
 struct nocopynoassign
 {
         nocopynoassign             ( nocopynoassign const & ) = delete ;
@@ -43,14 +46,14 @@ class D     {} ;
 union E     {} ;
 using I = int  ;
 
-using all_test_types_const    = uti::meta::unpack_t< uti::meta::transform< uti::meta::to_const    >, all_test_types       > ;
-using all_test_types_volatile = uti::meta::unpack_t< uti::meta::transform< uti::meta::to_volatile >, all_test_types       > ;
-using all_test_types_cv       = uti::meta::unpack_t< uti::meta::transform< uti::meta::to_volatile >, all_test_types_const > ;
+using uti_test_types_const    = uti::meta::unpack_t< uti::meta::transform< uti::meta::to_const    >, uti_test_types       > ;
+using uti_test_types_volatile = uti::meta::unpack_t< uti::meta::transform< uti::meta::to_volatile >, uti_test_types       > ;
+using uti_test_types_cv       = uti::meta::unpack_t< uti::meta::transform< uti::meta::to_volatile >, uti_test_types_const > ;
 
-using traits_test_types = join::fn< all_test_types, all_test_types_const, all_test_types_volatile, all_test_types_cv > ;
+using traits_test_types = join::fn< uti_test_types, uti_test_types_const, uti_test_types_volatile, uti_test_types_cv > ;
 
 
-TEMPLATE_LIST_TEST_CASE( "traits::identity", "[traits][identity]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "traits::identity", "[traits][identity]", uti_test_types )
 {
         CONSTEVAL_CHECK( uti::is_v    < uti:: true_type > ) ;
         CONSTEVAL_CHECK( uti::is_not_v< uti::false_type > ) ;
@@ -96,7 +99,7 @@ TEMPLATE_LIST_TEST_CASE( "traits::identity", "[traits][identity]", all_test_type
         CONSTEVAL_CHECK( uti::is_same_v< int, uti::remove_all_extents< int[] >::type > ) ;
 }
 
-TEMPLATE_LIST_TEST_CASE( "traits::cvref", "[traits][cvref]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "traits::cvref", "[traits][cvref]", uti_test_types )
 {
         CONSTEVAL_CHECK( uti::is_v    < uti::is_const< TestType const > > ) ;
         CONSTEVAL_CHECK( uti::is_not_v< uti::is_const< TestType       > > ) ;
@@ -125,7 +128,7 @@ TEMPLATE_LIST_TEST_CASE( "traits::cvref", "[traits][cvref]", all_test_types )
         CONSTEVAL_CHECK( uti::is_same_v< TestType, uti::remove_cvref_t< TestType const volatile & > > ) ;
 }
 
-TEMPLATE_LIST_TEST_CASE( "traits::conditionals", "[traits][conditionals]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "traits::conditionals", "[traits][conditionals]", uti_test_types )
 {
         CONSTEVAL_CHECK( uti::is_same_v< TestType, uti::conditional_t<  true, TestType, float > > ) ;
         CONSTEVAL_CHECK( uti::is_same_v<    float, uti::conditional_t< false, TestType, float > > ) ;
@@ -151,7 +154,7 @@ TEMPLATE_LIST_TEST_CASE( "traits::conditionals", "[traits][conditionals]", all_t
         CONSTEVAL_CHECK( uti::is_not_v< uti::conjunction< uti::false_type, uti::false_type > > ) ;
 }
 
-TEMPLATE_LIST_TEST_CASE( "traits::assignability", "[traits][assignability]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "traits::assignability", "[traits][assignability]", uti_test_types )
 {
 //      CONSTEVAL_CHECK( !uti::is_assignable_v<    TestType  , TestType > ) ;
         CONSTEVAL_CHECK(  uti::is_assignable_v<    TestType &, TestType > ) ;
@@ -181,7 +184,7 @@ TEMPLATE_LIST_TEST_CASE( "traits::assignability", "[traits][assignability]", all
         CONSTEVAL_CHECK( !uti::is_nothrow_move_assignable_v<       nocopynoassign > ) ;
 }
 
-TEMPLATE_LIST_TEST_CASE( "traits::constructibility", "[traits][constructibility]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "traits::constructibility", "[traits][constructibility]", uti_test_types )
 {
         CONSTEVAL_CHECK( uti::is_copy_constructible_v< TestType > ) ;
         CONSTEVAL_CHECK( uti::is_move_constructible_v< TestType > ) ;
@@ -205,7 +208,7 @@ TEMPLATE_LIST_TEST_CASE( "traits::constructibility", "[traits][constructibility]
         CONSTEVAL_CHECK( !uti::is_nothrow_move_constructible_v<       nocopynoassign > ) ;
 }
 
-TEMPLATE_LIST_TEST_CASE( "traits::swappability", "[traits][swappability]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "traits::swappability", "[traits][swappability]", uti_test_types )
 {
         CONSTEVAL_CHECK(  uti::meta::swappable_with< TestType       &, TestType       & > ) ;
         CONSTEVAL_CHECK( !uti::meta::swappable_with< TestType const &, TestType const & > ) ;

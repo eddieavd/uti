@@ -8,7 +8,12 @@ add_library( uti::uti ALIAS uti )
 
 set_property( TARGET uti PROPERTY SOVERSION "${PROJECT_VERSION}" )
 
-set( UTI_COMPILE_OPTIONS -std=c++26 -Wall -Wextra -pedantic -Werror -ftemplate-backtrace-limit=0 -fconstexpr-backtrace-limit=0 -fno-exceptions -fno-rtti )
+set( UTI_COMPILE_OPTIONS -std=c++26
+                         -Wall -Wextra -pedantic
+                         -ftemplate-backtrace-limit=0
+                         -fconstexpr-backtrace-limit=0
+                         -fno-exceptions -fno-rtti
+)
 target_compile_options( uti INTERFACE "${UTI_COMPILE_OPTIONS}" )
 
 if( CMAKE_BUILD_TYPE OR CMAKE_CONFIGURATION_TYPES )
@@ -19,16 +24,12 @@ if( CMAKE_BUILD_TYPE OR CMAKE_CONFIGURATION_TYPES )
         target_compile_options( uti INTERFACE "$<$<CONFIG:RELEASE>:${UTI_RELEASE_OPTIONS}>" )
 endif()
 
+if( UTI_HAS_STL )
+        target_compile_options( uti INTERFACE "-DUTI_HAS_STL" )
+endif()
+
 target_sources( uti PUBLIC
                 FILE_SET HEADERS
                 BASE_DIRS .
                 FILES uti.hxx
-)
-
-include( GNUInstallDirs )
-
-install( TARGETS uti
-         EXPORT uti
-         FILE_SET HEADERS
-                COMPONENT libuti-dev
 )
