@@ -8,15 +8,15 @@
 
 #include "uti.test.hxx"
 
-#include <uti/allocator/new.hxx>
-#include <uti/container/prefix_array.hxx>
+
+using namespace uti::test ;
 
 
 template< typename T >
 using container_type = uti::prefix_array< T > ;
 
 
-TEMPLATE_LIST_TEST_CASE( "prefix::ctor_default", "[prefix][ctor][ctor_default]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "prefix::ctor_default", "[prefix][ctor][ctor_default]", uti_test_types )
 {
         constexpr auto prefix = []{ return container_type< TestType >() ; } ;
 
@@ -25,7 +25,7 @@ TEMPLATE_LIST_TEST_CASE( "prefix::ctor_default", "[prefix][ctor][ctor_default]",
         CONSTEXPR_CHECK( prefix().capacity() ==    0 ) ;
 }
 
-TEMPLATE_LIST_TEST_CASE( "prefix::ctor_reserve", "[prefix][ctor][ctor_reserve]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "prefix::ctor_reserve", "[prefix][ctor][ctor_reserve]", uti_test_types )
 {
         constexpr auto prefix = []{ return container_type< TestType >( CUSTOM_CAP ) ; } ;
 

@@ -8,9 +8,6 @@
 
 #include "uti.test.hxx"
 
-#include <uti/string/string_view.hxx>
-#include <uti/container/variant_vector.hxx>
-
 
 using resource = uti::malloc_resource ;
 

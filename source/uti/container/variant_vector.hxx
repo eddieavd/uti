@@ -48,6 +48,13 @@ template< typename T >
 using iterator_type_for = iterator_base< T, random_access_iterator_tag > ;
 
 
+template< typename T >
+struct always_false : false_type {} ;
+
+template< typename T >
+static constexpr bool always_false_v = always_false< T >::value ;
+
+
 } // namespace _detail
 
 
@@ -132,6 +139,18 @@ public:
                 requires meta::one_of< T, Ts... > && meta::constructible_from< T, Args... >
         constexpr void insert ( ssize_type _position_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
+        template< typename T >
+                requires meta::one_of< T, Ts... >
+        constexpr void replace ( ssize_type _idx_, T const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        template< typename T >
+                requires meta::one_of< T, Ts... >
+        constexpr void replace ( ssize_type _idx_, T && _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        template< typename T >
+                requires meta::one_of< T, Ts... >
+        constexpr void erase ( ssize_type _position_ ) noexcept ;
+
         constexpr void reserve_bytes ( ssize_type _bytes_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
         template< typename T >
@@ -196,13 +215,21 @@ public:
                 }
         }
 
-        template< typename T >
-                requires meta::one_of< T, Ts... >
-        constexpr void replace ( ssize_type _idx_, T const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+        template< typename Visitor, typename Self >
+        constexpr void for_range ( this Self &&    self ,
+                                   ssize_type const _x_ ,
+                                   ssize_type const _y_ ,
+                                   Visitor&&  _visitor_ ) noexcept
+        {
+                UTI_CEXPR_ASSERT( 0 <= _x_ && _x_ <= _y_ && _y_ <= UTI_FWD( self ).size(),
+                                  "uti::variant_vector::for_range: index out of bounds" ) ;
 
-        template< typename T >
-                requires meta::one_of< T, Ts... >
-        constexpr void replace ( ssize_type _idx_, T && _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+                for( ssize_type i = _x_; i < _y_; ++i )
+                {
+                        UTI_FWD( self ).visit( i, _visitor_ ) ;
+                }
+        }
+
 private:
         ssize_type                                            size_ {          0 } ;
         block_type                                         storage_ { nullptr, 0 } ;
@@ -618,6 +645,38 @@ variant_vector< Resource, Ts...>::insert ( ssize_type _position_, Args&&... _arg
         {
                 /// lord have mercy
         }
+}
+
+template< typename Resource, typename... Ts >
+template< typename T >
+        requires meta::one_of< T, Ts... >
+constexpr void
+variant_vector< Resource, Ts... >::replace ( ssize_type _idx_, T const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        ( void ) _idx_ ;
+        ( void ) _val_ ;
+        UTI_CEXPR_ASSERT( _detail::always_false_v< T >, "uti::variant_vector::replace: unimplemented" ) ;
+}
+
+template< typename Resource, typename... Ts >
+template< typename T >
+        requires meta::one_of< T, Ts... >
+constexpr void
+variant_vector< Resource, Ts... >::replace ( ssize_type _idx_, T && _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        ( void ) _idx_ ;
+        ( void ) _val_ ;
+        UTI_CEXPR_ASSERT( _detail::always_false_v< T >, "uti::variant_vector::replace: unimplemented" ) ;
+}
+
+template< typename Resource, typename... Ts >
+template< typename T >
+        requires meta::one_of< T, Ts... >
+constexpr void
+variant_vector< Resource, Ts... >::erase ( ssize_type _position_ ) noexcept
+{
+        ( void ) _position_ ;
+        UTI_CEXPR_ASSERT( _detail::always_false_v< T >, "uti::variant_vector::erase: unimplemented" ) ;
 }
 
 template< typename Resource, typename... Ts >

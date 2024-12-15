@@ -8,12 +8,11 @@
 
 #include "uti.test.hxx"
 
-#include <uti/iterator/meta.hxx>
-#include <uti/container/prefix_array.hxx>
-#include <uti/container/segment_tree.hxx>
+
+using namespace uti::test ;
 
 
-TEMPLATE_LIST_TEST_CASE( "iterator::traits", "[iterator][traits]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "iterator::traits", "[iterator][traits]", uti_test_types )
 {
         using   input_iter = uti::iterator_base< TestType, uti::        input_iterator_tag > ;
         using forward_iter = uti::iterator_base< TestType, uti::      forward_iterator_tag > ;
@@ -66,7 +65,7 @@ TEMPLATE_LIST_TEST_CASE( "iterator::traits", "[iterator][traits]", all_test_type
         CONSTEVAL_CHECK( !uti::meta::prefix_array_iterator<      pointer > ) ;
 }
 
-TEMPLATE_LIST_TEST_CASE( "iterator::container", "[iterator][container]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "iterator::container", "[iterator][container]", uti_test_types )
 {
         using     prefix_iter = typename uti::prefix_array< TestType >::              iterator ;
         using   c_prefix_iter = typename uti::prefix_array< TestType >::        const_iterator ;
@@ -109,7 +108,7 @@ TEMPLATE_LIST_TEST_CASE( "iterator::container", "[iterator][container]", all_tes
         CONSTEVAL_CHECK( uti::meta::random_access_iterator< c_r_segtree_iter > ) ;
 }
 
-TEMPLATE_LIST_TEST_CASE( "iterator::convertibility", "[iterator][convertibility]", all_test_types )
+TEMPLATE_LIST_TEST_CASE( "iterator::convertibility", "[iterator][convertibility]", uti_test_types )
 {
         using iter_u8  = uti::iterator_base< uti::  u8_t, uti::random_access_iterator_tag > ;
         using iter_u64 = uti::iterator_base< uti:: u64_t, uti::random_access_iterator_tag > ;
