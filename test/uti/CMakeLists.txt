@@ -32,13 +32,13 @@ set( UTI_TEST_FILES
 
 add_executable( uti.test ${UTI_TEST_FILES} )
 
-set( UTI_COMPILE_OPTIONS -std=c++26
-                         -Wall -Wextra -pedantic
-                         -ftemplate-backtrace-limit=0
-                         -fconstexpr-backtrace-limit=0
-                         -fno-exceptions -fno-rtti
+set( UTI_TEST_COMPILE_OPTIONS -std=c++26
+                              -Wall -Wextra -pedantic
+                              -ftemplate-backtrace-limit=0
+                              -fconstexpr-backtrace-limit=0
+                              -fno-exceptions -fno-rtti
 )
-target_compile_options( uti.test PRIVATE "${UTI_COMPILE_OPTIONS}" )
+target_compile_options( uti.test PRIVATE "${UTI_TEST_COMPILE_OPTIONS}" )
 
 if( CMAKE_BUILD_TYPE OR CMAKE_CONFIGURATION_TYPES )
         set( UTI_DEBUG_OPTIONS   -O0 )

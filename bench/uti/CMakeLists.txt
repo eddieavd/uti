@@ -19,13 +19,13 @@ add_executable(
         uti.bench.cxx
 )
 
-set( UTI_COMPILE_OPTIONS -std=c++23
-                         -Wall -Wextra -pedantic
-                         -ftemplate-backtrace-limit=0
-                         -fconstexpr-backtrace-limit=0
-                         -fno-exceptions -fno-rtti
+set( UTI_BENCH_COMPILE_OPTIONS -std=c++23
+                               -Wall -Wextra -pedantic
+                               -ftemplate-backtrace-limit=0
+                               -fconstexpr-backtrace-limit=0
+                               -fno-exceptions -fno-rtti
 )
-target_compile_options( uti.bench PRIVATE "${UTI_COMPILE_OPTIONS}" )
+target_compile_options( uti.bench PRIVATE "${UTI_BENCH_COMPILE_OPTIONS}" )
 
 if( CMAKE_BUILD_TYPE OR CMAKE_CONFIGURATION_TYPES )
         set( UTI_DEBUG_OPTIONS   -O0 )
