@@ -8,10 +8,6 @@
 
 #include "uti.test.hxx"
 
-#include <uti/allocator/new.hxx>
-#include <uti/container/vector.hxx>
-#include <uti/container/prefix_array.hxx>
-
 
 template< typename T >
 using container_type = uti::vector< T > ;

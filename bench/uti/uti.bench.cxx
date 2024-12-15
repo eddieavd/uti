@@ -6,9 +6,7 @@
 
 #include "uti.bench.hxx"
 
-#include <uti/allocator/freelist_resource.hxx>
-#include <uti/container/vector.hxx>
-#include <uti/container/variant_vector.hxx>
+#include <uti.hxx>
 
 #include <vector>
 #include <string>

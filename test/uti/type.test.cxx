@@ -8,9 +8,6 @@
 
 #include "uti.test.hxx"
 
-#include <uti/type/traits.hxx>
-#include <uti/meta/algo.hxx>
-
 
 struct nocopynoassign
 {

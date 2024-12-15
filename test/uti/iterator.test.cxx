@@ -8,10 +8,6 @@
 
 #include "uti.test.hxx"
 
-#include <uti/iterator/meta.hxx>
-#include <uti/container/prefix_array.hxx>
-#include <uti/container/segment_tree.hxx>
-
 
 TEMPLATE_LIST_TEST_CASE( "iterator::traits", "[iterator][traits]", all_test_types )
 {

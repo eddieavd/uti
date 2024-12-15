@@ -1,6 +1,6 @@
 #
 #       uti
-#       source/uti/CMakeLists.txt
+#       source/CMakeLists.txt
 #
 
 add_library( uti INTERFACE )

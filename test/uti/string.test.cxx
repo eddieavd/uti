@@ -6,7 +6,7 @@
 
 #include <snitch/snitch.hpp>
 
-#include <uti/string/string.hxx>
+#include "uti.test.hxx"
 
 
 TEST_CASE( "string::ctor_default", "[string][ctor][ctor_default]" )
