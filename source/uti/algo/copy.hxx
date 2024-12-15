@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <type/traits.hxx>
-#include <algo/distance.hxx>
-#include <iterator/meta.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/algo/distance.hxx>
+#include <uti/iterator/meta.hxx>
 
 #if !__has_builtin( __builtin_memmove ) && defined( UTI_HAS_STL )
 #include <cstring>

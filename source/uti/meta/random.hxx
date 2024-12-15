@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <type/traits.hxx>
-#include <container/array.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/container/array.hxx>
 
 #include <bit>
 

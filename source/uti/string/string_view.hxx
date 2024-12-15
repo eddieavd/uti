@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include <util/assert.hxx>
-#include <type/traits.hxx>
-#include <container/meta.hxx>
-#include <algo/mem.hxx>
-#include <algo/distance.hxx>
+#include <uti/util/assert.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/container/meta.hxx>
+#include <uti/algo/mem.hxx>
+#include <uti/algo/distance.hxx>
 
 #define SV_FMT "%.*s"
 #define SV_ARG(sv) (int) (sv).size(), (sv).data()

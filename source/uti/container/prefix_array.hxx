@@ -6,14 +6,14 @@
 
 #pragma once
 
-#include <iterator/meta.hxx>
-#include <iterator/base.hxx>
-#include <allocator/meta.hxx>
-#include <allocator/new.hxx>
-#include <container/vector.hxx>
-#include <container/array.hxx>
-#include <type/sequence.hxx>
-#include <meta/concepts.hxx>
+#include <uti/iterator/meta.hxx>
+#include <uti/iterator/base.hxx>
+#include <uti/allocator/meta.hxx>
+#include <uti/allocator/new.hxx>
+#include <uti/container/vector.hxx>
+#include <uti/container/array.hxx>
+#include <uti/type/sequence.hxx>
+#include <uti/meta/concepts.hxx>
 
 #ifdef UTI_HAS_STL
 #include <initializer_list>

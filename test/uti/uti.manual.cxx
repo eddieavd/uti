@@ -4,7 +4,7 @@
 //      uti.manual.cxx
 //
 
-#include <container/prefix_array.hxx>
+#include <uti/container/prefix_array.hxx>
 
 #include <string>
 

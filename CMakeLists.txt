@@ -11,6 +11,6 @@ project( uti
          LANGUAGES                                   CXX
 )
 
-add_subdirectory( source/uti )
+add_subdirectory( source     )
 add_subdirectory(   test/uti )
 add_subdirectory(  bench/uti )

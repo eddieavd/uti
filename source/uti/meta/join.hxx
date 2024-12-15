@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <type/traits.hxx>
-#include <meta/list.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/meta/list.hxx>
 
 
 namespace uti

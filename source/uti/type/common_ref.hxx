@@ -8,8 +8,8 @@
 
 #ifndef UTI_DOXYGEN_SKIP
 
-#include <type/traits.hxx>
-#include <type/common_type.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/type/common_type.hxx>
 
 
 namespace uti

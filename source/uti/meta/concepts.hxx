@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include <type/traits.hxx>
-#include <type/common_type.hxx>
-#include <type/common_ref.hxx>
-#include <type/invoke.hxx>
-#include <algo/swap.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/type/common_type.hxx>
+#include <uti/type/common_ref.hxx>
+#include <uti/type/invoke.hxx>
+#include <uti/algo/swap.hxx>
 
 
 namespace uti::meta

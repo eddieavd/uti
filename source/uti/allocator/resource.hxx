@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include <type/traits.hxx>
-#include <allocator/meta.hxx>
-#include <iterator/meta.hxx>
-#include <iterator/base.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/allocator/meta.hxx>
+#include <uti/iterator/meta.hxx>
+#include <uti/iterator/base.hxx>
 
 
 namespace uti

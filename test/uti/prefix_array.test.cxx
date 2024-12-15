@@ -8,8 +8,8 @@
 
 #include "uti.test.hxx"
 
-#include <allocator/new.hxx>
-#include <container/prefix_array.hxx>
+#include <uti/allocator/new.hxx>
+#include <uti/container/prefix_array.hxx>
 
 
 template< typename T >

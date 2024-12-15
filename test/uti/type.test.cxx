@@ -8,8 +8,8 @@
 
 #include "uti.test.hxx"
 
-#include <type/traits.hxx>
-#include <meta/algo.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/meta/algo.hxx>
 
 
 struct nocopynoassign

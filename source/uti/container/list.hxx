@@ -6,13 +6,13 @@
 
 #pragma once
 
-#include <meta/concepts.hxx>
-#include <iterator/meta.hxx>
-#include <iterator/reverse_iterator.hxx>
-#include <allocator/meta.hxx>
-#include <allocator/resource.hxx>
-#include <allocator/default.hxx>
-#include <algo/mem.hxx>
+#include <uti/meta/concepts.hxx>
+#include <uti/iterator/meta.hxx>
+#include <uti/iterator/reverse_iterator.hxx>
+#include <uti/allocator/meta.hxx>
+#include <uti/allocator/resource.hxx>
+#include <uti/allocator/default.hxx>
+#include <uti/algo/mem.hxx>
 
 #ifdef UTI_HAS_STL
 #include <initializer_list>

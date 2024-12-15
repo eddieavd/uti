@@ -8,7 +8,7 @@
 
 #ifndef UTI_DOXYGEN_SKIP
 
-#include <util/config.hxx>
+#include <uti/util/config.hxx>
 
 #ifdef UTI_HAS_STL
 #include <type_traits>

@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <container/vector.hxx>
-#include <meta/list.hxx>
-#include <type/sequence.hxx>
+#include <uti/container/vector.hxx>
+#include <uti/meta/list.hxx>
+#include <uti/type/sequence.hxx>
 
 
 namespace uti

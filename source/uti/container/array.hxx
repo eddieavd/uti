@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include <type/traits.hxx>
-#include <container/base.hxx>
-#include <container/view.hxx>
-#include <allocator/meta.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/container/base.hxx>
+#include <uti/container/view.hxx>
+#include <uti/allocator/meta.hxx>
 
 #ifdef UTI_HAS_STL
 #include <initializer_list>

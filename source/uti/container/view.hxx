@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include <util/assert.hxx>
-#include <iterator/meta.hxx>
-#include <iterator/base.hxx>
-#include <iterator/reverse_iterator.hxx>
-#include <container/base.hxx>
-#include <container/meta.hxx>
+#include <uti/util/assert.hxx>
+#include <uti/iterator/meta.hxx>
+#include <uti/iterator/base.hxx>
+#include <uti/iterator/reverse_iterator.hxx>
+#include <uti/container/base.hxx>
+#include <uti/container/meta.hxx>
 
 
 namespace uti

@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include <util/config.hxx>
-#include <iterator/meta.hxx>
-#include <iterator/base.hxx>
-#include <container/meta.hxx>
-#include <algo/copy.hxx>
+#include <uti/util/config.hxx>
+#include <uti/iterator/meta.hxx>
+#include <uti/iterator/base.hxx>
+#include <uti/container/meta.hxx>
+#include <uti/algo/copy.hxx>
 
 #include <new>
 

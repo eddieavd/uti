@@ -8,8 +8,8 @@
 
 #include "uti.test.hxx"
 
-#include <container/prefix_array.hxx>
-#include <container/segment_tree.hxx>
+#include <uti/container/prefix_array.hxx>
+#include <uti/container/segment_tree.hxx>
 
 #define CUSTOM_CAP_OLD CUSTOM_CAP
 #undef  CUSTOM_CAP

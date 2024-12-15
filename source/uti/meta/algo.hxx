@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <type/traits.hxx>
-#include <meta/join.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/meta/join.hxx>
 
 
 namespace uti::meta

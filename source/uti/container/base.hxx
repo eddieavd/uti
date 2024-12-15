@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include <type/traits.hxx>
-#include <iterator/meta.hxx>
-#include <iterator/base.hxx>
-#include <iterator/reverse_iterator.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/iterator/meta.hxx>
+#include <uti/iterator/base.hxx>
+#include <uti/iterator/reverse_iterator.hxx>
 
 
 namespace uti

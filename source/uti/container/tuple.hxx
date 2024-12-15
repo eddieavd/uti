@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include <type/traits.hxx>
-#include <type/ref_wrap.hxx>
-#include <type/sequence.hxx>
-#include <type/invoke.hxx>
-#include <meta/list.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/type/ref_wrap.hxx>
+#include <uti/type/sequence.hxx>
+#include <uti/type/invoke.hxx>
+#include <uti/meta/list.hxx>
 
 
 namespace uti

@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include <type/traits.hxx>
-#include <meta/list.hxx>
-#include <meta/join.hxx>
-#include <string/string.hxx>
-#include <container/vector.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/meta/list.hxx>
+#include <uti/meta/join.hxx>
+#include <uti/string/string.hxx>
+#include <uti/container/vector.hxx>
 
 #include <string>
 #include <vector>

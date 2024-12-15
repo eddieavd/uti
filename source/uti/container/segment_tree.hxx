@@ -6,17 +6,17 @@
 
 #pragma once
 
-#include <util/assert.hxx>
-#include <algo/mem.hxx>
-#include <meta/concepts.hxx>
-#include <type/sequence.hxx>
-#include <iterator/meta.hxx>
-#include <iterator/base.hxx>
-#include <iterator/reverse_iterator.hxx>
-#include <container/view.hxx>
-#include <container/buffer.hxx>
-#include <allocator/meta.hxx>
-#include <allocator/new.hxx>
+#include <uti/util/assert.hxx>
+#include <uti/algo/mem.hxx>
+#include <uti/meta/concepts.hxx>
+#include <uti/type/sequence.hxx>
+#include <uti/iterator/meta.hxx>
+#include <uti/iterator/base.hxx>
+#include <uti/iterator/reverse_iterator.hxx>
+#include <uti/container/view.hxx>
+#include <uti/container/buffer.hxx>
+#include <uti/allocator/meta.hxx>
+#include <uti/allocator/new.hxx>
 
 
 

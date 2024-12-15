@@ -8,7 +8,7 @@
 
 #ifndef UTI_DOXYGEN_SKIP
 
-#include <type/traits.hxx>
+#include <uti/type/traits.hxx>
 
 #include <ostream>
 

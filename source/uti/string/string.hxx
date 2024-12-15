@@ -6,18 +6,18 @@
 
 #pragma once
 
-#include <util/assert.hxx>
-#include <type/traits.hxx>
-#include <allocator/meta.hxx>
-#include <allocator/default.hxx>
-#include <allocator/new.hxx>
-#include <iterator/meta.hxx>
-#include <iterator/base.hxx>
-#include <iterator/reverse_iterator.hxx>
-#include <meta/concepts.hxx>
-#include <container/meta.hxx>
-#include <algo/mem.hxx>
-#include <string/string_view.hxx>
+#include <uti/util/assert.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/allocator/meta.hxx>
+#include <uti/allocator/default.hxx>
+#include <uti/allocator/new.hxx>
+#include <uti/iterator/meta.hxx>
+#include <uti/iterator/base.hxx>
+#include <uti/iterator/reverse_iterator.hxx>
+#include <uti/meta/concepts.hxx>
+#include <uti/container/meta.hxx>
+#include <uti/algo/mem.hxx>
+#include <uti/string/string_view.hxx>
 
 #define UTI_SSO_CAP 23
 

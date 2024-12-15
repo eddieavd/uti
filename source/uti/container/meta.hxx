@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <type/traits.hxx>
+#include <uti/type/traits.hxx>
 
 #define UTI_SHADOW_IMPL( name, temp_args, specialization ) \
         template< temp_args > \

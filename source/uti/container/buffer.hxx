@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include <iterator/meta.hxx>
-#include <iterator/base.hxx>
-#include <container/base.hxx>
-#include <allocator/meta.hxx>
-#include <allocator/default.hxx>
-#include <allocator/new.hxx>
+#include <uti/iterator/meta.hxx>
+#include <uti/iterator/base.hxx>
+#include <uti/container/base.hxx>
+#include <uti/allocator/meta.hxx>
+#include <uti/allocator/default.hxx>
+#include <uti/allocator/new.hxx>
 
 
 namespace uti

@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <allocator/meta.hxx>
-#include <allocator/resource.hxx>
+#include <uti/allocator/meta.hxx>
+#include <uti/allocator/resource.hxx>
 
 
 namespace uti

@@ -8,8 +8,8 @@
 
 #ifndef UTI_DOXYGEN_SKIP
 
-#include <type/traits.hxx>
-#include <type/invoke.hxx>
+#include <uti/type/traits.hxx>
+#include <uti/type/invoke.hxx>
 
 
 namespace uti

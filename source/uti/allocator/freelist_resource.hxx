@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <allocator/meta.hxx>
-#include <allocator/resource.hxx>
-#include <container/list.hxx>
+#include <uti/allocator/meta.hxx>
+#include <uti/allocator/resource.hxx>
+#include <uti/container/list.hxx>
 
 #ifndef   UTI_FREELIST_CAP
 #define   UTI_FREELIST_CAP 64
