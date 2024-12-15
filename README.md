@@ -1,6 +1,6 @@
 # uti - universal template implementations
 
-### a humble attempt at a standard library
+### a humble attempt at a modern c++ standard library
 
 # components
 
@@ -22,6 +22,7 @@
 - new/delete allocator
 - default allocator
 - resource traits interface
+- malloc memory resource
 - static bump memory resource
 - static freelist memory resource
 
@@ -40,6 +41,11 @@
 
 # usage
 
+`uti` requires at least `c++23` (for `deducing this` among other things).  
+for full compile-time support, we require `c++26` to be able to cast `void` pointers at compile time.  
+
+side note: clang-18 frontend crashes when parsing some of the heavily-templated `variant_vector` code. the issue is fixed in clang-19
+
 ## cmake
 
 ```cmake
@@ -55,3 +61,4 @@ FetchContent_MakeAvailable( uti )
 target_link_libraries( <your_target> PRIVATE uti::uti )
 ...
 ```
+
