@@ -525,7 +525,7 @@ variant_vector< Resource, Ts... >::emplace_back ( Args&&... _args_ ) UTI_NOEXCEP
                 if( !dest ) return ;
 
                 offsets_.push_back( 0 ) ;
-                types_.push_back( index_of< T, Ts... >() ) ;
+                types_.push_back( index_of_v< T, Ts... > ) ;
         }
         else
         {
@@ -539,7 +539,7 @@ variant_vector< Resource, Ts... >::emplace_back ( Args&&... _args_ ) UTI_NOEXCEP
                 dest = _align_for< T >( _find_end( size_ - 1 ) ) ;
 
                 offsets_.push_back( static_cast< const_byte_iterator >( dest ) - storage_.begin() ) ;
-                types_.push_back( index_of< T, Ts... >() ) ;
+                types_.push_back( index_of_v< T, Ts... > ) ;
         }
         if( dest )
         {
@@ -605,7 +605,7 @@ variant_vector< Resource, Ts...>::insert ( ssize_type _position_, Args&&... _arg
                 ::uti::construct< iter_t >( aligned, UTI_FWD( _args_ )... ) ;
 
                 offsets_.insert( _position_, aligned - storage_.begin() ) ;
-                types_  .insert( _position_, index_of< T, Ts... >() ) ;
+                types_  .insert( _position_, index_of_v< T, Ts... > ) ;
 
                 ++size_ ;
         }
@@ -736,7 +736,7 @@ template< typename T >
 UTI_NODISCARD constexpr _detail::iterator_type_for< T >
 variant_vector< Resource, Ts... >::get_ptr ( ssize_type _idx_ ) noexcept
 {
-        if( index_of< T, Ts... >() == types_[ _idx_ ] )
+        if( index_of_v< T, Ts... > == types_[ _idx_ ] )
         {
                 return storage_.begin() + offsets_[ _idx_ ] ;
         }
@@ -748,7 +748,7 @@ template< typename T >
 UTI_NODISCARD constexpr _detail::iterator_type_for< T const >
 variant_vector< Resource, Ts... >::get_ptr ( ssize_type _idx_ ) const noexcept
 {
-        if( index_of< T, Ts... >() == types_[ _idx_ ] )
+        if( index_of_v< T, Ts... > == types_[ _idx_ ] )
         {
                 return storage_.begin() + offsets_[ _idx_ ] ;
         }
