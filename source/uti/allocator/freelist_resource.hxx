@@ -7,6 +7,7 @@
 #pragma once
 
 #include <uti/allocator/meta.hxx>
+#include <uti/allocator/default.hxx>
 #include <uti/allocator/resource.hxx>
 #include <uti/container/list.hxx>
 
@@ -42,7 +43,7 @@ struct static_freelist_resource
         using ssize_type = ssize_t ;
         using block_type = block_t< value_type > ;
 
-        using freelist_type           = uti::list< block_type, _detail::_internal_freelist_resource< FreeListId > > ;
+        using freelist_type           = uti::list< block_type, uti::allocator< list_node< block_type >, _detail::_internal_freelist_resource< FreeListId > > > ;
         using freelist_iterator       = typename freelist_type::      iterator ;
         using freelist_const_iterator = typename freelist_type::const_iterator ;
 

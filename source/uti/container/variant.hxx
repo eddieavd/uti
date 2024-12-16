@@ -11,7 +11,14 @@ namespace uti
 {
 
 
-template< typename... Ts > class variant ;
+template< typename... Ts >
+class variant
+{
+public:
+
+private:
+
+} ;
 
 
 } // namespace uti

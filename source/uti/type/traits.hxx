@@ -1606,6 +1606,105 @@ struct _sfinae_assign_base< true, false >
         _sfinae_assign_base & operator= ( _sfinae_assign_base       && ) = delete  ;
 } ;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T, typename... Ts >
+constexpr size_t max_align_of () noexcept
+{
+        if constexpr( sizeof...( Ts ) == 0 )
+        {
+                return alignof( T ) ;
+        }
+        else
+        {
+                size_t align_rest = max_align_of< Ts... >() ;
+
+                return alignof( T ) > align_rest ? alignof( T ) : align_rest ;
+        }
+} ;
+
+template< typename T, typename... Ts >
+constexpr size_t min_align_of () noexcept
+{
+        if constexpr( sizeof...( Ts ) == 0 )
+        {
+                return alignof( T ) ;
+        }
+        else
+        {
+                size_t align_rest = min_align_of< Ts... >() ;
+
+                return alignof( T ) < align_rest ? alignof( T ) : align_rest ;
+        }
+} ;
+
+template< typename T, typename... Ts >
+constexpr size_t max_size_of () noexcept
+{
+        if constexpr( sizeof...( Ts ) == 0 )
+        {
+                return sizeof( T ) ;
+        }
+        else
+        {
+                size_t size_rest = max_size_of< Ts... >() ;
+
+                return sizeof( T ) > size_rest ? sizeof( T ) : size_rest ;
+        }
+} ;
+
+template< typename T, typename... Ts >
+constexpr size_t min_size_of () noexcept
+{
+        if constexpr( sizeof...( Ts ) == 0 )
+        {
+                return sizeof( T ) ;
+        }
+        else
+        {
+                size_t size_rest = min_size_of< Ts... >() ;
+
+                return sizeof( T ) < size_rest ? sizeof( T ) : size_rest ;
+        }
+} ;
+
+template< typename T, typename T1, typename... Ts >
+constexpr ssize_t index_of ( ssize_t _start_ = 0 ) noexcept
+{
+        if constexpr( is_same_v< T, T1 > )
+        {
+                return _start_ ;
+        }
+        else if constexpr( sizeof...( Ts ) == 0 )
+        {
+                return -1 ;
+        }
+        else
+        {
+                return index_of< T, Ts... >( _start_ + 1 ) ;
+        }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///     always_false
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T >
+struct always_false : false_type {} ;
+
+template< typename T >
+static constexpr bool always_false_v = always_false< T >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+///     visitor
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename... Callable >
+struct visitor : Callable...
+{
+        using Callable::operator()... ;
+} ;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///     forward_like
