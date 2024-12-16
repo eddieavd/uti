@@ -34,7 +34,7 @@ using _internal_freelist_resource = static_bump_resource< UTI_FREELIST_CAP * siz
 } // namespace _detail
 
 
-template< ssize_t MemSize, ssize_t Id = 0, ssize_t FreeListId = UTI_FREELIST_TAG >
+template< ssize_t MemSize, ssize_t Id = 0, ssize_t FreeListId = UTI_FREELIST_TAG + Id >
 struct static_freelist_resource
 {
         using value_type =    u8_t ;

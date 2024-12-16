@@ -402,20 +402,20 @@ template< typename T >
 concept container =
         requires( T container )
         {
-                { T::     value_type } ;
-                { T::      size_type } ;
-                { T::     ssize_type } ;
-                { T::        pointer } ;
-                { T::      reference } ;
-                { T::const_reference } ;
-                { T::       iterator } ;
-                { T:: const_iterator } ;
-                { container. begin() } -> same_as< typename T::      iterator > ;
-                { container.   end() } -> same_as< typename T::      iterator > ;
-                { container. begin() } -> same_as< typename T::const_iterator > ;
-                { container.   end() } -> same_as< typename T::const_iterator > ;
-                { container.cbegin() } -> same_as< typename T::const_iterator > ;
-                { container.  cend() } -> same_as< typename T::const_iterator > ;
+                  typename T::     value_type ;
+                  typename T::      size_type ;
+                  typename T::     ssize_type ;
+                  typename T::        pointer ;
+                  typename T::      reference ;
+                  typename T::const_reference ;
+                  typename T::       iterator ;
+                  typename T:: const_iterator ;
+                { container. begin() } -> convertible_to< typename T::      iterator > ;
+                { container.   end() } -> convertible_to< typename T::      iterator > ;
+                { container. begin() } -> convertible_to< typename T::const_iterator > ;
+                { container.   end() } -> convertible_to< typename T::const_iterator > ;
+                { container.cbegin() } -> convertible_to< typename T::const_iterator > ;
+                { container.  cend() } -> convertible_to< typename T::const_iterator > ;
                 { container.  size() } -> one_of < typename T:: size_type
                                                  , typename T::ssize_type
                                                  >                              ;
@@ -426,7 +426,7 @@ concept range_container =
         requires( T c )
         {
                 container< T > ;
-                { c.range( ssize_t(), ssize_t() ) } -> same_as< typename T::value_type > ;
+                { c.range( ssize_t(), ssize_t() ) } -> convertible_to< typename T::value_type > ;
         };
 
 template< typename T >

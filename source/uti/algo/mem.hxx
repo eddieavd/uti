@@ -58,7 +58,7 @@ template< typename CharType >
 UTI_NODISCARD constexpr ssize_t strlen ( CharType const * str ) noexcept
 {
         ssize_t len { -1 };
-        while( str[ ++len ] != '\0' ) {}
+        while( str[ ++len ] != '\0' && len < i64_t_max ) {}
         return len;
 }
 
