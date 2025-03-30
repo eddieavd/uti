@@ -8,6 +8,7 @@
 
 #include <uti/type/traits.hxx>
 #include <uti/meta/concepts.hxx>
+#include <uti/meta/list.hxx>
 #include <uti/algo/mem.hxx>
 #include <uti/iterator/meta.hxx>
 #include <uti/iterator/base.hxx>
@@ -65,7 +66,7 @@ struct union_type
         constexpr union_type () {}
 } ;
 
-template< typename... Ts > struct union_types {} ;
+template< typename... Ts > using union_types = meta::type_list< Ts... > ;
 
 
 template< typename... Ts >
@@ -76,7 +77,6 @@ class tagged_union
         template< typename Union > friend struct _detail::destroy_union ;
         template< typename Union > friend struct _detail::   copy_union ;
         template< typename Union > friend struct _detail::   move_union ;
-
 public:
         using value_types = union_types< decay_t< Ts >... > ;
 
@@ -205,19 +205,18 @@ private:
         template< typename T >
         static constexpr void call ( short, Union&&, Fn&&, Args&&... ) {}
 
-        static constexpr void apply_impl ( union_types<>, Union&&, Fn&&, Args&&... ) {}
-
-        template< typename T1, typename... Ts1 >
-        static constexpr void apply_impl ( union_types< T1, Ts1... >, Union&& _union_, Fn&& _fn_, Args&&... _args_ )
+        template< typename... Ts1 >
+        static constexpr void apply_impl ( union_types< Ts1... >, Union&& _union_, Fn&& _fn_, Args&&... _args_ )
         {
-                if( _union_.type() == union_type< T1 >{} )
+                ( ... || [ & ]
                 {
-                        call< T1 >( 0, UTI_FWD( _union_ ), UTI_FWD( _fn_ ), UTI_FWD( _args_ )... ) ;
-                }
-                else
-                {
-                        apply_impl( union_types< Ts1... >{}, UTI_FWD( _union_ ), UTI_FWD( _fn_ ), UTI_FWD( _args_ )... ) ;
-                }
+                        if( _union_.type() == union_type< Ts1 >{} )
+                        {
+                                call< Ts1 >( 0, UTI_FWD( _union_ ), UTI_FWD( _fn_ ), UTI_FWD( _args_ )... ) ;
+                                return true ;
+                        }
+                        return false ;
+                }() ) ;
         }
 } ;
 
@@ -236,7 +235,7 @@ template< typename... Ts, typename Fn, typename... Args >
 constexpr void apply ( tagged_union< Ts... > const & _union_, Fn&& _fn_, Args&&... _args_ )
 {
         _detail::apply_union< Fn&&, decltype( _union_ ), typename tagged_union< Ts... >::value_types, Args&&... >
-                ::apply( UTI_MOVE( _union_ ), UTI_FWD( _fn_ ), UTI_FWD( _args_ )... ) ;
+                ::apply( _union_, UTI_FWD( _fn_ ), UTI_FWD( _args_ )... ) ;
 }
 
 template< typename... Ts, typename Fn, typename... Args >
@@ -270,9 +269,9 @@ struct destroy_union
                 }
         } ;
 
-        static void destroy ( Union & _union_ ) noexcept
+        static constexpr void destroy ( Union & _union_ ) noexcept
         {
-                if( Union::trivial::value )
+                if constexpr( Union::trivial::value )
                 {
                         _union_.current_type_ = Union::invalid_type ;
                 }
@@ -295,9 +294,9 @@ struct copy_union
                 }
         } ;
 
-        static void copy ( Union & _dest_, Union const & _src_ ) noexcept
+        static constexpr void copy ( Union & _dest_, Union const & _src_ ) noexcept
         {
-                if( Union::trivial::value )
+                if constexpr( Union::trivial::value )
                 {
                         _dest_.     storage_ = _src_.     storage_ ;
                         _dest_.current_type_ = _src_.current_type_ ;
@@ -321,9 +320,9 @@ struct move_union
                 }
         } ;
 
-        static void move ( Union & _dest_, Union && _src_ ) noexcept
+        static constexpr void move ( Union & _dest_, Union && _src_ ) noexcept
         {
-                if( Union::trivial::value )
+                if constexpr( Union::trivial::value )
                 {
                         _dest_.     storage_ = _src_.     storage_ ;
                         _dest_.current_type_ = _src_.current_type_ ;

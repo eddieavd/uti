@@ -32,6 +32,9 @@ struct is_variant_impl< variant_base< VariantPolicy, T, Ts... > > : true_type {}
 template< typename T >
 using is_variant = is_variant_impl< decay_t< T > > ;
 
+template< typename T >
+static constexpr bool is_variant_v = is_variant< T >::value ;
+
 
 template< typename... Ts >
 struct variant_traits_impl
@@ -370,6 +373,13 @@ using enable_variant_type_impl = enable_if_t< Union::type_id::template is_valid<
 
 template< typename Union, typename T, typename... Args >
 using enable_variant_type = enable_variant_type_impl< Union, decay_t< T >, Args... > ;
+
+
+template< typename Union, typename T, typename... Args >
+using valid_variant_type = integral_constant< Union::type_id::template is_valid< T >() && is_constructible_v< T, Args... > > ;
+
+template< typename Union, typename T, typename... Args >
+static constexpr bool valid_variant_type_v = valid_variant_type< Union, T, Args... >::value ;
 
 
 } // namespace _detail

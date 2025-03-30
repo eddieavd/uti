@@ -99,14 +99,14 @@ struct generic_string_view
         constexpr value_type chop_char_left  () noexcept ;
         constexpr value_type chop_char_right () noexcept ;
 
-        UTI_NODISCARD constexpr ssize_type index_of ( value_type  const & _val_, ssize_type const start ) const noexcept ;
+        UTI_NODISCARD constexpr ssize_type index_of ( value_type          const & _val_, ssize_type const start ) const noexcept ;
         UTI_NODISCARD constexpr ssize_type index_of ( generic_string_view const & _val_, ssize_type const start ) const noexcept ;
 
         UTI_NODISCARD constexpr bool contains ( value_type const & _val_ ) const noexcept ;
 
         UTI_NODISCARD constexpr ssize_type count ( value_type const & _val_ ) const noexcept ;
 
-        constexpr generic_string_view chop_to_delimiter ( value_type  const & _delimiter_, bool _discard_delimiter_ ) noexcept ;
+        constexpr generic_string_view chop_to_delimiter ( value_type          const & _delimiter_, bool _discard_delimiter_ ) noexcept ;
         constexpr generic_string_view chop_to_string    ( generic_string_view const & _delimiter_, bool _discard_delimiter_ ) noexcept ;
 
         constexpr generic_string_view chop_to_first_of ( generic_string_view const & _delims_, bool const _discard_delimiter_ ) noexcept ;

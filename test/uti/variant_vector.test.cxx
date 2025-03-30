@@ -282,6 +282,200 @@ TEST_CASE( "variant_vector::get", "[variant_vector][access][get]" )
         }
 }
 
+TEST_CASE( "variant_vector::insert", "[variant_vector][modify][insert]" )
+{
+        SECTION( "insert::fits_in_padding" )
+        {
+                uti::variant_vector< resource, int, double > varvec ;
+
+                varvec.push_back( 1 ) ;
+                varvec.push_back( 3.0 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< int    >( 0 ) == 1   ) ;
+                CHECK( varvec.get< double >( 1 ) == 3.0 ) ;
+
+                varvec.insert( 1, 2 ) ;
+
+                CHECK( varvec.size() == 3 ) ;
+                CHECK( varvec.get< int    >( 0 ) == 1   ) ;
+                CHECK( varvec.get< int    >( 1 ) == 2   ) ;
+                CHECK( varvec.get< double >( 2 ) == 3.0 ) ;
+        }
+        SECTION( "insert::requires_repack" )
+        {
+                CHECK( false ) ;
+        }
+}
+
+TEST_CASE( "variant_vector::replace", "[variant_vector][modify][replace]" )
+{
+        SECTION( "replace::smaller_than_original" )
+        {
+                uti::variant_vector< resource, int, double > varvec ;
+
+                varvec.push_back( 1.0 ) ;
+                varvec.push_back( 3   ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< double >( 0 ) == 1.0 ) ;
+                CHECK( varvec.get< int    >( 1 ) == 3   ) ;
+                CHECK( varvec.size_bytes() == static_cast< signed long >( sizeof( double ) + sizeof( int ) ) ) ;
+
+                varvec.replace( 0, 2 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< int >( 0 ) == 2 ) ;
+                CHECK( varvec.get< int >( 1 ) == 3 ) ;
+                INFO( "check for correct repack" ) ;
+                CHECK( varvec.size_bytes() == static_cast< signed long >( sizeof( int ) * 2 ) ) ;
+        }
+        SECTION( "replace::same_size_1" )
+        {
+                uti::variant_vector< resource, uti::string, uti::vector< int > > varvec ;
+
+                varvec.emplace_back< uti::string >( "1234567890123456789012345" ) ;
+                varvec.emplace_back< uti::vector< int > >( 32, 1 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 25 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 1 ).size() == 32 ) ;
+
+                varvec.replace< uti::vector< int > >( 0, 64, 9 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 0 ).size() == 64 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 1 ).size() == 32 ) ;
+
+                varvec.replace( 0, uti::string( "xyz" ) ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 3 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 1 ).size() == 32 ) ;
+        }
+        SECTION( "replace::same_size_2" )
+        {
+                uti::variant_vector< resource, uti::string, uti::vector< int > > varvec ;
+
+                varvec.emplace_back< uti::string >( "1234567890123456789012345" ) ;
+                varvec.emplace_back< uti::vector< int > >( 32, 1 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 25 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 1 ).size() == 32 ) ;
+
+                varvec.replace( 1, uti::string( "xyz" ) ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 25 ) ;
+                CHECK( varvec.get< uti::string >( 1 ).size() ==  3 ) ;
+
+                varvec.replace< uti::vector< int > >( 1, 64, 9 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 25 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 1 ).size() == 64 ) ;
+        }
+        SECTION( "replace::same_size_3" )
+        {
+                uti::variant_vector< resource, uti::string, uti::vector< int > > varvec ;
+
+                varvec.emplace_back< uti::string >( "abc" ) ;
+                varvec.emplace_back< uti::vector< int > >( 32, 1 ) ;
+                varvec.emplace_back< uti::string >( "xyz" ) ;
+
+                CHECK( varvec.size() == 3 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 3 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 1 ).size() == 32 ) ;
+                CHECK( varvec.get< uti::string >( 2 ).size() == 3 ) ;
+
+                varvec.replace( 1, uti::string( "abcxyz" ) ) ;
+
+                CHECK( varvec.size() == 3 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 3 ) ;
+                CHECK( varvec.get< uti::string >( 1 ).size() == 6 ) ;
+                CHECK( varvec.get< uti::string >( 2 ).size() == 3 ) ;
+        }
+        SECTION( "replace::requires_repack" )
+        {
+                CHECK( false ) ;
+        }
+}
+
+TEST_CASE( "variant_vector::modify::erase", "[variant_vector][modify][erase]" )
+{
+        SECTION( "erase::no_pack" )
+        {
+                uti::variant_vector< resource, int, char, double > varvec ;
+
+                varvec.push_back( 1 ) ;
+                varvec.push_back( 'x' ) ;
+                varvec.push_back( 3.0 ) ;
+
+                CHECK( varvec.size() == 3 ) ;
+                CHECK( varvec.size_bytes() == static_cast< signed long >( 2 * sizeof( double ) ) ) ;
+
+                varvec.erase_no_pack( 1 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.size_bytes() == static_cast< signed long >( 2 * sizeof( double ) ) ) ;
+        }
+        SECTION( "erase::pack" )
+        {
+                uti::variant_vector< resource, int, char, double > varvec ;
+
+                varvec.push_back( 1 ) ;
+                varvec.push_back( 'x' ) ;
+                varvec.push_back( 3.0 ) ;
+
+                CHECK( varvec.size() == 3 ) ;
+                CHECK( varvec.size_bytes() == static_cast< signed long >( 2 * sizeof( double ) ) ) ;
+
+                varvec.erase( 1 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.size_bytes() == static_cast< signed long >( 2 * sizeof( double ) ) ) ;
+
+                varvec.erase( 0 ) ;
+
+                CHECK( varvec.size() == 1 ) ;
+                INFO( "check for correct repack" ) ;
+                CHECK( varvec.size_bytes() == static_cast< signed long >( sizeof( double ) ) ) ;
+        }
+}
+
+TEST_CASE( "variant_vector::modify", "[variant_vector][modify]" )
+{
+        uti::variant_vector< resource, int, char, double > varvec ;
+
+        varvec.push_back( 1   ) ;
+        varvec.push_back( 2.0 ) ;
+
+        CHECK( varvec.size() == 2 ) ;
+        CHECK( varvec.get< int    >( 0 ) == 1   ) ;
+        CHECK( varvec.get< double >( 1 ) == 2.0 ) ;
+
+        varvec.insert( 1, 'x' ) ;
+
+        CHECK( varvec.size() == 3 ) ;
+        CHECK( varvec.get< int    >( 0 ) == 1   ) ;
+        CHECK( varvec.get< char   >( 1 ) == 'x' ) ;
+        CHECK( varvec.get< double >( 2 ) == 2.0 ) ;
+
+        varvec.replace( 1, 3 ) ;
+
+        CHECK( varvec.size() == 3 ) ;
+        CHECK( varvec.get< int    >( 0 ) == 1   ) ;
+        CHECK( varvec.get< int    >( 1 ) == 3   ) ;
+        CHECK( varvec.get< double >( 2 ) == 2.0 ) ;
+
+        varvec.erase( 1 ) ;
+
+        CHECK( varvec.size() == 2 ) ;
+        CHECK( varvec.get< int    >( 0 ) == 1   ) ;
+        CHECK( varvec.get< double >( 1 ) == 2.0 ) ;
+}
+
 TEST_CASE( "variant_vector::clear", "[variant_vector][modify][clear]" )
 {
         uti::variant_vector< resource, int, double, uti::string > varvec1 ;

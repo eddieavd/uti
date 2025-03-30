@@ -113,9 +113,8 @@ public:
                 destroy( storage_.get_union() ) ;
         }
 
-        template< typename T1, typename Arg,
-                  typename = enable_if_t< is_direct_assignable_v< T, Arg&& > >,
-                  typename = _detail::enable_variant_type< union_t, T1, Arg&& > >
+        template< typename T1, typename Arg >
+                requires( is_direct_assignable_v< T, Arg&& > && _detail::valid_variant_type_v< union_t, T1, Arg&& > )
         constexpr void emplace ( variant_type< T1 > _type_, Arg&& _arg_ )
         {
                 if( storage_.get_union().type() == typename union_t::type_id( _type_ ) )
@@ -128,11 +127,25 @@ public:
                 }
         }
 
-        template< typename T1, typename... Args,
-                  typename = _detail::enable_variant_type< union_t, T1, Args&&... > >
+        template< typename T1, typename Arg >
+                requires( is_direct_assignable_v< T, Arg&& > && _detail::valid_variant_type_v< union_t, T1, Arg&& > )
+        constexpr void emplace ( Arg&& _arg_ )
+        {
+                emplace( variant_type< T1 >{}, UTI_FWD( _arg_ ) ) ;
+        }
+
+        template< typename T1, typename... Args >
+                requires( _detail::valid_variant_type_v< union_t, T1, Args&&... > )
         constexpr void emplace ( variant_type< T1 > _type_, Args&&... _args_ )
         {
                 emplace_impl( _type_, UTI_FWD( _args_ )... ) ;
+        }
+
+        template< typename T1, typename... Args >
+                requires( _detail::valid_variant_type_v< union_t, T1, Args&&... > )
+        constexpr void emplace ( Args&&... _args_ )
+        {
+                emplace( variant_type< T1 >{}, UTI_FWD( _args_ )... ) ;
         }
 private:
         template< typename T1, typename... Args >
@@ -177,63 +190,46 @@ public:
                 return this->type() == type_id( _type_ ) ;
         }
 
+        template< typename T1 >
+        UTI_NODISCARD constexpr bool has_value () const noexcept
+        {
+                return has_value( variant_type< T1 >{} ) ;
+        }
+
         UTI_NODISCARD constexpr nullvar_t value ( variant_type< nullvar_t > ) const noexcept
         {
                 UTI_CEXPR_ASSERT( !has_value(), "uti::variant::value_nullvar_t: variant has value" ) ;
                 return nullvar ;
         }
 
-        template< typename T1, typename = enable_valid< T1 > >
-        UTI_NODISCARD constexpr T1 & value ( variant_type< T1 > _type_ ) & noexcept
+        template< typename T1, typename Self, typename = enable_valid< T1 > >
+        UTI_NODISCARD constexpr decltype( auto ) value ( this Self && self, variant_type< T1 > _type_ ) noexcept
         {
-                return storage_.get_union().value( _type_ ) ;
+                return UTI_FWD( self ).storage_.get_union().value( _type_ ) ;
         }
-        template< typename T1, typename = enable_valid< T1 > >
-        UTI_NODISCARD constexpr T1 const & value ( variant_type< T1 > _type_ ) const & noexcept
+        template< typename T1, typename Self, typename = enable_valid< T1 > >
+        UTI_NODISCARD constexpr decltype( auto ) value ( this Self && self ) noexcept
         {
-                return storage_.get_union().value( _type_ ) ;
-        }
-
-        template< typename T1, typename = enable_valid< T1 > >
-        UTI_NODISCARD constexpr T1 && value ( variant_type< T1 > _type_ ) && noexcept
-        {
-                return UTI_MOVE( storage_.get_union() ).value( _type_ ) ;
-        }
-        template< typename T1, typename = enable_valid< T1 > >
-        UTI_NODISCARD constexpr T1 const && value ( variant_type< T1 > _type_ ) const && noexcept
-        {
-                return UTI_MOVE( storage_.get_union() ).value( _type_ ) ;
+                return UTI_FWD( self ).value( variant_type< T1 >{} ) ;
         }
 
         // TODO: replace with optional
-        template< typename T1 > using optional_ref      = T1 * ;
-        template< typename T1 > using optional_xval_ref = T1 * ;
+        template< typename T1 > using optional_ref = T1 * ;
 
         UTI_NODISCARD constexpr optional_ref< nullvar_t const > optional_value ( variant_type< nullvar_t > ) const noexcept
         {
                 return has_value() ? nullptr : &nullvar ;
         }
 
-        template< typename T1 >
-        UTI_NODISCARD constexpr optional_ref< T1 > optional_value ( variant_type< T1 > _type_ ) & noexcept
+        template< typename T1, typename Self >
+        UTI_NODISCARD constexpr decltype( auto ) optional_value ( this Self && self, variant_type< T1 > _type_ ) noexcept
         {
-                return has_value( _type_ ) ? optional_ref< T1 >( &storage_.get_union().value( _type_ ) ) : nullptr ;
+                return UTI_FWD( self ).has_value( _type_ ) ? optional_ref< T1 >( &UTI_FWD( self ).storage_.get_union().value( _type_ ) ) : nullptr ;
         }
-        template< typename T1 >
-        UTI_NODISCARD constexpr optional_ref< T1 const > optional_value ( variant_type< T1 > _type_ ) const & noexcept
+        template< typename T1, typename Self >
+        UTI_NODISCARD constexpr decltype( auto ) optional_value ( this Self && self ) noexcept
         {
-                return has_value( _type_ ) ? optional_ref< T1 >( &storage_.get_union().value( _type_ ) ) : nullptr ;
-        }
-
-        template< typename T1 >
-        UTI_NODISCARD constexpr optional_xval_ref< T1 > optional_value ( variant_type< T1 > _type_ ) && noexcept
-        {
-                return has_value( _type_ ) ? optional_xval_ref( &storage_.get_union().value( _type_ ) ) : nullptr ;
-        }
-        template< typename T1 >
-        UTI_NODISCARD constexpr optional_xval_ref< T1 const > optional_value ( variant_type< T1 > _type_ ) const && noexcept
-        {
-                return has_value( _type_ ) ? optional_xval_ref( &storage_.get_union().value( _type_ ) ) : nullptr ;
+                return UTI_FWD( self ).optional_value( variant_type< T1 >{} ) ;
         }
 
         template< typename T1, typename U1 >

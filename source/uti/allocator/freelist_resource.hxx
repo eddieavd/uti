@@ -35,7 +35,7 @@ using _internal_freelist_resource = static_bump_resource< UTI_FREELIST_CAP * siz
 } // namespace _detail
 
 
-template< ssize_t MemSize, ssize_t Id = 0, ssize_t FreeListId = UTI_FREELIST_TAG + Id >
+template< ssize_t MemSize, ssize_t Id = 0, typename InternalResource = _detail::_internal_freelist_resource< UTI_FREELIST_TAG + Id > >
 struct static_freelist_resource
 {
         using value_type =    u8_t ;
@@ -43,7 +43,8 @@ struct static_freelist_resource
         using ssize_type = ssize_t ;
         using block_type = block_t< value_type > ;
 
-        using freelist_type           = uti::list< block_type, uti::allocator< list_node< block_type >, _detail::_internal_freelist_resource< FreeListId > > > ;
+        using internal_resource_type  = InternalResource ;
+        using freelist_type           = uti::list< block_type, uti::allocator< list_node< block_type >, internal_resource_type > > ;
         using freelist_iterator       = typename freelist_type::      iterator ;
         using freelist_const_iterator = typename freelist_type::const_iterator ;
 

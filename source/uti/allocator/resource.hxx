@@ -82,6 +82,7 @@ public:
         {
                 return i64_t_max ;
         }
+
         UTI_DEEP_INLINE static constexpr
         void reset () noexcept
         {
