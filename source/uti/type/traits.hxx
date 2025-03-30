@@ -1606,6 +1606,134 @@ struct _sfinae_assign_base< true, false >
         _sfinae_assign_base & operator= ( _sfinae_assign_base       && ) = delete  ;
 } ;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T >
+constexpr T const & max ( T const & a ) noexcept
+{
+        return a ;
+}
+
+template< typename T >
+constexpr T const & max ( T const & a, T const & b ) noexcept
+{
+        return a > b ? a : b ;
+}
+
+template< typename T, typename... Ts >
+constexpr T const & max ( T const & t, Ts const &... ts ) noexcept
+{
+        return max( t, max( ts... ) ) ;
+}
+
+template< typename T >
+constexpr T const & min ( T const & a ) noexcept
+{
+        return a ;
+}
+
+template< typename T >
+constexpr T const & min ( T const & a, T const & b ) noexcept
+{
+        return a > b ? a : b ;
+}
+
+template< typename T, typename... Ts >
+constexpr T const & min ( T const & t, Ts const &... ts ) noexcept
+{
+        return min( t, min( ts... ) ) ;
+}
+
+
+template< typename T, typename... Ts >
+constexpr size_t max_align_of () noexcept
+{
+        return max( alignof( T ), alignof( Ts )... ) ;
+} ;
+
+template< typename T, typename... Ts >
+constexpr size_t min_align_of () noexcept
+{
+        return min( alignof( T ), alignof( Ts )... ) ;
+} ;
+
+template< typename T, typename... Ts >
+constexpr size_t max_size_of () noexcept
+{
+        return max( sizeof( T ), sizeof( Ts )... ) ;
+} ;
+
+template< typename T, typename... Ts >
+constexpr size_t min_size_of () noexcept
+{
+        return min( sizeof( T ), sizeof( Ts )... ) ;
+} ;
+
+template< typename T, typename... Ts > struct index_of_impl ;
+
+template< typename T > struct index_of_impl< T > : integral_constant< ssize_t{ -1 } > {} ;
+
+template< typename T, typename... Ts > struct index_of_impl< T, T, Ts... > : integral_constant< ssize_t{ 0 } > {} ;
+
+template< typename T, typename Tx, typename... Ts >
+struct index_of_impl< T, Tx, Ts... > : integral_constant< index_of_impl< T, Ts... >::value == -1
+                                                          ? ssize_t{ -1 }
+                                                          : 1 + index_of_impl< T, Ts... >::value
+                                                        > {} ;
+
+template< typename T, typename... Ts >
+using index_of = index_of_impl< T, typename uti::decay_t< Ts >... > ;
+
+template< typename T, typename... Ts >
+static constexpr ssize_t index_of_v = index_of< T, Ts... >::value ;
+
+
+////////////////////////////////////////////////////////////////////////////////
+///     always_false
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T >
+struct always_false : false_type {} ;
+
+template< typename T >
+static constexpr bool always_false_v = always_false< T >::value ;
+
+////////////////////////////////////////////////////////////////////////////////
+///     visitor
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename... Callable >
+struct visitor : Callable...
+{
+        using Callable::operator()... ;
+} ;
+
+////////////////////////////////////////////////////////////////////////////////
+///     direct_assignable
+///     ( assignability w/o user-defined conversions )
+////////////////////////////////////////////////////////////////////////////////
+
+template< typename T, typename Arg >
+struct is_direct_assignable
+{
+        template< typename U >
+        struct consume_udc
+        {
+                operator U () const ;
+        } ;
+
+        template< typename U >
+        static true_type check ( decltype( declval< T& >() = declval< consume_udc< U > >(), 0 ) * ) ;
+
+        template< typename U >
+        static false_type check ( ... ) ;
+
+        static constexpr bool value = decltype( check< Arg >( 0 ) )::value ;
+} ;
+
+template< typename T, typename Arg >
+static constexpr bool is_direct_assignable_v = is_direct_assignable< T, Arg >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///     forward_like

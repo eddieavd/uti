@@ -35,22 +35,21 @@ inline std::ostream & operator<< ( std::ostream & stream, copy_stats const & sta
         return stream;
 }
 
-/*
-struct copy_counter
+struct old_copy_counter
 {
         inline static copy_stats stats ;
 
         copy_stats priv_stats ;
 
-        copy_counter () noexcept { ++stats.n_default_constructs; ++priv_stats.n_default_constructs; }
+        old_copy_counter () noexcept { ++stats.n_default_constructs; ++priv_stats.n_default_constructs; }
 
-        copy_counter             ( copy_counter const & ) noexcept { ++stats.n_copies; ++priv_stats.n_copies;               }
-        copy_counter & operator= ( copy_counter const & ) noexcept { ++stats.n_copies; ++priv_stats.n_copies; return *this; }
+        old_copy_counter             ( old_copy_counter const & ) noexcept { ++stats.n_copies; ++priv_stats.n_copies;               }
+        old_copy_counter & operator= ( old_copy_counter const & ) noexcept { ++stats.n_copies; ++priv_stats.n_copies; return *this; }
 
-        copy_counter             ( copy_counter && ) noexcept { ++stats.n_moves; ++priv_stats.n_moves;               }
-        copy_counter & operator= ( copy_counter && ) noexcept { ++stats.n_moves; ++priv_stats.n_moves; return *this; }
+        old_copy_counter             ( old_copy_counter && ) noexcept { ++stats.n_moves; ++priv_stats.n_moves;               }
+        old_copy_counter & operator= ( old_copy_counter && ) noexcept { ++stats.n_moves; ++priv_stats.n_moves; return *this; }
 
-        ~copy_counter () noexcept { ++stats.n_destructs; }
+        ~old_copy_counter () noexcept { ++stats.n_destructs; }
 
         static copy_stats reset () noexcept
         {
@@ -63,7 +62,6 @@ struct copy_counter
                 return old_stats;
         }
 };
-*/
 
 template< ssize_t Idx >
 struct indexed_copy_counter

@@ -10,8 +10,7 @@
 #include <uti/iterator/meta.hxx>
 #include <uti/iterator/reverse_iterator.hxx>
 #include <uti/allocator/meta.hxx>
-#include <uti/allocator/resource.hxx>
-#include <uti/allocator/default.hxx>
+#include <uti/allocator/new.hxx>
 #include <uti/algo/mem.hxx>
 
 #ifdef UTI_HAS_STL
@@ -152,7 +151,7 @@ public:
 } ;
 
 
-template< typename T, typename Resource = malloc_resource >
+template< typename T, typename Allocator = new_allocator< list_node< T > > >
 class list
 {
 public:
@@ -162,8 +161,7 @@ public:
         using      ssize_type = ssize_t        ;
         using difference_type = ssize_type     ;
 
-        using   resource_type = Resource ;
-        using  allocator_type = uti::allocator< node_type, resource_type > ;
+        using  allocator_type = Allocator ;
         using   _alloc_traits = allocator_traits< allocator_type > ;
         using      block_type = typename _alloc_traits::block_type ;
 
@@ -274,17 +272,17 @@ private:
 } ;
 
 
-template< typename T, typename Resource >
-constexpr list< T, Resource >::list ( value_type const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+template< typename T, typename Allocator >
+constexpr list< T, Allocator >::list ( value_type const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         head_ = tail_ = _new_node( nullptr, nullptr, _val_ ) ;
         ++size_ ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 template< meta::forward_iterator Iter >
         requires meta::convertible_to< iter_value_t< Iter >, T >
-constexpr list< T, Resource >::list ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+constexpr list< T, Allocator >::list ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         for( ; _begin_ != _end_; ++_begin_ )
         {
@@ -293,21 +291,21 @@ constexpr list< T, Resource >::list ( Iter _begin_, Iter const _end_ ) UTI_NOEXC
 }
 
 #ifdef UTI_HAS_STL
-template< typename T, typename Resource >
-constexpr list< T, Resource >::list ( std::initializer_list< T > _list_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+template< typename T, typename Allocator >
+constexpr list< T, Allocator >::list ( std::initializer_list< T > _list_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
         : list( _list_.begin(), _list_.end() )
 {}
 #endif // UTI_HAS_STL
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr
-list< T, Resource >::list ( list const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+list< T, Allocator >::list ( list const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
         : list( _other_.begin(), _other_.end() )
 {}
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr
-list< T, Resource >::list ( list && _other_ ) noexcept
+list< T, Allocator >::list ( list && _other_ ) noexcept
         : head_( _other_.head_ )
         , tail_( _other_.tail_ )
         , size_( _other_.size_ )
@@ -316,10 +314,10 @@ list< T, Resource >::list ( list && _other_ ) noexcept
         _other_.size_ = 0 ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr
-list< T, Resource > &
-list< T, Resource >::operator= ( list const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+list< T, Allocator > &
+list< T, Allocator >::operator= ( list const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         clear() ;
 
@@ -328,10 +326,10 @@ list< T, Resource >::operator= ( list const & _other_ ) UTI_NOEXCEPT_UNLESS_BADA
         return *this ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr
-list< T, Resource > &
-list< T, Resource >::operator= ( list && _other_ ) noexcept
+list< T, Allocator > &
+list< T, Allocator >::operator= ( list && _other_ ) noexcept
 {
         clear() ;
 
@@ -345,25 +343,25 @@ list< T, Resource >::operator= ( list && _other_ ) noexcept
         return *this ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr void
-list< T, Resource >::push_back ( value_type const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+list< T, Allocator >::push_back ( value_type const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         emplace_back( _val_ ) ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr void
-list< T, Resource >::push_back ( value_type && _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+list< T, Allocator >::push_back ( value_type && _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         emplace_back( UTI_MOVE( _val_ ) ) ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 template< typename... Args >
         requires meta::constructible_from< T, Args... >
 constexpr void
-list< T, Resource >::emplace_back ( Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+list< T, Allocator >::emplace_back ( Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         if( !head_ )
         {
@@ -381,25 +379,25 @@ list< T, Resource >::emplace_back ( Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADAL
         }
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr void
-list< T, Resource >::push_front ( value_type const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+list< T, Allocator >::push_front ( value_type const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         emplace_front( _val_ ) ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr void
-list< T, Resource >::push_front ( value_type && _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+list< T, Allocator >::push_front ( value_type && _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         emplace_front( UTI_MOVE( _val_ ) ) ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 template< typename... Args >
         requires meta::constructible_from< T, Args... >
 constexpr void
-list< T, Resource >::emplace_front ( Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+list< T, Allocator >::emplace_front ( Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         if( !head_ )
         {
@@ -417,11 +415,11 @@ list< T, Resource >::emplace_front ( Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADA
         }
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 template< typename... Args >
         requires meta::constructible_from< T, Args... >
 constexpr void
-list< T, Resource >::insert ( iterator _position_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+list< T, Allocator >::insert ( iterator _position_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         if( !head_ )
         {
@@ -444,11 +442,11 @@ list< T, Resource >::insert ( iterator _position_, Args&&... _args_ ) UTI_NOEXCE
         }
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 template< meta::forward_iterator Iter >
         requires meta::convertible_to< iter_value_t< Iter >, T >
 constexpr void
-list< T, Resource >::append ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+list< T, Allocator >::append ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         for( ; _begin_ != _end_; ++_begin_ )
         {
@@ -456,18 +454,18 @@ list< T, Resource >::append ( Iter _begin_, Iter const _end_ ) UTI_NOEXCEPT_UNLE
         }
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 template< meta::simple_container Other >
         requires meta::convertible_to< typename Other::value_type, T >
 constexpr void
-list< T, Resource >::append ( Other const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+list< T, Allocator >::append ( Other const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
         append( _other_.begin(), _other_.end() ) ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr void
-list< T, Resource >::pop_back () noexcept
+list< T, Allocator >::pop_back () noexcept
 {
         if( !tail_ ) return ;
 
@@ -481,9 +479,9 @@ list< T, Resource >::pop_back () noexcept
         --size_ ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr void
-list< T, Resource >::pop_front () noexcept
+list< T, Allocator >::pop_front () noexcept
 {
         if( !head_ ) return ;
 
@@ -497,9 +495,9 @@ list< T, Resource >::pop_front () noexcept
         --size_ ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr void
-list< T, Resource >::erase ( iterator _position_ ) noexcept
+list< T, Allocator >::erase ( iterator _position_ ) noexcept
 {
         node_pointer node = _position_.ptr_ ;
 
@@ -528,9 +526,9 @@ list< T, Resource >::erase ( iterator _position_ ) noexcept
         --size_ ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr void
-list< T, Resource >::clear () noexcept
+list< T, Allocator >::clear () noexcept
 {
         while( head_ )
         {
@@ -543,9 +541,9 @@ list< T, Resource >::clear () noexcept
         size_ = 0 ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 constexpr void
-list< T, Resource >::_destroy_node ( node_pointer _node_ ) const noexcept
+list< T, Allocator >::_destroy_node ( node_pointer _node_ ) const noexcept
 {
         if constexpr( !is_trivially_destructible_v< value_type > )
         {
@@ -555,12 +553,12 @@ list< T, Resource >::_destroy_node ( node_pointer _node_ ) const noexcept
         _alloc_traits::deallocate( block ) ;
 }
 
-template< typename T, typename Resource >
+template< typename T, typename Allocator >
 template< typename... Args >
         requires meta::constructible_from< T, Args... >
 constexpr
-list< T, Resource >::node_pointer
-list< T, Resource >::_new_node ( node_pointer _prev_, node_pointer _next_, Args&&... _args_ )
+list< T, Allocator >::node_pointer
+list< T, Allocator >::_new_node ( node_pointer _prev_, node_pointer _next_, Args&&... _args_ )
         UTI_NOEXCEPT_UNLESS_BADALLOC_AND( meta::nothrow_constructible_from< T, Args... > )
 {
         node_pointer node = _alloc_traits::allocate( 1 ).begin() ;

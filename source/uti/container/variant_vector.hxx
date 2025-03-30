@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <uti/container/tuple.hxx>
 #include <uti/container/vector.hxx>
 #include <uti/meta/list.hxx>
 #include <uti/type/sequence.hxx>
@@ -15,44 +16,12 @@ namespace uti
 {
 
 
-template< typename... Callable >
-struct visitor : Callable...
-{
-        using Callable::operator()... ;
-} ;
-
-
 namespace _detail
 {
 
 
-class offset_storage
-{
-public:
-
-private:
-
-} ;
-
-
-template< typename T, typename... Ts > constexpr size_t max_align_of () noexcept ;
-template< typename T, typename... Ts > constexpr size_t min_align_of () noexcept ;
-template< typename T, typename... Ts > constexpr size_t max_size_of  () noexcept ;
-template< typename T, typename... Ts > constexpr size_t min_size_of  () noexcept ;
-
-template< typename T, typename T1, typename... Ts >
-constexpr ssize_t index_of ( ssize_t _start_ = 0 ) noexcept ;
-
-
 template< typename T >
 using iterator_type_for = iterator_base< T, random_access_iterator_tag > ;
-
-
-template< typename T >
-struct always_false : false_type {} ;
-
-template< typename T >
-static constexpr bool always_false_v = always_false< T >::value ;
 
 
 } // namespace _detail
@@ -63,11 +32,11 @@ class variant_vector
 {
         using value_types = meta::type_list< Ts... > ;
 
-        static constexpr ssize_t max_elem_align { _detail::max_align_of< Ts... >() } ;
-        static constexpr ssize_t min_elem_align { _detail::min_align_of< Ts... >() } ;
+        static constexpr ssize_t max_elem_align { max_align_of< Ts... >() } ;
+        static constexpr ssize_t min_elem_align { min_align_of< Ts... >() } ;
 
-        static constexpr ssize_t max_elem_size { _detail::max_size_of< Ts... >() } ;
-        static constexpr ssize_t min_elem_size { _detail::min_size_of< Ts... >() } ;
+        static constexpr ssize_t max_elem_size { max_size_of< Ts... >() } ;
+        static constexpr ssize_t min_elem_size { min_size_of< Ts... >() } ;
 public:
         using           resource_type = Resource ;
         using        _resource_traits = uti::resource_traits< resource_type > ;
@@ -116,7 +85,7 @@ public:
         constexpr void push_back ( T && _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
         template< typename T, typename... Args >
-                requires( meta::one_of< T, Ts... > && meta::constructible_from< T, Args... > )
+                requires meta::one_of< T, Ts... > && meta::constructible_from< T, Args... >
         constexpr void emplace_back ( Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
         template< meta::forward_iterator Iter >
@@ -147,9 +116,12 @@ public:
                 requires meta::one_of< T, Ts... >
         constexpr void replace ( ssize_type _idx_, T && _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
-        template< typename T >
-                requires meta::one_of< T, Ts... >
-        constexpr void erase ( ssize_type _position_ ) noexcept ;
+        template< typename T, typename... Args >
+                requires meta::one_of< T, Ts... > && meta::constructible_from< T, Args&&... >
+        constexpr void replace ( ssize_type _idx_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        constexpr void erase         ( ssize_type _position_ ) noexcept ;
+        constexpr void erase_no_pack ( ssize_type _position_ ) noexcept ;
 
         constexpr void reserve_bytes ( ssize_type _bytes_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
@@ -182,7 +154,7 @@ public:
         {
                 [ & ]< ssize_type... Idxs >( uti::index_sequence< Idxs... > )
                 {
-                        ( ...,
+                        ( ... ||
                         [ & ]
                         {
                                 using       raw_type =             meta::list::at_t< Idxs, value_types >   ;
@@ -193,6 +165,7 @@ public:
                                         if( UTI_FWD( self ).types_[ _idx_ ] == Idxs )
                                         {
                                                 _visitor_( UTI_FWD( self ).template get< raw_type >( _idx_ ), _idx_ ) ;
+                                                return true ;
                                         }
                                 }
                                 else if constexpr( meta::invocable< Visitor, effective_type > )
@@ -200,8 +173,10 @@ public:
                                         if( UTI_FWD( self ).types_[ _idx_ ] == Idxs )
                                         {
                                                 _visitor_( UTI_FWD( self ).template get< raw_type >( _idx_ ) ) ;
+                                                return true ;
                                         }
                                 }
+                                return false ;
                         }() ) ;
                 }( uti::make_index_sequence< sizeof...( Ts ) >{} ) ;
         }
@@ -211,7 +186,7 @@ public:
         {
                 for( ssize_type i = 0; i < UTI_FWD( self ).size(); ++i )
                 {
-                        UTI_FWD( self ).visit( i, _visitor_ ) ;
+                        UTI_FWD( self ).visit( i, UTI_FWD( _visitor_ ) ) ;
                 }
         }
 
@@ -226,10 +201,24 @@ public:
 
                 for( ssize_type i = _x_; i < _y_; ++i )
                 {
-                        UTI_FWD( self ).visit( i, _visitor_ ) ;
+                        UTI_FWD( self ).visit( i, UTI_FWD( _visitor_ ) ) ;
                 }
         }
 
+        template< typename Visitor, typename Self >
+        constexpr void for_range_back ( this Self &&    self ,
+                                        ssize_type const _y_ ,
+                                        ssize_type const _x_ ,
+                                        Visitor&&  _visitor_ ) noexcept
+        {
+                UTI_CEXPR_ASSERT( 0 <= _x_ && _x_ <= _y_ && _y_ <= UTI_FWD( self ).size(),
+                                  "uti::variant_vector::for_range: index out of bounds" ) ;
+
+                for( ssize_type i = _y_; i > _x_; --i )
+                {
+                        UTI_FWD( self ).visit( i, UTI_FWD( _visitor_ ) ) ;
+                }
+        }
 private:
         ssize_type                                            size_ {          0 } ;
         block_type                                         storage_ { nullptr, 0 } ;
@@ -249,6 +238,31 @@ private:
         template< typename T > constexpr const_byte_iterator _align_for ( const_byte_iterator _ptr_ ) const noexcept ;
 
         template< typename T > constexpr ssize_type _padding_for ( const_byte_iterator _ptr_ ) const noexcept ;
+
+        constexpr void _repack_forward  ( ssize_type _block_end_idx_, ssize_type _padding_ ) noexcept ;
+        constexpr void _repack_backward ( ssize_type _block_end_idx_                       ) noexcept ;
+
+        template< typename T, typename... Args >
+                requires meta::one_of< T, Ts... > && meta::constructible_from< T, Args... >
+        constexpr void _insert ( ssize_type _position_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        template< typename T, typename... Args >
+                requires meta::one_of< T, Ts... > && meta::constructible_from< T, Args&&... >
+        constexpr void _replace ( ssize_type _idx_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
+
+        template< typename T >
+                requires meta::one_of< T, Ts... >
+        constexpr void _erase_no_pack ( ssize_type _position_ ) noexcept ;
+
+        constexpr void _tag_block ( byte_iterator _begin_, ssize_type _size_, char _tag_ ) const noexcept
+        {
+                block_t< typename byte_iterator::value_type > block( _begin_, _size_ ) ;
+
+                for( auto & b : block )
+                {
+                        b = _tag_ ;
+                }
+        }
 } ;
 
 
@@ -273,7 +287,7 @@ variant_vector< Resource, Ts... >::_reserve ( ssize_type _bytes_ ) UTI_NOEXCEPT_
 
                 block_type new_block = _resource_traits::allocate( _bytes_, max_elem_align ) ;
 
-                if( !new_block ) return ;
+                if( new_block.size_ < _bytes_ ) return ;
 
                 for_each( [ & ]( auto & elem, ssize_type idx )
                         {
@@ -287,7 +301,10 @@ variant_vector< Resource, Ts... >::_reserve ( ssize_type _bytes_ ) UTI_NOEXCEPT_
                                 }
                                 else
                                 {
-                                        ::uti::copy( storage_.begin() + offsets_[ idx ], _find_end( idx ), new_block.begin() + offsets_[ idx ] ) ;
+                                        ::uti::copy( storage_ .begin() + offsets_[ idx ] ,
+                                                     storage_ .begin() + offsets_[ idx ] + sizeof( type ),
+                                                     new_block.begin() + offsets_[ idx ]
+                                        ) ;
                                 }
                         }
                 ) ;
@@ -314,6 +331,8 @@ constexpr
 variant_vector< Resource, Ts... >::byte_iterator
 variant_vector< Resource, Ts... >::_find_end ( ssize_type _idx_ ) noexcept
 {
+        UTI_CEXPR_ASSERT( 0 <= _idx_ && _idx_ < size(), "uti::variant_vector::_find_end: index out of bounds" ) ;
+
         byte_iterator elem_start = storage_.begin() + offsets_[ _idx_ ] ;
 
         ssize_type elem_size { 0 } ;
@@ -328,6 +347,8 @@ constexpr
 variant_vector< Resource, Ts... >::const_byte_iterator
 variant_vector< Resource, Ts... >::_find_end ( ssize_type _idx_ ) const noexcept
 {
+        UTI_CEXPR_ASSERT( 0 <= _idx_ && _idx_ < size(), "uti::variant_vector::_find_end: index out of bounds" ) ;
+
         const_byte_iterator elem_start = storage_.begin() + offsets_[ _idx_ ] ;
 
         ssize_type elem_size { 0 } ;
@@ -343,7 +364,7 @@ constexpr
 variant_vector< Resource, Ts... >::byte_iterator
 variant_vector< Resource, Ts... >::_align_for ( byte_iterator _ptr_ ) noexcept
 {
-        ssize_type mask = alignof( T ) - 1 ;
+        static constexpr ssize_type mask = alignof( T ) - 1 ;
 
         while( ( _ptr_ & mask ) != 0 )
         {
@@ -358,7 +379,7 @@ constexpr
 variant_vector< Resource, Ts... >::const_byte_iterator
 variant_vector< Resource, Ts... >::_align_for ( const_byte_iterator _ptr_ ) const noexcept
 {
-        ssize_type mask = alignof( T ) - 1 ;
+        static constexpr ssize_type mask = alignof( T ) - 1 ;
 
         while( ( _ptr_ & mask ) != 0 )
         {
@@ -377,6 +398,159 @@ variant_vector< Resource, Ts... >::_padding_for ( const_byte_iterator _ptr_ ) co
 
         return aligned - _ptr_ ;
 }
+
+template< typename Resource, typename... Ts >
+constexpr void
+variant_vector< Resource, Ts... >::_repack_forward ( ssize_type _block_end_idx_, ssize_type _padding_ ) noexcept
+{
+        uti::vector< ssize_type > new_offsets( size() - _block_end_idx_ ) ;
+
+        for_range( _block_end_idx_, size() - 1,
+                [ & ]( auto & elem, ssize_type idx )
+                {
+                        using type = remove_cvref_t< decltype( elem ) > ;
+
+                        byte_iterator prev_end = idx == 0 ? storage_.begin() : _find_end( idx - 1 ) ;
+                        byte_iterator padded   = prev_end + _padding_ ;
+                        byte_iterator aligned  = _align_for< type >( padded ) ;
+
+                        new_offsets.push_back( aligned - storage_.begin() ) ;
+                }
+        ) ;
+        for_range_back( size() - 1, _block_end_idx_,
+                [ & ]( auto & elem, ssize_type idx )
+                {
+                        using type   = remove_cvref_t< decltype( elem ) > ;
+                        using iter_t = _detail::iterator_type_for< type > ;
+
+                        ssize_type new_off = new_offsets.at( idx - _block_end_idx_ ) ;
+
+//                      if constexpr( uti::is_trivially_relocatable_v< type > )
+                        {
+
+                        }
+//                      else
+                        {
+                                auto tmp( UTI_MOVE( elem ) ) ;
+
+                                ::uti::destroy( &elem ) ;
+                                ::uti::construct< iter_t >( storage_.begin() + new_off, UTI_MOVE( tmp ) ) ;
+                        }
+                        offsets_.at( idx ) = new_off ;
+                }
+        ) ;
+}
+
+template< typename Resource, typename... Ts >
+constexpr void
+variant_vector< Resource, Ts... >::_repack_backward ( ssize_type _block_end_idx_ ) noexcept
+{
+        for_range( _block_end_idx_, size() - 1,
+                [ & ]( auto & elem, ssize_type idx )
+                {
+                        using type   = remove_cvref_t< decltype( elem ) > ;
+                        using iter_t = _detail::iterator_type_for< type > ;
+
+                        auto prev_end = idx == 0 ? storage_.begin() : _find_end( idx - 1 ) ;
+
+                        byte_iterator aligned_iter = _align_for< type >( prev_end ) ;
+                        if( aligned_iter == byte_iterator( &elem ) ) return ;
+
+                        if constexpr( is_trivially_relocatable_v< type > )
+                        {
+                                ::uti::copy( &elem, &elem + 1, aligned_iter ) ;
+                        }
+                        else
+                        {
+                                auto tmp( UTI_MOVE( elem ) ) ;
+
+                                ::uti::destroy( &elem ) ;
+                                ::uti::construct< iter_t >( aligned_iter, UTI_MOVE( tmp ) ) ;
+                        }
+                        offsets_.at( idx ) = aligned_iter - storage_.begin() ;
+                }
+        ) ;
+}
+
+template< typename Resource, typename... Ts >
+template< typename T, typename... Args >
+        requires meta::one_of< T, Ts... > && meta::constructible_from< T, Args... >
+constexpr void
+variant_vector< Resource, Ts...>::_insert ( ssize_type _position_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        using iter_t = _detail::iterator_type_for< T > ;
+
+              byte_iterator prev_end   = _position_ == 0 ? storage_.begin() : _find_end( _position_ - 1 ) ;
+              byte_iterator aligned    = _position_ == 0 ? storage_.begin() : _align_for< T >( prev_end ) ;
+        const_byte_iterator next_begin = storage_.begin() + offsets_[ _position_ ] ;
+
+        if( next_begin - aligned >= static_cast< ssize_type >( sizeof( T ) ) )
+        {
+                ::uti::construct< iter_t >( aligned, UTI_FWD( _args_ )... ) ;
+
+                ++size_ ;
+        }
+        else
+        {
+                reserve_bytes( size_bytes() * 2 ) ;
+                _repack_forward( _position_, aligned - prev_end + sizeof( T ) ) ;
+                _insert< T, Args&&... >( _position_, UTI_FWD( _args_ )... ) ;
+        }
+}
+
+template< typename Resource, typename... Ts >
+template< typename T, typename... Args >
+        requires meta::one_of< T, Ts... > && meta::constructible_from< T, Args&&... >
+constexpr void
+variant_vector< Resource, Ts... >::_replace ( ssize_type _idx_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+/*
+        using iter_t = _detail::iterator_type_for< T > ;
+
+        visit( _idx_, [ & ]( auto & val ){ _erase_no_pack< remove_cvref_t< decltype( val ) > >( _idx_ ) ; } ) ;
+
+              byte_iterator aligned    = _idx_ ==          0 ? storage_.begin() : _align_for< T >( _find_end(  _idx_ - 1 ) ) ;
+        const_byte_iterator next_begin = _idx_ == size() - 1 ? storage_.  end() : storage_.begin() + offsets_[ _idx_ + 1 ] ;
+
+        if( next_begin - aligned >= static_cast< ssize_type >( sizeof( T ) ) )
+        {
+                ::uti::construct< iter_t >( aligned, UTI_FWD( _args_ )... ) ;
+                ++size_ ;
+        }
+        else
+        {
+
+        }
+        offsets_.at( _idx_ ) = aligned - storage_.begin() ;
+        types_  .at( _idx_ ) = index_of_v< T, Ts... > ;
+
+        _repack_backward( _idx_ ) ;
+*/
+        erase_no_pack( _idx_ ) ;
+        insert< T, Args&&... >( _idx_, UTI_FWD( _args_ )... ) ;
+        _repack_backward( _idx_ ) ;
+}
+
+template< typename Resource, typename... Ts >
+template< typename T >
+        requires meta::one_of< T, Ts... >
+constexpr void
+variant_vector< Resource, Ts... >::_erase_no_pack ( ssize_type _position_ ) noexcept
+{
+        UTI_CEXPR_ASSERT( 0 <= _position_ && _position_ < size(), "uti::variant_vector::_erase_no_pack: index out of bounds" ) ;
+
+        using iter_t = _detail::iterator_type_for< T > ;
+
+        iter_t val_iter = get_ptr< T >( _position_ ) ;
+
+        if constexpr( !uti::is_trivially_destructible_v< T > )
+        {
+                ::uti::destroy( val_iter ) ;
+        }
+        _tag_block( val_iter, sizeof( T ), 'X' ) ;
+        --size_ ;
+}
+
 
 template< typename Resource, typename... Ts >
 template< typename T >
@@ -400,16 +574,10 @@ variant_vector< Resource, Ts... >::variant_vector ( type_identity< T >, ssize_ty
         /// which dynamically picks the smalles type large enough to fit the current offset values.
         /// with this taken into account, the memory overhead of the metadata will decrease
         /// making the below optimization less costly
-        if( sizeof( T ) < max_elem_size )
-        {
-                offsets_.reserve( _capacity_ ) ;
-                types_  .reserve( _capacity_ ) ;
-        }
-        else
-        {
-                offsets_.reserve( _capacity_ * 2 ) ;
-                types_  .reserve( _capacity_ * 2 ) ;
-        }
+
+        offsets_.reserve( _capacity_ * 2 ) ;
+        types_  .reserve( _capacity_ * 2 ) ;
+
         _reserve( _capacity_ * sizeof( T ) ) ;
 }
 
@@ -446,11 +614,14 @@ variant_vector< Resource, Ts... >::variant_vector ( variant_vector const & _othe
 {
         reserve_bytes( _other_.size_bytes() ) ;
 
-        if( !storage_ ) return ;
+        if( storage_.size_ < _other_.size_bytes() ) return ;
 
         if constexpr( conjunction_v< is_trivially_relocatable< Ts >... > )
         {
-                ::uti::copy( _other_.storage_.begin(), _other_.storage_.begin() + _other_.size_bytes(), storage_.begin() ) ;
+                ::uti::copy( _other_.storage_.begin(),
+                             _other_.storage_.begin() + _other_.size_bytes(),
+                                     storage_.begin()
+                ) ;
         }
         else
         {
@@ -541,7 +712,7 @@ variant_vector< Resource, Ts... >::push_back ( T && _val_ ) UTI_NOEXCEPT_UNLESS_
 
 template< typename Resource, typename... Ts >
 template< typename T, typename... Args >
-        requires( meta::one_of< T, Ts... > && meta::constructible_from< T, Args... > )
+        requires meta::one_of< T, Ts... > && meta::constructible_from< T, Args... >
 constexpr void
 variant_vector< Resource, Ts... >::emplace_back ( Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
@@ -551,13 +722,16 @@ variant_vector< Resource, Ts... >::emplace_back ( Args&&... _args_ ) UTI_NOEXCEP
 
         if( null() || empty() )
         {
+                offsets_.reserve( 4 ) ;
+                types_  .reserve( 4 ) ;
+
                 _reserve( sizeof( T ) ) ;
                 dest = storage_.begin() ;
 
                 if( !dest ) return ;
 
                 offsets_.push_back( 0 ) ;
-                types_.push_back( _detail::index_of< T, Ts... >() ) ;
+                types_.push_back( index_of_v< T, Ts... > ) ;
         }
         else
         {
@@ -571,12 +745,17 @@ variant_vector< Resource, Ts... >::emplace_back ( Args&&... _args_ ) UTI_NOEXCEP
                 dest = _align_for< T >( _find_end( size_ - 1 ) ) ;
 
                 offsets_.push_back( static_cast< const_byte_iterator >( dest ) - storage_.begin() ) ;
-                types_.push_back( _detail::index_of< T, Ts... >() ) ;
+                types_.push_back( index_of_v< T, Ts... > ) ;
         }
         if( dest )
         {
                 ::uti::construct( dest, UTI_FWD( _args_ )... ) ;
                 ++size_ ;
+        }
+        else
+        {
+                offsets_.pop_back() ;
+                types_  .pop_back() ;
         }
 }
 
@@ -627,24 +806,16 @@ template< typename T, typename... Args >
 constexpr void
 variant_vector< Resource, Ts...>::insert ( ssize_type _position_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
-        using iter_t = _detail::iterator_type_for< T > ;
-
-              byte_iterator aligned    = _align_for< T >( _find_end( _position_ - 1 ) ) ;
-        const_byte_iterator next_begin = storage_.begin() + offsets_[ _position_ ] ;
-
-        if( next_begin - aligned >= static_cast< ssize_type >( sizeof( T ) ) )
+        if( _position_ >= size() )
         {
-                ::uti::construct< iter_t >( aligned, UTI_FWD( _args_ )... ) ;
-
-                offsets_.insert( _position_, aligned - storage_.begin() ) ;
-                types_  .insert( _position_, _detail::index_of< T, Ts... >() ) ;
-
-                ++size_ ;
+                return emplace_back< T, Args&&... >( UTI_FWD( _args_ )... ) ;
         }
-        else
-        {
-                /// lord have mercy
-        }
+        _insert< T, Args&&... >( _position_, UTI_FWD( _args_ )... ) ;
+
+        ssize_type offset = _position_ == 0 ? 0 : _align_for< T >( _find_end( _position_ - 1 ) ) - storage_.begin() ;
+
+        offsets_.insert( _position_, offset ) ;
+        types_  .insert( _position_, index_of_v< T, Ts... > ) ;
 }
 
 template< typename Resource, typename... Ts >
@@ -653,9 +824,9 @@ template< typename T >
 constexpr void
 variant_vector< Resource, Ts... >::replace ( ssize_type _idx_, T const & _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
-        ( void ) _idx_ ;
-        ( void ) _val_ ;
-        UTI_CEXPR_ASSERT( _detail::always_false_v< T >, "uti::variant_vector::replace: unimplemented" ) ;
+        UTI_CEXPR_ASSERT( 0 <= _idx_ && _idx_ < size(), "uti::variant_vector::replace: index out of bounds" ) ;
+
+        _replace< T >( _idx_, _val_ ) ;
 }
 
 template< typename Resource, typename... Ts >
@@ -664,19 +835,42 @@ template< typename T >
 constexpr void
 variant_vector< Resource, Ts... >::replace ( ssize_type _idx_, T && _val_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
-        ( void ) _idx_ ;
-        ( void ) _val_ ;
-        UTI_CEXPR_ASSERT( _detail::always_false_v< T >, "uti::variant_vector::replace: unimplemented" ) ;
+        UTI_CEXPR_ASSERT( 0 <= _idx_ && _idx_ < size(), "uti::variant_vector::replace: index out of bounds" ) ;
+
+        _replace< T >( _idx_, UTI_MOVE( _val_ ) ) ;
 }
 
 template< typename Resource, typename... Ts >
-template< typename T >
-        requires meta::one_of< T, Ts... >
+template< typename T, typename... Args >
+        requires meta::one_of< T, Ts... > && meta::constructible_from< T, Args&&... >
+constexpr void
+variant_vector< Resource, Ts... >::replace ( ssize_type _idx_, Args&&... _args_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+{
+        UTI_CEXPR_ASSERT( 0 <= _idx_ && _idx_ < size(), "uti::variant_vector::replace: index out of bounds" ) ;
+
+        _replace< T, Args&&... >( _idx_, UTI_FWD( _args_ )... ) ;
+}
+
+template< typename Resource, typename... Ts >
 constexpr void
 variant_vector< Resource, Ts... >::erase ( ssize_type _position_ ) noexcept
 {
-        ( void ) _position_ ;
-        UTI_CEXPR_ASSERT( _detail::always_false_v< T >, "uti::variant_vector::erase: unimplemented" ) ;
+        UTI_CEXPR_ASSERT( 0 <= _position_ && _position_ < size(), "uti::variant_vector::erase: index out of bounds" ) ;
+
+        erase_no_pack( _position_ ) ;
+        _repack_backward(  _position_ ) ;
+}
+
+template< typename Resource, typename... Ts >
+constexpr void
+variant_vector< Resource, Ts... >::erase_no_pack ( ssize_type _position_ ) noexcept
+{
+        UTI_CEXPR_ASSERT( 0 <= _position_ && _position_ < size(), "uti::variant_vector::erase_no_pack: index out of bounds" ) ;
+
+        visit( _position_, [ & ]( auto & val ){ _erase_no_pack< remove_cvref_t< decltype( val ) > >( _position_ ) ; } ) ;
+
+        offsets_.erase_stable( _position_ ) ;
+        types_  .erase_stable( _position_ ) ;
 }
 
 template< typename Resource, typename... Ts >
@@ -695,16 +889,9 @@ template< typename T >
 constexpr void
 variant_vector< Resource, Ts... >::reserve ( ssize_type _count_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
-        if( sizeof( T ) < max_elem_size )
-        {
-                offsets_.reserve( _count_ ) ;
-                types_  .reserve( _count_ ) ;
-        }
-        else
-        {
-                offsets_.reserve( _count_ * 2 ) ;
-                types_  .reserve( _count_ * 2 ) ;
-        }
+        offsets_.reserve( _count_ * 2 ) ;
+        types_  .reserve( _count_ * 2 ) ;
+
         _reserve( _count_ * sizeof( T ) ) ;
 }
 
@@ -768,7 +955,7 @@ template< typename T >
 UTI_NODISCARD constexpr _detail::iterator_type_for< T >
 variant_vector< Resource, Ts... >::get_ptr ( ssize_type _idx_ ) noexcept
 {
-        if( _detail::index_of< T, Ts... >() == types_[ _idx_ ] )
+        if( index_of_v< T, Ts... > == types_[ _idx_ ] )
         {
                 return storage_.begin() + offsets_[ _idx_ ] ;
         }
@@ -780,97 +967,12 @@ template< typename T >
 UTI_NODISCARD constexpr _detail::iterator_type_for< T const >
 variant_vector< Resource, Ts... >::get_ptr ( ssize_type _idx_ ) const noexcept
 {
-        if( _detail::index_of< T, Ts... >() == types_[ _idx_ ] )
+        if( index_of_v< T, Ts... > == types_[ _idx_ ] )
         {
                 return storage_.begin() + offsets_[ _idx_ ] ;
         }
         return nullptr ;
 }
-
-
-namespace _detail
-{
-
-
-template< typename T, typename... Ts >
-constexpr size_t max_align_of () noexcept
-{
-        if constexpr( sizeof...( Ts ) == 0 )
-        {
-                return alignof( T ) ;
-        }
-        else
-        {
-                size_t align_rest = max_align_of< Ts... >() ;
-
-                return alignof( T ) > align_rest ? alignof( T ) : align_rest ;
-        }
-} ;
-
-template< typename T, typename... Ts >
-constexpr size_t min_align_of () noexcept
-{
-        if constexpr( sizeof...( Ts ) == 0 )
-        {
-                return alignof( T ) ;
-        }
-        else
-        {
-                size_t align_rest = min_align_of< Ts... >() ;
-
-                return alignof( T ) < align_rest ? alignof( T ) : align_rest ;
-        }
-} ;
-
-template< typename T, typename... Ts >
-constexpr size_t max_size_of () noexcept
-{
-        if constexpr( sizeof...( Ts ) == 0 )
-        {
-                return sizeof( T ) ;
-        }
-        else
-        {
-                size_t size_rest = max_size_of< Ts... >() ;
-
-                return sizeof( T ) > size_rest ? sizeof( T ) : size_rest ;
-        }
-} ;
-
-template< typename T, typename... Ts >
-constexpr size_t min_size_of () noexcept
-{
-        if constexpr( sizeof...( Ts ) == 0 )
-        {
-                return sizeof( T ) ;
-        }
-        else
-        {
-                size_t size_rest = min_size_of< Ts... >() ;
-
-                return sizeof( T ) < size_rest ? sizeof( T ) : size_rest ;
-        }
-} ;
-
-template< typename T, typename T1, typename... Ts >
-constexpr ssize_t index_of ( ssize_t _start_ ) noexcept
-{
-        if constexpr( meta::same_as< T, T1 > )
-        {
-                return _start_ ;
-        }
-        else if constexpr( sizeof...( Ts ) == 0 )
-        {
-                return -1 ;
-        }
-        else
-        {
-                return index_of< T, Ts... >( _start_ + 1 ) ;
-        }
-}
-
-
-} // namespace _detail
 
 
 } // namespace uti
