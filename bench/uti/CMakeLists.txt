@@ -23,6 +23,6 @@ target_compile_options( uti.bench PRIVATE -std=c++23               )
 target_compile_options( uti.bench PRIVATE "${UTI_OPT_LVL}"         )
 target_compile_options( uti.bench PRIVATE "${UTI_COMPILE_OPTIONS}" )
 
-target_link_libraries( uti.bench PRIVATE       uti::uti            )
+target_link_libraries( uti.bench PRIVATE  uti_core::uti_core       )
 target_link_libraries( uti.bench PRIVATE benchmark::benchmark      )
 target_link_libraries( uti.bench PRIVATE benchmark::benchmark_main )

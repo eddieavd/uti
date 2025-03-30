@@ -6,7 +6,7 @@
 
 #include "uti.bench.hxx"
 
-#include <uti.hxx>
+#include <uti.core.hxx>
 
 #include <vector>
 #include <string>
@@ -23,22 +23,30 @@ using utivecstr = uti::vector< std::string, uti::allocator< std::string, uti::ma
 
 using utivarvec = uti::variant_vector< uti::malloc_resource, int > ;
 
-using utivecintstat = uti::vector<         int, uti::allocator<         int, uti::static_bump_resource< 16 * 1024 * 1024, 1 > > > ;
-using utivecstrstat = uti::vector< std::string, uti::allocator< std::string, uti::static_bump_resource< 16 * 1024 * 1024, 2 > > > ;
+using utivecintstat  = uti::vector<         int, uti::allocator<         int, uti::static_bump_resource< 16 * 1024 * 1024, 1 > > > ;
+using utivecintstat1 = uti::vector<         int, uti::allocator<         int, uti::static_bump_resource< 16 * 1024 * 1024, 2 > > > ;
+using utivecstrstat  = uti::vector< std::string, uti::allocator< std::string, uti::static_bump_resource< 16 * 1024 * 1024, 3 > > > ;
 
-using utivarvecstat = uti::variant_vector< uti::static_bump_resource< 32 * 1024 * 1024, 3 >, int > ;
+using utivarvecstat = uti::variant_vector< uti::static_bump_resource< 32 * 1024 * 1024, 4 >, int > ;
 
-using utivecintlist = uti::vector<         int, uti::allocator<         int, uti::static_freelist_resource< 16 * 1024 * 1024, 4 > > > ;
-using utivecstrlist = uti::vector< std::string, uti::allocator< std::string, uti::static_freelist_resource< 16 * 1024 * 1024, 5 > > > ;
+using utivecintlist  = uti::vector<         int, uti::allocator<         int, uti::static_freelist_resource< 16 * 1024 * 1024, 5 > > > ;
+using utivecintlist1 = uti::vector<         int, uti::allocator<         int, uti::static_freelist_resource< 16 * 1024 * 1024, 6 > > > ;
+using utivecstrlist  = uti::vector< std::string, uti::allocator< std::string, uti::static_freelist_resource< 16 * 1024 * 1024, 7 > > > ;
 
-using utivarveclist = uti::variant_vector< uti::static_freelist_resource< 32 * 1024 * 1024, 6 >, int > ;
+using utivarveclist = uti::variant_vector< uti::static_freelist_resource< 32 * 1024 * 1024, 8 >, int > ;
 
+// BENCHMARK( bm_push_back_trivial< stdvecint     > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+// BENCHMARK( bm_push_back_trivial< utivecint     > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+// BENCHMARK( bm_push_back_trivial< utivecintstat > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+// BENCHMARK( bm_push_back_trivial< utivecintlist > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+// BENCHMARK( bm_push_back_trivial< utivarvec     > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
 
-BENCHMARK( bm_push_back_trivial< stdvecint     > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
-BENCHMARK( bm_push_back_trivial< utivecint     > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
-BENCHMARK( bm_push_back_trivial< utivecintstat > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
-BENCHMARK( bm_push_back_trivial< utivecintlist > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
-BENCHMARK( bm_push_back_trivial< utivarvec     > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_dual_push_back_trivial< stdvecint     > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_dual_push_back_trivial< utivecint     > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_dual_push_back_trivial< utivecintstat > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_dual_push_back_trivial< utivecintstat, utivecintstat1 > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_dual_push_back_trivial< utivecintlist, utivecintlist1 > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
+BENCHMARK( bm_dual_push_back_trivial< utivarvec     > )->RangeMultiplier( 4 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );
 
 /*
 BENCHMARK( bm_push_back_nontrivial< stdvecstr     > )->RangeMultiplier( 2 )->Range( 1024, 1024 << 10 )->Unit( benchmark::kMicrosecond );

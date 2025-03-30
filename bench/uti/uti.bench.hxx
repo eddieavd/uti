@@ -80,6 +80,25 @@ static void bm_push_back_trivial ( benchmark::State & state )
         }
 }
 
+template< typename T, typename U = T >
+static void bm_dual_push_back_trivial ( benchmark::State & state )
+{
+        for( auto _ : state )
+        {
+                T container_1 ;
+                U container_2 ;
+
+                for( ssize_t i = 0; i < state.range( 0 ); ++i )
+                {
+                        container_1.push_back( 1024 ) ;
+                        container_2.push_back( 1024 ) ;
+                }
+                benchmark::ClobberMemory() ;
+                benchmark::DoNotOptimize( container_1 ) ;
+                benchmark::DoNotOptimize( container_2 ) ;
+        }
+}
+
 template< typename T >
 static void bm_push_back_nontrivial ( benchmark::State & state )
 {
