@@ -25,6 +25,11 @@
         static_cast< decltype(__VA_ARGS__)&&>(__VA_ARGS__)
 #endif
 
+#ifndef ssizeof
+#define ssizeof( x ) \
+        static_cast< ::uti::ssize_t >( sizeof( x ) )
+#endif
+
 
 
 namespace uti

@@ -302,9 +302,26 @@ TEST_CASE( "variant_vector::insert", "[variant_vector][modify][insert]" )
                 CHECK( varvec.get< int    >( 1 ) == 2   ) ;
                 CHECK( varvec.get< double >( 2 ) == 3.0 ) ;
         }
-        SECTION( "insert::requires_repack" )
+        SECTION( "insert::requires_expansion" )
         {
                 CHECK( false ) ;
+/*
+                uti::variant_vector< resource, int, double > varvec ;
+
+                varvec.push_back( 1 ) ;
+                varvec.push_back( 3 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< int >( 0 ) == 1 ) ;
+                CHECK( varvec.get< int >( 1 ) == 3 ) ;
+
+                varvec.insert( 1, 2.0 ) ;
+
+                CHECK( varvec.size() == 3 ) ;
+                CHECK( varvec.get<    int >( 0 ) == 1   ) ;
+                CHECK( varvec.get< double >( 1 ) == 2.0 ) ;
+                CHECK( varvec.get<    int >( 2 ) == 3   ) ;
+*/
         }
 }
 
@@ -327,11 +344,11 @@ TEST_CASE( "variant_vector::replace", "[variant_vector][modify][replace]" )
                 CHECK( varvec.size() == 2 ) ;
                 CHECK( varvec.get< int >( 0 ) == 2 ) ;
                 CHECK( varvec.get< int >( 1 ) == 3 ) ;
-                INFO( "check for correct repack" ) ;
-                CHECK( varvec.size_bytes() == static_cast< signed long >( sizeof( int ) * 2 ) ) ;
         }
         SECTION( "replace::same_size_1" )
         {
+                static_assert( sizeof( uti::string ) == sizeof( uti::vector< int > ) ) ;
+
                 uti::variant_vector< resource, uti::string, uti::vector< int > > varvec ;
 
                 varvec.emplace_back< uti::string >( "1234567890123456789012345" ) ;
@@ -355,6 +372,8 @@ TEST_CASE( "variant_vector::replace", "[variant_vector][modify][replace]" )
         }
         SECTION( "replace::same_size_2" )
         {
+                static_assert( sizeof( uti::string ) == sizeof( uti::vector< int > ) ) ;
+
                 uti::variant_vector< resource, uti::string, uti::vector< int > > varvec ;
 
                 varvec.emplace_back< uti::string >( "1234567890123456789012345" ) ;
@@ -378,6 +397,8 @@ TEST_CASE( "variant_vector::replace", "[variant_vector][modify][replace]" )
         }
         SECTION( "replace::same_size_3" )
         {
+                static_assert( sizeof( uti::string ) == sizeof( uti::vector< int > ) ) ;
+
                 uti::variant_vector< resource, uti::string, uti::vector< int > > varvec ;
 
                 varvec.emplace_back< uti::string >( "abc" ) ;
@@ -396,7 +417,107 @@ TEST_CASE( "variant_vector::replace", "[variant_vector][modify][replace]" )
                 CHECK( varvec.get< uti::string >( 1 ).size() == 6 ) ;
                 CHECK( varvec.get< uti::string >( 2 ).size() == 3 ) ;
         }
-        SECTION( "replace::requires_repack" )
+        SECTION( "replace::requires_expansion" )
+        {
+                CHECK( false ) ;
+        }
+}
+
+TEST_CASE( "variant_vector::replace_repack", "[variant_vector][modify][replace_repack]" )
+{
+        SECTION( "replace_repack::smaller_than_original" )
+        {
+                uti::variant_vector< resource, int, double > varvec ;
+
+                varvec.push_back( 1.0 ) ;
+                varvec.push_back( 3   ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< double >( 0 ) == 1.0 ) ;
+                CHECK( varvec.get< int    >( 1 ) == 3   ) ;
+                CHECK( varvec.size_bytes() == static_cast< signed long >( sizeof( double ) + sizeof( int ) ) ) ;
+
+                varvec.replace_repack( 0, 2 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< int >( 0 ) == 2 ) ;
+                CHECK( varvec.get< int >( 1 ) == 3 ) ;
+                INFO( "check for correct repack" ) ;
+                CHECK( varvec.size_bytes() == static_cast< signed long >( sizeof( int ) * 2 ) ) ;
+        }
+        SECTION( "replace_repack::same_size_1" )
+        {
+                static_assert( sizeof( uti::string ) == sizeof( uti::vector< int > ) ) ;
+
+                uti::variant_vector< resource, uti::string, uti::vector< int > > varvec ;
+
+                varvec.emplace_back< uti::string >( "1234567890123456789012345" ) ;
+                varvec.emplace_back< uti::vector< int > >( 32, 1 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 25 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 1 ).size() == 32 ) ;
+
+                varvec.replace_repack< uti::vector< int > >( 0, 64, 9 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 0 ).size() == 64 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 1 ).size() == 32 ) ;
+
+                varvec.replace_repack( 0, uti::string( "xyz" ) ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 3 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 1 ).size() == 32 ) ;
+        }
+        SECTION( "replace_repack::same_size_2" )
+        {
+                static_assert( sizeof( uti::string ) == sizeof( uti::vector< int > ) ) ;
+
+                uti::variant_vector< resource, uti::string, uti::vector< int > > varvec ;
+
+                varvec.emplace_back< uti::string >( "1234567890123456789012345" ) ;
+                varvec.emplace_back< uti::vector< int > >( 32, 1 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 25 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 1 ).size() == 32 ) ;
+
+                varvec.replace_repack( 1, uti::string( "xyz" ) ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 25 ) ;
+                CHECK( varvec.get< uti::string >( 1 ).size() ==  3 ) ;
+
+                varvec.replace_repack< uti::vector< int > >( 1, 64, 9 ) ;
+
+                CHECK( varvec.size() == 2 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 25 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 1 ).size() == 64 ) ;
+        }
+        SECTION( "replace_repack::same_size_3" )
+        {
+                static_assert( sizeof( uti::string ) == sizeof( uti::vector< int > ) ) ;
+
+                uti::variant_vector< resource, uti::string, uti::vector< int > > varvec ;
+
+                varvec.emplace_back< uti::string >( "abc" ) ;
+                varvec.emplace_back< uti::vector< int > >( 32, 1 ) ;
+                varvec.emplace_back< uti::string >( "xyz" ) ;
+
+                CHECK( varvec.size() == 3 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 3 ) ;
+                CHECK( varvec.get< uti::vector< int > >( 1 ).size() == 32 ) ;
+                CHECK( varvec.get< uti::string >( 2 ).size() == 3 ) ;
+
+                varvec.replace_repack( 1, uti::string( "abcxyz" ) ) ;
+
+                CHECK( varvec.size() == 3 ) ;
+                CHECK( varvec.get< uti::string >( 0 ).size() == 3 ) ;
+                CHECK( varvec.get< uti::string >( 1 ).size() == 6 ) ;
+                CHECK( varvec.get< uti::string >( 2 ).size() == 3 ) ;
+        }
+        SECTION( "replace_repack::requires_expansion" )
         {
                 CHECK( false ) ;
         }
@@ -415,7 +536,7 @@ TEST_CASE( "variant_vector::modify::erase", "[variant_vector][modify][erase]" )
                 CHECK( varvec.size() == 3 ) ;
                 CHECK( varvec.size_bytes() == static_cast< signed long >( 2 * sizeof( double ) ) ) ;
 
-                varvec.erase_no_pack( 1 ) ;
+                varvec.erase( 1 ) ;
 
                 CHECK( varvec.size() == 2 ) ;
                 CHECK( varvec.size_bytes() == static_cast< signed long >( 2 * sizeof( double ) ) ) ;
@@ -431,12 +552,12 @@ TEST_CASE( "variant_vector::modify::erase", "[variant_vector][modify][erase]" )
                 CHECK( varvec.size() == 3 ) ;
                 CHECK( varvec.size_bytes() == static_cast< signed long >( 2 * sizeof( double ) ) ) ;
 
-                varvec.erase( 1 ) ;
+                varvec.erase_repack( 1 ) ;
 
                 CHECK( varvec.size() == 2 ) ;
                 CHECK( varvec.size_bytes() == static_cast< signed long >( 2 * sizeof( double ) ) ) ;
 
-                varvec.erase( 0 ) ;
+                varvec.erase_repack( 0 ) ;
 
                 CHECK( varvec.size() == 1 ) ;
                 INFO( "check for correct repack" ) ;

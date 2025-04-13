@@ -26,6 +26,7 @@ public:
 
         constexpr iterator_base (                       ) noexcept requires _has_forward_iterator_category_v< _self > : ptr_( nullptr ) {}
         constexpr iterator_base ( pointer const & _ptr_ ) noexcept                                                    : ptr_(   _ptr_ ) {}
+        constexpr iterator_base ( u64_t       _ptrdata_ ) noexcept                                                    : ptr_( ( pointer ) _ptrdata_ ) {}
 
         template< typename T1 >
                 requires( !meta::same_as< remove_const_t< T >, remove_const_t< T1 > > && meta::same_as< remove_const_t< T >, u8_t > && !is_const_v< T1 > )
