@@ -166,9 +166,15 @@ public:
 
         constexpr ~iterator_base () noexcept = default ;
 
-        template< typename IterCat1 >
-                requires is_base_of_v< IterCat1, iterator_category >
-        constexpr iterator_base ( iterator_base< T, IterCat1 > const & _iter_ ) noexcept : ptr_( _iter_.ptr_ ) {}
+        template< typename IterTag >
+        constexpr iterator_base ( iterator_base< T, IterTag, DiffType, Pointer, Reference > const & _other_ ) noexcept
+                requires( is_base_of_v< IterTag, iterator_category > )
+                : ptr_( _other_.ptr_ ) {}
+
+        template< typename IterTag >
+        constexpr iterator_base ( iterator_base< T, IterTag, DiffType, Pointer, Reference > const & _other_ ) noexcept
+                requires( is_base_of_v< iterator_category, IterTag > )
+                : ptr_( _other_.ptr_ ) {}
 
         constexpr operator pointer ()       noexcept { return ptr_ ; }
         constexpr operator pointer () const noexcept { return ptr_ ; }

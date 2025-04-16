@@ -172,6 +172,8 @@ public:
         UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return --begin() ; }
         UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return --begin() ; }
         UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return    rend() ; }
+
+        constexpr memory_footprint memory_usage () const noexcept { return _base::memory_usage() ; }
 private:
         constexpr void _update_range ( ssize_type const _x_, ssize_type const _y_, value_type const & _diff_ ) noexcept ;
 };
@@ -195,7 +197,7 @@ prefix_array< T, Alloc >::prefix_array ( ssize_type const _capacity_, value_type
 
         for( ssize_type i = 0; i < _base::capacity(); ++i )
         {
-                _base::_emplace( last ) ;
+                _base::_emplace( end(), last ) ;
                 last += _val_ ;
         }
 }
@@ -208,12 +210,12 @@ prefix_array< T, Alloc >::prefix_array ( Iter _begin_, Iter const & _end_ )
 {
         value_type last = *_begin_ ;
 
-        _base::_emplace( last ) ;
+        _base::_emplace( end(), last ) ;
 
         while( ++_begin_ != _end_ )
         {
                 last += *_begin_ ;
-                _base::_emplace( last ) ;
+                _base::_emplace( end(), last ) ;
         }
 }
 

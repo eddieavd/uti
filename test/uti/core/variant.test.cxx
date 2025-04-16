@@ -37,16 +37,16 @@ constexpr void check_variant_value_impl ( Variant const & var, T const & val )
 {
         CHECK( var.has_value() ) ;
         CHECK( bool( var )     ) ;
-        
+
         CHECK( var.type() == typename Variant::type_id( uti::variant_type< T >{} ) ) ;
         CHECK( var.has_value( uti::variant_type< T >{} ) ) ;
-        
+
         CHECK( var.value( uti::variant_type< T >{} ) == val ) ;
-        
+
         using is_int     = uti::is_same< T, int > ;
         using is_double  = uti::is_same< T, double > ;
         using is_counter = uti::is_same< T, uti::test::copy_counter > ;
-        
+
         CHECK(      !var.optional_value( uti::variant_type< uti::nullvar_t          >{} ) ) ;
         CHECK( bool( var.optional_value( uti::variant_type< int                     >{} ) ) == is_int::value ) ;
         CHECK( bool( var.optional_value( uti::variant_type< double                  >{} ) ) == is_double::value ) ;
@@ -269,25 +269,25 @@ TEST_CASE( "variant::swap", "[variant][swap]" )
                 check_variant_value( non_empty_2, uti::string( 'x', 5 ) ) ;
                 check_variant_empty( empty ) ;
         }
-//      SECTION( "swap::non_empty::different" )
-//      {
-//              swap( non_empty_1, non_empty_2 ) ;
-//              check_variant_value( non_empty_1, uti::string( 'x', 5 ) ) ;
-//              check_variant_value( non_empty_2, 5 ) ;
+        SECTION( "swap::non_empty::different_1" )
+        {
+                swap( non_empty_1, non_empty_2 ) ;
+                check_variant_value( non_empty_1, uti::string( 'x', 5 ) ) ;
+                check_variant_value( non_empty_2, 5 ) ;
 
-//              swap( non_empty_1, non_empty_2 ) ;
-//              check_variant_value( non_empty_1, 5 ) ;
-//              check_variant_value( non_empty_2, uti::string( 'x', 5 ) ) ;
-//      }
-        SECTION( "swap::non_empty::different" )
+                swap( non_empty_1, non_empty_2 ) ;
+                check_variant_value( non_empty_1, 5 ) ;
+                check_variant_value( non_empty_2, uti::string( 'x', 5 ) ) ;
+        }
+        SECTION( "swap::non_empty::different_2" )
         {
                 swap( non_empty_1, non_empty_3 ) ;
-                check_variant_value( non_empty_1, 3.0, "swap::non_empty::different::1" ) ;
-                check_variant_value( non_empty_3, 5, "swap::non_empty::different::2" ) ;
+                check_variant_value( non_empty_1, 3.0, "swap::non_empty::different_2::1" ) ;
+                check_variant_value( non_empty_3, 5, "swap::non_empty::different_2::2" ) ;
 
                 swap( non_empty_1, non_empty_3 ) ;
-                check_variant_value( non_empty_1, 5, "swap::non_empty::different::3" ) ;
-                check_variant_value( non_empty_3, 3.0, "swap::non_empty::different::4" ) ;
+                check_variant_value( non_empty_1, 5, "swap::non_empty::different_2::3" ) ;
+                check_variant_value( non_empty_3, 3.0, "swap::non_empty::different_2::4" ) ;
         }
         SECTION( "swap::non_empty::same" )
         {

@@ -10,7 +10,6 @@
 #include <uti/core/iterator/meta.hxx>
 #include <uti/core/iterator/base.hxx>
 #include <uti/core/iterator/reverse_iterator.hxx>
-#include <uti/core/container/base.hxx>
 #include <uti/core/container/meta.hxx>
 
 
@@ -21,23 +20,22 @@ namespace uti
 template< typename T >
 class view
 {
-        using _self =  view                ;
-        using _base = _container_base< T > ;
+        using _self = view ;
 public:
-        using      value_type = typename _base::     value_type ;
-        using       size_type = typename _base::      size_type ;
-        using      ssize_type = typename _base::     ssize_type ;
-        using difference_type = typename _base::difference_type ;
+        using      value_type =       T    ;
+        using       size_type =  size_t    ;
+        using      ssize_type = ssize_t    ;
+        using difference_type = ssize_type ;
 
-        using         pointer = typename _base::        pointer ;
-        using   const_pointer = typename _base::  const_pointer ;
-        using       reference = typename _base::      reference ;
-        using const_reference = typename _base::const_reference ;
+        using         pointer = value_type       * ;
+        using   const_pointer = value_type const * ;
+        using       reference = value_type       & ;
+        using const_reference = value_type const & ;
 
-        using               iterator = typename _base::              iterator ;
-        using         const_iterator = typename _base::        const_iterator ;
-        using       reverse_iterator = typename _base::      reverse_iterator ;
-        using const_reverse_iterator = typename _base::const_reverse_iterator ;
+        using               iterator = iterator_base< value_type      , random_access_iterator_tag > ;
+        using         const_iterator = iterator_base< value_type const, random_access_iterator_tag > ;
+        using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
+        using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
         constexpr view () noexcept = default ;
 
@@ -119,6 +117,11 @@ public:
                 return *( UTI_FWD( self ).end() - 1 );
         }
         UTI_NODISCARD constexpr const_reference cback () const noexcept { return back(); }
+
+        constexpr ssize_type memory_usage () const noexcept
+        {
+
+        }
 protected:
         pointer   begin_ { nullptr } ;
         ssize_type size_ {       0 } ;
@@ -127,7 +130,6 @@ protected:
         UTI_NODISCARD constexpr pointer    const & _begin () const noexcept { return begin_ ; }
         UTI_NODISCARD constexpr ssize_type       & _size  ()       noexcept { return  size_ ; }
         UTI_NODISCARD constexpr ssize_type const & _size  () const noexcept { return  size_ ; }
-
 };
 
 

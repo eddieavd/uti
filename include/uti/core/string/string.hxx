@@ -16,6 +16,7 @@
 #include <uti/core/iterator/reverse_iterator.hxx>
 #include <uti/core/meta/concepts.hxx>
 #include <uti/core/container/meta.hxx>
+#include <uti/core/container/memory_footprint.hxx>
 #include <uti/core/algo/mem.hxx>
 #include <uti/core/string/string_view.hxx>
 
@@ -174,6 +175,29 @@ public:
         UTI_NODISCARD constexpr const_reference cback () const noexcept { return at( size() - 1 ) ; }
 
         UTI_NODISCARD constexpr bool is_small () const noexcept { return _is_small() ; }
+
+        UTI_NODISCARD constexpr memory_footprint memory_usage () const noexcept
+        {
+                if( _is_small() )
+                {
+                        return
+                        {
+                                .         static_usage_ = ssizeof( *this ) ,
+                                .top_lvl_dynamic_usage_ = 0 ,
+                                .low_lvl_dynamic_usage_ = 0
+                        } ;
+                }
+                else
+                {
+                        return
+                        {
+                                .         static_usage_ = ssizeof( *this ) ,
+                                .top_lvl_dynamic_usage_ = rep_.heap_.capacity_ ,
+                                .low_lvl_dynamic_usage_ = 0
+                        } ;
+
+                }
+        }
 private:
         iterator   ptr_ { nullptr } ;
         string_rep rep_ ;

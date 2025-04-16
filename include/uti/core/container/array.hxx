@@ -7,7 +7,6 @@
 #pragma once
 
 #include <uti/core/type/traits.hxx>
-#include <uti/core/container/base.hxx>
 #include <uti/core/container/view.hxx>
 #include <uti/core/allocator/meta.hxx>
 
@@ -23,24 +22,23 @@ namespace uti
 template< typename T, ssize_t Capacity >
 class array : public view< T >
 {
-        using      _self =  array               ;
-        using      _base = _container_base< T > ;
-        using _view_base =  view          < T > ;
+        using      _self = array     ;
+        using _view_base = view< T > ;
 
         static constexpr i64_t capacity_ { Capacity } ;
 public:
-        using      value_type = typename _base::     value_type ;
-        using       size_type = typename _base::      size_type ;
-        using      ssize_type = typename _base::     ssize_type ;
-        using difference_type = typename _base::difference_type ;
+        using      value_type = typename _view_base::     value_type ;
+        using       size_type = typename _view_base::      size_type ;
+        using      ssize_type = typename _view_base::     ssize_type ;
+        using difference_type = typename _view_base::difference_type ;
 
-        using         pointer = typename _base::        pointer ;
-        using   const_pointer = typename _base::  const_pointer ;
-        using       reference = typename _base::      reference ;
-        using const_reference = typename _base::const_reference ;
+        using         pointer = typename _view_base::        pointer ;
+        using   const_pointer = typename _view_base::  const_pointer ;
+        using       reference = typename _view_base::      reference ;
+        using const_reference = typename _view_base::const_reference ;
 
-        using        iterator = typename _base::       iterator ;
-        using  const_iterator = typename _base:: const_iterator ;
+        using        iterator = typename _view_base::       iterator ;
+        using  const_iterator = typename _view_base:: const_iterator ;
 
         constexpr array () noexcept : _view_base( data, data + capacity_ ) {}
 

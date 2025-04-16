@@ -38,10 +38,9 @@ constexpr auto  sum     = []( auto const & lhs, auto const & rhs ) { return     
 template< typename T, auto Compare = compare::_default, typename Alloc = new_allocator< T > >
 class segment_tree : public buffer< T, Alloc >, public view< T >
 {
-        using       _self =  segment_tree               ;
-        using       _base = _container_base< T        > ;
-        using  _buff_base =  buffer        < T, Alloc > ;
-        using  _view_base =  view          < T        > ;
+        using      _self = segment_tree       ;
+        using _buff_base = buffer< T, Alloc > ;
+        using _view_base = view  < T        > ;
 
         using _comparator = decltype( Compare ) ;
 
@@ -50,18 +49,18 @@ class segment_tree : public buffer< T, Alloc >, public view< T >
         static_assert( is_convertible_v< remove_cv_t< T >, decltype( comp_( declval< T const & >(), declval< T const & >() ) ) >, "uti::segment_tree: bad comparator!" ) ;
         static_assert( is_default_constructible_v< T >, "uti::segment_tree: T has to be default constructible!" ) ;
 public:
-        using      value_type = typename      _base::     value_type ;
-        using       size_type = typename      _base::      size_type ;
-        using      ssize_type = typename      _base::     ssize_type ;
-        using difference_type = typename      _base::difference_type ;
+        using      value_type = typename _view_base::     value_type ;
+        using       size_type = typename _view_base::      size_type ;
+        using      ssize_type = typename _view_base::     ssize_type ;
+        using difference_type = typename _view_base::difference_type ;
 
         using  allocator_type = typename _buff_base:: allocator_type ;
         using   _alloc_traits = typename _buff_base::  _alloc_traits ;
 
-        using         pointer = typename      _base::        pointer ;
-        using   const_pointer = typename      _base::  const_pointer ;
-        using       reference = typename      _base::      reference ;
-        using const_reference = typename      _base::const_reference ;
+        using         pointer = typename _view_base::        pointer ;
+        using   const_pointer = typename _view_base::  const_pointer ;
+        using       reference = typename _view_base::      reference ;
+        using const_reference = typename _view_base::const_reference ;
 
         using               iterator = iterator_base< T      , random_access_iterator_tag > ;
         using         const_iterator = iterator_base< T const, random_access_iterator_tag > ;
@@ -849,7 +848,7 @@ template< typename T, auto Compare, typename Alloc >
 constexpr void
 segment_tree< T, Compare, Alloc >::_init_tree () noexcept
 {
-        if constexpr( !is_trivially_constructible_v< value_type > )
+//      if constexpr( !is_trivially_constructible_v< value_type > )
         {
                 for( auto it = _buff_base::begin(); it != _view_base::begin(); ++it )
                 {

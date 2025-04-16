@@ -15,6 +15,7 @@
 #include <uti/core/allocator/new.hxx>
 #include <uti/core/container/view.hxx>
 #include <uti/core/container/buffer.hxx>
+#include <uti/core/container/memory_footprint.hxx>
 #include <uti/core/meta/concepts.hxx>
 
 #ifdef UTI_HAS_STL
@@ -30,26 +31,25 @@ template< typename T, typename Alloc = new_allocator< T > >
 class vector : public buffer< T, Alloc >, public view< T >
 {
 protected:
-        using      _self =  vector                     ;
-        using      _base = _container_base< T        > ;
-        using _buff_base =  buffer        < T, Alloc > ;
-        using _view_base =  view          < T        > ;
+        using      _self =  vector             ;
+        using _buff_base =  buffer< T, Alloc > ;
+        using _view_base =  view  < T        > ;
 public:
-        using      value_type = typename      _base::     value_type ;
-        using       size_type = typename      _base::      size_type ;
-        using      ssize_type = typename      _base::     ssize_type ;
-        using difference_type = typename      _base::difference_type ;
+        using      value_type = typename _view_base::     value_type ;
+        using       size_type = typename _view_base::      size_type ;
+        using      ssize_type = typename _view_base::     ssize_type ;
+        using difference_type = typename _view_base::difference_type ;
 
         using  allocator_type = typename _buff_base:: allocator_type ;
         using   _alloc_traits = typename _buff_base::  _alloc_traits ;
 
-        using         pointer = typename      _base::        pointer ;
-        using   const_pointer = typename      _base::  const_pointer ;
-        using       reference = typename      _base::      reference ;
-        using const_reference = typename      _base::const_reference ;
+        using         pointer = typename _view_base::        pointer ;
+        using   const_pointer = typename _view_base::  const_pointer ;
+        using       reference = typename _view_base::      reference ;
+        using const_reference = typename _view_base::const_reference ;
 
-        using               iterator = iterator_base< T      , random_access_iterator_tag > ;
-        using         const_iterator = iterator_base< T const, random_access_iterator_tag > ;
+        using               iterator = iterator_base< value_type      , random_access_iterator_tag > ;
+        using         const_iterator = iterator_base< value_type const, random_access_iterator_tag > ;
         using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
         using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
@@ -85,6 +85,12 @@ public:
         template< typename... Args >
         constexpr void emplace_back ( Args&&... _args_ ) ;
 
+        constexpr void push_front ( value_type const &  _val_ ) ;
+        constexpr void push_front ( value_type       && _val_ ) ;
+
+        template< typename... Args >
+        constexpr void emplace_front ( Args&&... _args_ ) ;
+
         constexpr void pop_back  () noexcept ;
         constexpr void pop_front () noexcept ;
 
@@ -101,6 +107,9 @@ public:
 
         constexpr void insert ( ssize_type _position_, value_type const &  _val_ ) ;
         constexpr void insert ( ssize_type _position_, value_type       && _val_ ) ;
+
+        template< typename... Args >
+        constexpr void insert ( ssize_type _position_, Args&&... _args_ ) ;
 
         constexpr void erase        ( ssize_type const _position_ ) noexcept( is_nothrow_move_assignable_v< value_type > ) ;
         constexpr void erase_stable ( ssize_type const _position_ ) noexcept( is_nothrow_move_assignable_v< value_type > ) ;
@@ -122,9 +131,27 @@ public:
         UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return _view_base:: rend() ; }
         UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return _view_base:: rend() ; }
         UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return _view_base::crend() ; }
+
+        UTI_NODISCARD constexpr memory_footprint memory_usage () const noexcept
+        {
+                memory_footprint footprint
+                {
+                        .         static_usage_ = ssizeof( *this ),
+                        .top_lvl_dynamic_usage_ = _buff_base::capacity() * ssizeof( value_type ),
+                        .low_lvl_dynamic_usage_ = 0
+                } ;
+                if constexpr( meta::memory_reporter< value_type > )
+                {
+                        for( auto const & val : *this )
+                        {
+                                footprint.low_lvl_dynamic_usage_ += val.memory_usage().dynamic_footprint() ;
+                        }
+                }
+                return footprint ;
+        }
 protected:
         template< typename... Args >
-        constexpr void _emplace ( Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > ) ;
+        constexpr void _emplace ( iterator _position_, Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > ) ;
 
         constexpr void _copy_buffer ( _buff_base & _buff_ ) noexcept ( is_nothrow_copy_assignable_v< value_type > && is_nothrow_destructible_v< value_type > ) ;
         constexpr void _swap_buffer ( _buff_base & _buff_ ) noexcept ( is_nothrow_swappable_v< value_type > ) ;
@@ -190,7 +217,7 @@ vector< T, Alloc >::vector ( ssize_type const _count_, value_type const & _val_ 
         {
                 for( ssize_type i = 0; i < _count_; ++i )
                 {
-                        _emplace( _val_ );
+                        _emplace( _view_base::end(), _val_ );
                 }
         }
 }
@@ -220,7 +247,7 @@ vector< T, Alloc >::vector ( Iter _begin_, Iter const & _end_ )
         {
                 while( _begin_ != _end_ )
                 {
-                        _emplace( *_begin_ ) ;
+                        _emplace( _view_base::end(), *_begin_ ) ;
                         ++_begin_ ;
                 }
         }
@@ -239,7 +266,7 @@ vector< T, Alloc >::vector ( Iter _begin_, Iter const & _end_ )
 
         while( _begin_ != _end_ )
         {
-                _emplace( *_begin_ - last ) ;
+                _emplace( _view_base::end(), *_begin_ - last ) ;
                 last = *_begin_ ;
                 ++_begin_ ;
         }
@@ -269,7 +296,7 @@ vector< T, Alloc >::vector ( vector const & _other_ )
         {
                 for( auto const & val : _other_ )
                 {
-                        _emplace( val );
+                        _emplace( _view_base::end(), val );
                 }
         }
 }
@@ -315,7 +342,7 @@ vector< T, Alloc >::operator= ( vector const & _other_ )
                         }
                         for( ; pos < _other_.size(); ++pos )
                         {
-                                _emplace( _other_.at( pos ) );
+                                _emplace( _view_base::end(), _other_.at( pos ) );
                         }
                 }
         }
@@ -391,16 +418,48 @@ vector< T, Alloc >::emplace_back ( Args&&... _args_ )
 {
         if( !reserve() ) return ;
 
-        _emplace( UTI_FWD( _args_ )... );
+        _emplace( _view_base::end(), UTI_FWD( _args_ )... );
 }
 
 template< typename T, typename Alloc >
 template< typename... Args >
 constexpr void
-vector< T, Alloc >::_emplace ( Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > )
+vector< T, Alloc >::_emplace ( iterator _position_, Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > )
 {
-        ::uti::construct( _view_base::end(), UTI_FWD( _args_ )... );
+        ::uti::construct( _position_, UTI_FWD( _args_ )... );
         _view_base::_size()++ ;
+}
+
+template< typename T, typename Alloc >
+constexpr void
+vector< T, Alloc >::push_front ( value_type const & _val_ )
+{
+        emplace_front( _val_ ) ;
+}
+
+template< typename T, typename Alloc >
+constexpr void
+vector< T, Alloc >::push_front ( value_type && _val_ )
+{
+        emplace_front( UTI_MOVE( _val_ ) ) ;
+}
+
+template< typename T, typename Alloc >
+template< typename... Args >
+constexpr void
+vector< T, Alloc >::emplace_front ( Args&&... _args_ )
+{
+        insert( 0, UTI_FWD( _args_ )... ) ;
+
+        if( _view_base::begin() > _buff_base::begin() )
+        {
+                --_view_base::begin_ ;
+                _emplace( _view_base::begin(), UTI_FWD( _args_ )... ) ;
+        }
+        else
+        {
+                insert( 0, UTI_FWD( _args_ )... ) ;
+        }
 }
 
 template< typename T, typename Alloc >
@@ -544,42 +603,32 @@ template< typename T, typename Alloc >
 constexpr void
 vector< T, Alloc >::insert ( ssize_type _position_, value_type const & _val_ )
 {
-        if( _position_ >= _view_base::size() )
-        {
-                push_back( _val_ );
-                return;
-        }
-        if( _position_ < 0 ) _position_ = 0 ;
-
-        if( !reserve() ) return ;
-
-        if constexpr( is_trivially_relocatable_v< value_type > )
-        {
-                ::uti::copy_backward( _view_base::end() - 1, _view_base::begin() + _position_ - 1, _view_base::end() ) ;
-        }
-        else
-        {
-                ::uti::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) );
-                for( ssize_type i = _view_base::size() - 1; i > _position_; --i )
-                {
-                        _view_base::at( i ) = UTI_MOVE( _view_base::at( i - 1 ) );
-                }
-        }
-        _view_base::at( _position_ ) = _val_;
-        ++_view_base::_size();
+        insert< T const & >( _position_, _val_ ) ;
 }
 
 template< typename T, typename Alloc >
 constexpr void
 vector< T, Alloc >::insert ( ssize_type _position_, value_type && _val_ )
 {
+        insert< T && >( _position_, UTI_MOVE( _val_ ) ) ;
+}
+
+template< typename T, typename Alloc >
+template< typename... Args >
+constexpr void
+vector< T, Alloc >::insert ( ssize_type _position_, Args&&... _args_ )
+{
         if( _position_ >= _view_base::size() )
         {
-                push_back( _val_ );
-                return;
+                return emplace_back( UTI_FWD( _args_ )... ) ;
         }
         if( _position_ < 0 ) _position_ = 0 ;
 
+        if( _position_ == 0 && _view_base::begin() > _buff_base::begin() )
+        {
+                --_view_base::begin_ ;
+                return _emplace( _view_base::begin(), UTI_FWD( _args_ )... ) ;
+        }
         if( !reserve() ) return ;
 
         if constexpr( is_trivially_relocatable_v< value_type > )
@@ -588,14 +637,14 @@ vector< T, Alloc >::insert ( ssize_type _position_, value_type && _val_ )
         }
         else
         {
-                ::uti::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) );
+                ::uti::construct( _view_base::end(), UTI_MOVE( _view_base::back() ) ) ;
                 for( ssize_type i = _view_base::size() - 1; i > _position_; --i )
                 {
-                        _view_base::at( i ) = UTI_MOVE( _view_base::at( i - 1 ) );
+                        _view_base::at( i ) = UTI_MOVE( _view_base::at( i - 1 ) ) ;
                 }
         }
-        _view_base::at( _position_ ) = UTI_MOVE( _val_ );
-        ++_view_base::_size();
+        ::uti::construct( begin() + _position_, UTI_FWD( _args_ )... ) ;
+        ++_view_base::size_ ;
 }
 
 template< typename T, typename Alloc >
