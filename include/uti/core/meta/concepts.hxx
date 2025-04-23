@@ -45,6 +45,11 @@ concept derived_from =
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template< typename T, template< typename... > typename U >
+concept instantiated_from = is_instance_of_v< T, U > ;
+
+////////////////////////////////////////////////////////////////////////////////
+
 template< typename From, typename To >
 concept convertible_to =
         is_convertible_v< From, To > &&

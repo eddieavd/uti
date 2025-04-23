@@ -74,10 +74,10 @@ public:
                 requires meta::one_of< typename Other::value_type, Ts... >
         constexpr variant_vector ( Other const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
 
-        constexpr variant_vector             ( variant_vector const &  ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
-        constexpr variant_vector             ( variant_vector       && )     noexcept                 ;
-        constexpr variant_vector & operator= ( variant_vector const &  ) UTI_NOEXCEPT_UNLESS_BADALLOC ;
-        constexpr variant_vector & operator= ( variant_vector       && )     noexcept                 ;
+        constexpr variant_vector             ( variant_vector const &  ) UTI_NOEXCEPT_UNLESS_BADALLOC requires( conjunction_v< is_copy_constructible< Ts >... > ) ;
+        constexpr variant_vector             ( variant_vector       && )     noexcept                 requires( conjunction_v< is_move_constructible< Ts >... > ) ;
+        constexpr variant_vector & operator= ( variant_vector const &  ) UTI_NOEXCEPT_UNLESS_BADALLOC requires( conjunction_v< is_copy_constructible< Ts >... > ) ;
+        constexpr variant_vector & operator= ( variant_vector       && )     noexcept                 requires( conjunction_v< is_move_constructible< Ts >... > ) ;
 
         constexpr ~variant_vector () noexcept { reset() ; }
 
@@ -274,6 +274,34 @@ public:
                         UTI_FWD( self ).visit( i, UTI_FWD( _visitor_ ), UTI_FWD( _args_ )... ) ;
                 }
         }
+
+////////////////////////////////////////////////////////////////////////////////
+
+        UTI_NODISCARD constexpr memory_footprint memory_usage () const noexcept
+        {
+                memory_footprint footprint
+                {
+                        .         static_usage_ = ssizeof( *this ) ,
+                        .top_lvl_dynamic_usage_ = storage_.size_ ,
+                        .low_lvl_dynamic_usage_ = 0
+                } ;
+                footprint.top_lvl_dynamic_usage_ += offsets_.memory_usage().dynamic_footprint() ;
+                footprint.top_lvl_dynamic_usage_ +=   types_.memory_usage().dynamic_footprint() ;
+
+                if constexpr( disjunction_v< integral_constant< meta::memory_reporter< Ts > >... > )
+                {
+                        for_each( [ & ]( auto const & elem )
+                        {
+                                using type = remove_cvref_t< decltype( elem ) > ;
+
+                                if constexpr( meta::memory_reporter< type > )
+                                {
+                                        footprint.low_lvl_dynamic_usage_ += elem.memory_usage().dynamic_footprint() ;
+                                }
+                        } ) ;
+                }
+                return footprint ;
+        }
 private:
         ssize_type              size_ {          0 } ;
         block_type           storage_ { nullptr, 0 } ;
@@ -395,6 +423,7 @@ variant_vector< Resource, Ts... >::variant_vector ( Other const & _other_ ) UTI_
 template< typename Resource, typename... Ts >
 constexpr
 variant_vector< Resource, Ts... >::variant_vector ( variant_vector const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+        requires( conjunction_v< is_copy_constructible< Ts >... > )
 {
         reserve_bytes( _other_.size_bytes() ) ;
 
@@ -437,6 +466,7 @@ variant_vector< Resource, Ts... >::variant_vector ( variant_vector const & _othe
 template< typename Resource, typename... Ts >
 constexpr
 variant_vector< Resource, Ts... >::variant_vector ( variant_vector && _other_ ) noexcept
+        requires( conjunction_v< is_move_constructible< Ts >... > )
         : size_   (           _other_.   size_   )
         , storage_(           _other_.storage_   )
         , offsets_( UTI_MOVE( _other_.offsets_ ) )
@@ -453,6 +483,7 @@ template< typename Resource, typename... Ts >
 constexpr
 variant_vector< Resource, Ts... > &
 variant_vector< Resource, Ts... >::operator= ( variant_vector const & _other_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
+        requires( conjunction_v< is_copy_constructible< Ts >... > )
 {
         clear() ;
         reserve_bytes( _other_.size_bytes() ) ;
@@ -489,6 +520,7 @@ template< typename Resource, typename... Ts >
 constexpr
 variant_vector< Resource, Ts... > &
 variant_vector< Resource, Ts... >::operator= ( variant_vector && _other_ ) noexcept
+        requires( conjunction_v< is_move_constructible< Ts >... > )
 {
         reset() ;
 
@@ -692,6 +724,74 @@ variant_vector< Resource, Ts...>::insert ( ssize_type _position_, Args&&... _arg
         else
         {
                 /// lord have mercy
+
+                byte_iterator iter { dest + ssizeof( T ) } ;
+                offsets_storage_type new_offsets( size_ - _position_ ) ;
+                offsets_storage_type elem_sizes ( size_ - _position_ ) ;
+
+                for_range( _position_, size_, [ & ]( auto const & elem )
+                {
+                        using type = remove_cvref_t< decltype( elem ) > ;
+
+                        iter = _align_for< type >( iter ) ;
+                        new_offsets.push_back( iter - storage_.begin() ) ;
+                        elem_sizes.push_back( ssizeof( type ) ) ;
+                        iter += ssizeof( type ) ;
+                } ) ;
+                ssize_type new_cap_requirement { new_offsets.back() + elem_sizes.back() } ;
+
+                if( new_cap_requirement > capacity_bytes() )
+                {
+                        variant_vector new_vec ;
+                        new_vec.reserve_bytes( new_cap_requirement ) ;
+
+                        constexpr auto _move_destroy = []( auto & elem, auto & new_vec )
+                        {
+                                using type_t = remove_cvref_t< decltype( elem ) > ;
+                                using iter_t = _detail::iterator_type_for< type_t > ;
+
+                                new_vec.template emplace_back< type_t, type_t && >( UTI_MOVE( elem ) ) ;
+
+                                if constexpr( !is_trivially_destructible_v< type_t > )
+                                {
+                                        ::uti::destroy< iter_t >( &elem ) ;
+                                }
+                        } ;
+
+                        for_range( 0, _position_, _move_destroy, new_vec ) ;
+                        new_vec.emplace_back< T, Args&&... >( UTI_FWD( _args_ )... ) ;
+                        for_range( _position_, size_, _move_destroy, new_vec ) ;
+
+                        *this = UTI_MOVE( new_vec ) ;
+                        return ;
+                }
+                else
+                {
+                        ssize_type i { new_offsets.size() - 1 } ;
+
+                        for_range_back( size_ - 1, _position_ - 1, [ & ]( auto & elem )
+                        {
+                                using type_t = remove_cvref_t< decltype( elem ) > ;
+                                using iter_t = _detail::iterator_type_for< type_t > ;
+
+                                type_t tmp = UTI_MOVE( elem ) ;
+
+                                if constexpr( !is_trivially_destructible_v< type_t > ) ::uti::destroy( &elem ) ;
+
+                                ::uti::construct< iter_t >( storage_.begin() + new_offsets[ i ], UTI_MOVE( tmp ) ) ;
+
+                                --i ;
+                        } ) ;
+                        for( i = _position_; i < size_; ++i )
+                        {
+                                offsets_[ i ] = new_offsets[ i - _position_ ] ;
+                        }
+                        ::uti::construct< iter_t >( dest, UTI_FWD( _args_ )... ) ;
+                        ++size_ ;
+
+                        offsets_.insert( _position_, dest - storage_.begin() ) ;
+                        types_  .insert( _position_, index_of_v< T, Ts... > ) ;
+                }
         }
 }
 

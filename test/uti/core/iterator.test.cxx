@@ -120,20 +120,20 @@ TEMPLATE_LIST_TEST_CASE( "iterator::convertibility", "[iterator][convertibility]
 
         /// self
         {
-                CONSTEVAL_CHECK(  uti::is_convertible_v<       iter_u8,       iter_u8 > ) ;
-                CONSTEVAL_CHECK(  uti::is_convertible_v<       iter_u8, const_iter_u8 > ) ;
-                CONSTEVAL_CHECK( !uti::is_convertible_v< const_iter_u8,       iter_u8 > ) ;
-                CONSTEVAL_CHECK(  uti::is_convertible_v< const_iter_u8, const_iter_u8 > ) ;
+                CONSTEVAL_CHECK( uti::is_convertible_v<       iter_u8,       iter_u8 > ) ;
+                CONSTEVAL_CHECK( uti::is_convertible_v<       iter_u8, const_iter_u8 > ) ;
+                CONSTEVAL_CHECK( uti::is_convertible_v< const_iter_u8,       iter_u8 > ) ;
+                CONSTEVAL_CHECK( uti::is_convertible_v< const_iter_u8, const_iter_u8 > ) ;
 
-                CONSTEVAL_CHECK(  uti::is_convertible_v<       iter_u64,       iter_u64 > ) ;
-                CONSTEVAL_CHECK(  uti::is_convertible_v<       iter_u64, const_iter_u64 > ) ;
-                CONSTEVAL_CHECK( !uti::is_convertible_v< const_iter_u64,       iter_u64 > ) ;
-                CONSTEVAL_CHECK(  uti::is_convertible_v< const_iter_u64, const_iter_u64 > ) ;
+                CONSTEVAL_CHECK( uti::is_convertible_v<       iter_u64,       iter_u64 > ) ;
+                CONSTEVAL_CHECK( uti::is_convertible_v<       iter_u64, const_iter_u64 > ) ;
+                CONSTEVAL_CHECK( uti::is_convertible_v< const_iter_u64,       iter_u64 > ) ;
+                CONSTEVAL_CHECK( uti::is_convertible_v< const_iter_u64, const_iter_u64 > ) ;
 
-                CONSTEVAL_CHECK(  uti::is_convertible_v<       iter_u64,       iter_u64 > ) ;
-                CONSTEVAL_CHECK(  uti::is_convertible_v<       iter_u64, const_iter_u64 > ) ;
-                CONSTEVAL_CHECK( !uti::is_convertible_v< const_iter_u64,       iter_u64 > ) ;
-                CONSTEVAL_CHECK(  uti::is_convertible_v< const_iter_u64, const_iter_u64 > ) ;
+                CONSTEVAL_CHECK( uti::is_convertible_v<       iter_u64,       iter_u64 > ) ;
+                CONSTEVAL_CHECK( uti::is_convertible_v<       iter_u64, const_iter_u64 > ) ;
+                CONSTEVAL_CHECK( uti::is_convertible_v< const_iter_u64,       iter_u64 > ) ;
+                CONSTEVAL_CHECK( uti::is_convertible_v< const_iter_u64, const_iter_u64 > ) ;
         }
         /// to and from u8
         {

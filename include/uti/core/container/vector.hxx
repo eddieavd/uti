@@ -149,6 +149,9 @@ public:
                 }
                 return footprint ;
         }
+
+        template< typename T1 >
+        friend constexpr memory_footprint calculate_memory_usage ( T1 const & ) noexcept ;
 protected:
         template< typename... Args >
         constexpr void _emplace ( iterator _position_, Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > ) ;
@@ -262,7 +265,7 @@ vector< T, Alloc >::vector ( Iter _begin_, Iter const & _end_ )
 {
         if( !_can_fit( ::uti::distance( _begin_, _end_ ) ) ) return ;
 
-        value_type last = 0 ;
+        value_type last {} ;
 
         while( _begin_ != _end_ )
         {
@@ -304,7 +307,8 @@ vector< T, Alloc >::vector ( vector const & _other_ )
 template< typename T, typename Alloc >
 constexpr
 vector< T, Alloc >::vector ( vector && _other_ ) noexcept
-        : _buff_base( UTI_MOVE( _other_ ) ), _view_base( UTI_MOVE( _other_ ) ) {}
+        : _buff_base( UTI_MOVE( _other_ ) ), _view_base( UTI_MOVE( _other_ ) )
+{}
 
 template< typename T, typename Alloc >
 constexpr

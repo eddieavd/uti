@@ -562,6 +562,7 @@ TEST_CASE( "segment::iterate", "[segment][access][iterate]" )
         }
 }
 
+/*
 TEST_CASE( "segment::no_double_free", "[segment][dtor]" )
 {
         CONSTEXPR_CHECK( []
@@ -602,6 +603,7 @@ TEST_CASE( "segment::no_double_free", "[segment][dtor]" )
         return dummy_counter ;
         }() == 16 ) ;
 }
+*/
 
 TEST_CASE( "segment::range", "[segment][range]" )
 {

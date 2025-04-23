@@ -74,6 +74,22 @@ public:
                 noexcept requires( is_const_v< T > ) { ptr_ = _other_.ptr_ ; return *this ; }
 
         ////////////////////////////////////////////////////////////////////////////////
+        /// const to non-const
+        ////////////////////////////////////////////////////////////////////////////////
+
+        constexpr iterator_base ( iterator_base< T const, IterCat, DiffType, T const *, T const & > const & _other_ )
+                noexcept requires( !is_const_v< T > ) : ptr_( const_cast< T * >( _other_.ptr_ ) ) {} ;
+
+        constexpr iterator_base & operator= ( iterator_base< T const, IterCat, DiffType, T const *, T const & > const & _other_ )
+                noexcept requires( !is_const_v< T > ) { ptr_ = const_cast< T * >( _other_.ptr_ ) ; return *this ; }
+
+        constexpr iterator_base ( iterator_base< T const, IterCat, DiffType, T const *, T const & > && _other_ )
+                noexcept requires( !is_const_v< T > ) : ptr_( const_cast< T * >( _other_.ptr_ ) ) {} ;
+
+        constexpr iterator_base & operator= ( iterator_base< T const, IterCat, DiffType, T const *, T const & > && _other_ )
+                noexcept requires( !is_const_v< T > ) { ptr_ = const_cast< T * >( _other_.ptr_ ) ; return *this ; }
+
+        ////////////////////////////////////////////////////////////////////////////////
         /// u8_t to whatever
         ////////////////////////////////////////////////////////////////////////////////
 
@@ -176,9 +192,6 @@ public:
                 requires( is_base_of_v< iterator_category, IterTag > )
                 : ptr_( _other_.ptr_ ) {}
 
-        constexpr operator pointer ()       noexcept { return ptr_ ; }
-        constexpr operator pointer () const noexcept { return ptr_ ; }
-
         constexpr iterator_base & operator++ (     ) noexcept {                     ++ptr_ ; return *this ; }
         constexpr iterator_base   operator++ ( int ) noexcept { auto prev = *this ; ++ptr_ ; return  prev ; }
 
@@ -188,8 +201,11 @@ public:
         constexpr iterator_base & operator+= ( difference_type const _n_ ) noexcept requires _has_random_access_iterator_category_v< _self > { this->ptr_ += _n_ ; return *this ; }
         constexpr iterator_base & operator-= ( difference_type const _n_ ) noexcept requires _has_random_access_iterator_category_v< _self > { this->ptr_ -= _n_ ; return *this ; }
 
-        constexpr reference operator*  () noexcept { return *ptr_ ; }
-        constexpr pointer   operator-> () noexcept { return  ptr_ ; }
+        constexpr reference operator*  () const noexcept { return *ptr_ ; }
+        constexpr pointer   operator-> () const noexcept { return  ptr_ ; }
+
+        constexpr operator pointer ()       noexcept { return ptr_ ; }
+        constexpr operator pointer () const noexcept { return ptr_ ; }
 
         friend constexpr bool operator== ( iterator_base const & _lhs_, iterator_base const & _rhs_ ) noexcept
                 requires _has_input_iterator_category_v< _self >

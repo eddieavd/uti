@@ -1058,6 +1058,14 @@ inline constexpr bool is_base_of_v = is_base_of< Base, Derived >::value ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template< typename T, template< typename... > typename U >
+inline constexpr bool is_instance_of_v = false_type {} ;
+
+template< template< typename... > typename T, typename... Us >
+inline constexpr bool is_instance_of_v< T< Us... >, T > = true_type {} ;
+
+////////////////////////////////////////////////////////////////////////////////
+
 template< typename T >
 struct is_object : integral_constant< is_scalar_v< T >
                                    || is_array_v < T >

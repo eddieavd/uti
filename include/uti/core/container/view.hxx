@@ -10,6 +10,7 @@
 #include <uti/core/iterator/meta.hxx>
 #include <uti/core/iterator/base.hxx>
 #include <uti/core/iterator/reverse_iterator.hxx>
+#include <uti/core/algo/distance.hxx>
 #include <uti/core/container/meta.hxx>
 
 
@@ -44,6 +45,10 @@ public:
 
         constexpr view ( pointer const _begin_, ssize_type const _size_ ) noexcept
                 : begin_( _begin_ ), size_( _size_ ) {}
+
+        template< meta::simple_container Other >
+        constexpr view ( Other const & _other_ ) noexcept requires( !is_instance_of_v< Other, view > && !is_base_of_v< _self, Other > )
+                : begin_( _other_.begin() ), size_( ::uti::distance( _other_.begin(), _other_.end() ) ) {}
 
         constexpr view             ( view const &  _other_ ) noexcept = default ;
         constexpr view             ( view       && _other_ ) noexcept           ;
@@ -82,21 +87,21 @@ public:
         UTI_NODISCARD constexpr ssize_type  size () const noexcept { return  size_ ; }
         UTI_NODISCARD constexpr       bool empty () const noexcept { return !size_ ; }
 
-        UTI_NODISCARD constexpr       iterator  begin ()       noexcept { return begin_  ; }
-        UTI_NODISCARD constexpr const_iterator  begin () const noexcept { return begin_  ; }
+        UTI_NODISCARD constexpr       iterator  begin ()       noexcept { return       iterator{ begin_ }  ; }
+        UTI_NODISCARD constexpr const_iterator  begin () const noexcept { return const_iterator{ begin_ }  ; }
         UTI_NODISCARD constexpr const_iterator cbegin () const noexcept { return begin() ; }
 
-        UTI_NODISCARD constexpr       iterator  end ()       noexcept { return begin_ + size_ ; }
-        UTI_NODISCARD constexpr const_iterator  end () const noexcept { return begin_ + size_ ; }
+        UTI_NODISCARD constexpr       iterator  end ()       noexcept { return       iterator{ begin_ + size_ } ; }
+        UTI_NODISCARD constexpr const_iterator  end () const noexcept { return const_iterator{ begin_ + size_ } ; }
         UTI_NODISCARD constexpr const_iterator cend () const noexcept { return end(); }
 
-        UTI_NODISCARD constexpr       reverse_iterator  rbegin ()       noexcept { return  --end() ; }
-        UTI_NODISCARD constexpr const_reverse_iterator  rbegin () const noexcept { return  --end() ; }
+        UTI_NODISCARD constexpr       reverse_iterator  rbegin ()       noexcept { return       reverse_iterator{ --end() } ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rbegin () const noexcept { return const_reverse_iterator{ --end() } ; }
         UTI_NODISCARD constexpr const_reverse_iterator crbegin () const noexcept { return rbegin() ; }
 
-        UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return --begin() ; }
-        UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return --begin() ; }
-        UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return    rend() ; }
+        UTI_NODISCARD constexpr       reverse_iterator  rend ()       noexcept { return       reverse_iterator{ --begin() } ; }
+        UTI_NODISCARD constexpr const_reverse_iterator  rend () const noexcept { return const_reverse_iterator{ --begin() } ; }
+        UTI_NODISCARD constexpr const_reverse_iterator crend () const noexcept { return rend() ; }
 
         template< typename Self >
         UTI_NODISCARD constexpr
@@ -123,11 +128,11 @@ public:
 
         }
 protected:
-        pointer   begin_ { nullptr } ;
+        iterator  begin_ { nullptr } ;
         ssize_type size_ {       0 } ;
 
-        UTI_NODISCARD constexpr pointer          & _begin ()       noexcept { return begin_ ; }
-        UTI_NODISCARD constexpr pointer    const & _begin () const noexcept { return begin_ ; }
+        UTI_NODISCARD constexpr iterator         & _begin ()       noexcept { return begin_ ; }
+        UTI_NODISCARD constexpr iterator   const & _begin () const noexcept { return begin_ ; }
         UTI_NODISCARD constexpr ssize_type       & _size  ()       noexcept { return  size_ ; }
         UTI_NODISCARD constexpr ssize_type const & _size  () const noexcept { return  size_ ; }
 };
