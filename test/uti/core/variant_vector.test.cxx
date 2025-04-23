@@ -305,7 +305,7 @@ TEST_CASE( "variant_vector::insert", "[variant_vector][modify][insert]" )
         SECTION( "insert::requires_expansion" )
         {
                 CHECK( false ) ;
-/*
+
                 uti::variant_vector< resource, int, double > varvec ;
 
                 varvec.push_back( 1 ) ;
@@ -321,7 +321,6 @@ TEST_CASE( "variant_vector::insert", "[variant_vector][modify][insert]" )
                 CHECK( varvec.get<    int >( 0 ) == 1   ) ;
                 CHECK( varvec.get< double >( 1 ) == 2.0 ) ;
                 CHECK( varvec.get<    int >( 2 ) == 3   ) ;
-*/
         }
 }
 

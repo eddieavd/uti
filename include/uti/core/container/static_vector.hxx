@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <uti/core/util/assert.hxx>
 #include <uti/core/type/traits.hxx>
 #include <uti/core/iterator/meta.hxx>
 #include <uti/core/iterator/base.hxx>
@@ -15,6 +16,7 @@
 #include <uti/core/iterator/meta.hxx>
 #include <uti/core/iterator/base.hxx>
 #include <uti/core/algo/mem.hxx>
+#include <uti/core/algo/distance.hxx>
 
 
 namespace uti
@@ -52,12 +54,14 @@ public:
         using  iterator_category = typename _iter_traits::iterator_category ;
 
         using storage_raw_type = copy_cv_t< typename _iter_traits::value_type, typename storage_value_type::raw > ;
-//      using storage_raw_type =                T ;
         using       value_type = storage_raw_type ;
         using          pointer = value_type *     ;
         using        reference = value_type &     ;
 
-        constexpr static_vector_iterator ( iterator_type const & _iter_ ) noexcept : iter_( _iter_ ) {}
+        using raw_iterator_base = iterator_base< value_type, typename _iter_traits::iterator_category, typename _iter_traits::difference_type, pointer, reference > ;
+
+        constexpr static_vector_iterator (                              ) noexcept : iter_( nullptr ) {}
+        constexpr static_vector_iterator ( iterator_type const & _iter_ ) noexcept : iter_(  _iter_ ) {}
 
         constexpr static_vector_iterator             ( static_vector_iterator const &  ) noexcept = default ;
         constexpr static_vector_iterator & operator= ( static_vector_iterator const &  ) noexcept = default ;
@@ -75,13 +79,18 @@ public:
         constexpr static_vector_iterator & operator+= ( difference_type const _n_ ) noexcept { iter_ += _n_ ; return *this ; }
         constexpr static_vector_iterator & operator-= ( difference_type const _n_ ) noexcept { iter_ -= _n_ ; return *this ; }
 
-        constexpr bool operator== ( static_vector_iterator const & _other_ ) const noexcept { return  iter_ == _other_.iter_ ; }
-        constexpr bool operator!= ( static_vector_iterator const & _other_ ) const noexcept { return !( iter_ == _other_.iter_ ) ; }
+        constexpr static_vector_iterator operator+ ( difference_type const _n_ ) const noexcept { auto iter = *this ; iter += _n_ ; return iter ; }
+        constexpr static_vector_iterator operator- ( difference_type const _n_ ) const noexcept { auto iter = *this ; iter -= _n_ ; return iter ; }
+
+        constexpr bool operator== ( static_vector_iterator const & _other_ ) const noexcept { return iter_ == _other_.iter_ ; }
+        constexpr bool operator!= ( static_vector_iterator const & _other_ ) const noexcept { return iter_ != _other_.iter_ ; }
 
         constexpr reference operator*  () const noexcept { return  iter_->val_ ; }
         constexpr   pointer operator-> () const noexcept { return &iter_->val_ ; }
 
         constexpr operator pointer () const noexcept { return &iter_->val_ ; }
+
+        constexpr operator raw_iterator_base () const noexcept { return &iter_->val_ ; }
 private:
         iterator_type iter_ ;
 } ;

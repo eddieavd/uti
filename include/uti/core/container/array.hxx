@@ -7,140 +7,68 @@
 #pragma once
 
 #include <uti/core/type/traits.hxx>
-#include <uti/core/container/view.hxx>
-#include <uti/core/allocator/meta.hxx>
-
-#ifdef UTI_HAS_STL
-#include <initializer_list>
-#endif // UTI_HAS_STL
+#include <uti/core/container/meta.hxx>
+#include <uti/core/iterator/meta.hxx>
+#include <uti/core/iterator/base.hxx>
+#include <uti/core/iterator/reverse_iterator.hxx>
 
 
 namespace uti
 {
 
 
-template< typename T, ssize_t Capacity >
-class array : public view< T >
+template< typename T, ssize_t Size >
+class array
 {
-        using      _self = array     ;
-        using _view_base = view< T > ;
-
-        static constexpr i64_t capacity_ { Capacity } ;
+        using _self = array ;
 public:
-        using      value_type = typename _view_base::     value_type ;
-        using       size_type = typename _view_base::      size_type ;
-        using      ssize_type = typename _view_base::     ssize_type ;
-        using difference_type = typename _view_base::difference_type ;
+        using      value_type =       T ;
+        using       size_type =  size_t ;
+        using      ssize_type = ssize_t ;
+        using difference_type = ssize_type ;
 
-        using         pointer = typename _view_base::        pointer ;
-        using   const_pointer = typename _view_base::  const_pointer ;
-        using       reference = typename _view_base::      reference ;
-        using const_reference = typename _view_base::const_reference ;
+        using         pointer = value_type       * ;
+        using   const_pointer = value_type const * ;
+        using       reference = value_type       & ;
+        using const_reference = value_type const & ;
 
-        using        iterator = typename _view_base::       iterator ;
-        using  const_iterator = typename _view_base:: const_iterator ;
+        using               iterator = iterator_base< value_type      , random_access_iterator_tag > ;
+        using         const_iterator = iterator_base< value_type const, random_access_iterator_tag > ;
+        using       reverse_iterator = ::uti::reverse_iterator<       iterator > ;
+        using const_reverse_iterator = ::uti::reverse_iterator< const_iterator > ;
 
-        constexpr array () noexcept : _view_base( data, data + capacity_ ) {}
+        template< typename Self >
+        UTI_NODISCARD constexpr decltype( auto ) operator[] ( this Self && self, ssize_type _index_ ) noexcept
+        { return UTI_FWD( self ).data[ _index_ ] ; }
 
-        constexpr array ( value_type const & _val_ ) noexcept( is_nothrow_copy_assignable_v< value_type > ) ;
+        template< typename Self >
+        UTI_NODISCARD constexpr decltype( auto ) at ( this Self && self, ssize_type _index_ ) noexcept
+        { return UTI_FWD( self ).data[ _index_ ] ; }
 
-#ifdef UTI_HAS_STL
-        constexpr array ( std::initializer_list< value_type > _list_ ) : _view_base( data, data + capacity_ )
-        {
-                if constexpr( is_trivially_copy_constructible_v< value_type > )
-                {
-                        UTI_CEXPR_ASSERT( _list_.size() <= capacity_, "uti::array: excess elements in initializer list" ) ;
-                        UTI_CEXPR_ASSERT( _list_.size() >= capacity_, "uti::array: missing elements in initializer list" ) ;
+        template< typename Self > UTI_NODISCARD constexpr decltype( auto ) front ( this Self && self ) noexcept { return UTI_FWD( self ).data[        0 ] ; }
+        template< typename Self > UTI_NODISCARD constexpr decltype( auto )  back ( this Self && self ) noexcept { return UTI_FWD( self ).data[ Size - 1 ] ; }
 
-                        ssize_type pos = 0 ;
+        UTI_NODISCARD constexpr       iterator  begin ()       noexcept { return       iterator{ data } ; }
+        UTI_NODISCARD constexpr const_iterator  begin () const noexcept { return const_iterator{ data } ; }
+        UTI_NODISCARD constexpr const_iterator cbegin () const noexcept { return begin() ; }
 
-                        for( auto const & val : _list_ )
-                        {
-                                _view_base::at( pos++ ) = val ;
-                        }
-                }
-                else
-                {
+        UTI_NODISCARD constexpr       iterator  end ()       noexcept { return       iterator{ data + Size } ; }
+        UTI_NODISCARD constexpr const_iterator  end () const noexcept { return const_iterator{ data + Size } ; }
+        UTI_NODISCARD constexpr const_iterator cend () const noexcept { return end() ; }
 
-                }
-        }
-#endif // UTI_HAS_STL
+        UTI_NODISCARD constexpr       iterator  rbegin ()       noexcept { return       reverse_iterator{ --end() } ; }
+        UTI_NODISCARD constexpr const_iterator  rbegin () const noexcept { return const_reverse_iterator{ --end() } ; }
+        UTI_NODISCARD constexpr const_iterator crbegin () const noexcept { return rbegin() ; }
 
-        constexpr array             ( array const & _other_ ) noexcept( is_nothrow_copy_assignable_v< value_type > ) ;
-        constexpr array & operator= ( array const & _other_ ) noexcept( is_nothrow_copy_assignable_v< value_type > &&
-                                                                        is_nothrow_destructible_v   < value_type > ) ;
+        UTI_NODISCARD constexpr       iterator  rend ()       noexcept { return       reverse_iterator{ --begin() } ; }
+        UTI_NODISCARD constexpr const_iterator  rend () const noexcept { return const_reverse_iterator{ --begin() } ; }
+        UTI_NODISCARD constexpr const_iterator crend () const noexcept { return rend() ; }
 
-        constexpr array             ( array && _other_ ) noexcept( is_nothrow_move_assignable_v< value_type > ) ;
-        constexpr array & operator= ( array && _other_ ) noexcept( is_nothrow_move_assignable_v< value_type > &&
-                                                                   is_nothrow_destructible_v   < value_type > ) ;
+        UTI_NODISCARD constexpr ssize_type     size () const noexcept { return Size ; }
+        UTI_NODISCARD constexpr ssize_type capacity () const noexcept { return Size ; }
 
-        constexpr ~array () noexcept = default ;
-
-        constexpr void fill ( value_type const & _val_ ) noexcept( is_nothrow_copy_assignable_v< value_type > &&
-                                                                   is_nothrow_destructible_v   < value_type > ) ;
-
-        UTI_NODISCARD ssize_type capacity () const noexcept { return capacity_ ; }
-private:
-        value_type data[ capacity_ ] {} ;
-};
-
-
-template< typename T, ssize_t Capacity >
-constexpr
-array< T, Capacity >::array ( value_type const & _val_ ) noexcept( is_nothrow_copy_assignable_v< value_type > )
-        : _view_base( data, capacity_ )
-{
-        for( ssize_type i = 0; i < capacity_; ++i )
-        {
-                _view_base::at( i ) = _val_;
-        }
-}
-
-template< typename T, ssize_t Capacity >
-constexpr
-array< T, Capacity >::array ( array const & _other_ ) noexcept( is_nothrow_copy_assignable_v< value_type > )
-        : _view_base( data, capacity_ )
-{
-        for( ssize_type i = 0; i < capacity_; ++i )
-        {
-                _view_base::at( i ) = _other_.at( i );
-        }
-}
-
-template< typename T, ssize_t Capacity >
-constexpr
-array< T, Capacity >::array ( array && _other_ ) noexcept( is_nothrow_move_assignable_v< value_type > )
-        : _view_base( data, capacity_ )
-{
-        for( ssize_type i = 0; i < capacity_; ++i )
-        {
-                _view_base::at( i ) = UTI_MOVE( _other_.at( i ) );
-        }
-}
-
-template< typename T, ssize_t Capacity >
-constexpr array< T, Capacity > &
-array< T, Capacity >::operator= ( array const & _other_ ) noexcept( is_nothrow_copy_assignable_v< value_type > &&
-                                                                    is_nothrow_destructible_v   < value_type > )
-{
-        for( ssize_type i = 0; i < capacity_; ++i )
-        {
-                _view_base::at( i ) = _other_.at( i );
-        }
-        return *this ;
-}
-
-template< typename T, ssize_t Capacity >
-constexpr array< T, Capacity > &
-array< T, Capacity >::operator= ( array && _other_ ) noexcept( is_nothrow_move_assignable_v< value_type > &&
-                                                               is_nothrow_destructible_v   < value_type > )
-{
-        for( ssize_type i = 0; i < capacity_; ++i )
-        {
-                _view_base::at( i ) = UTI_MOVE( _other_.at( i ) );
-        }
-        return *this ;
-}
+        value_type data [ Size ] ;
+} ;
 
 
 } // namespace uti

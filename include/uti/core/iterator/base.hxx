@@ -243,13 +243,6 @@ public:
                 return _lhs_.ptr_ == _rhs_.ptr_ ;
         }
 
-        friend constexpr bool operator== ( iterator_base const & _lhs_,
-                                           iterator_base< T const, IterCat, DiffType, T const *, T const & > const & _rhs_ ) noexcept
-                requires( !is_const_v< T > )
-        {
-                return _lhs_.ptr_ == _rhs_.ptr_ ;
-        }
-
         friend constexpr bool operator< ( iterator_base const & _lhs_, iterator_base const & _rhs_ ) noexcept
                 requires _has_random_access_iterator_category_v< _self >
         {
