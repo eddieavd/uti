@@ -149,9 +149,6 @@ public:
                 }
                 return footprint ;
         }
-
-        template< typename T1 >
-        friend constexpr memory_footprint calculate_memory_usage ( T1 const & ) noexcept ;
 protected:
         template< typename... Args >
         constexpr void _emplace ( iterator _position_, Args&&... _args_ ) noexcept( is_nothrow_constructible_v< value_type, Args... > ) ;
