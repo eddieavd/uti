@@ -64,6 +64,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable( uti )
 
-target_link_libraries( <your_target> PRIVATE uti::uti )
+target_link_libraries( <your_target> PRIVATE uti_core::uti_core uti_sys::uti_sys )
 ...
 ```

@@ -11,7 +11,8 @@ project( uti
          LANGUAGES    CXX
 )
 
-add_subdirectory( source )
+add_subdirectory( include )
+add_subdirectory(  source )
 
 set( UTI_COMPILE_OPTIONS -Wall -Wextra -pedantic
                          -ftemplate-backtrace-limit=0

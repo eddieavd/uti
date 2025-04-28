@@ -3,5 +3,5 @@
 
 --build-type=debug
 --opt=UTI_HAS_STL,OFF
---opt=UTI_TEST,OFF
+--opt=UTI_TEST,ON
 --opt=UTI_BENCH,OFF
