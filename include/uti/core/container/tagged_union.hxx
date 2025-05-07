@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <uti/core/util/assert.hxx>
 #include <uti/core/type/traits.hxx>
 #include <uti/core/meta/concepts.hxx>
 #include <uti/core/meta/list.hxx>
