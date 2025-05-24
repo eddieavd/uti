@@ -9,7 +9,7 @@ add_library( uti_sys::uti_sys ALIAS uti_sys )
 set_property( TARGET uti_sys PROPERTY SOVERSION "${PROJECT_VERSION}" )
 
 if( CMAKE_BUILD_TYPE OR CMAKE_CONFIGURATION_TYPES )
-        set( UTI_DEBUG_OPTIONS -DUTI_DEBUG )
+        set( UTI_DEBUG_OPTIONS   -DUTI_DEBUG  )
         set( UTI_RELEASE_OPTIONS -DUTI_RELESE )
 
         set_target_properties( uti_sys PROPERTIES ARCHIVE_OUTPUT_NAME "uti_sys.$<LOWER_CASE:$<CONFIG>>" )
@@ -29,7 +29,6 @@ target_sources( uti_sys PRIVATE
 target_sources( uti_sys PUBLIC
         FILE_SET HEADERS
         BASE_DIRS ${PROJECT_SOURCE_DIR}/include
-#       FILES uti.sys.hxx
 )
 target_link_libraries( uti_sys PRIVATE
         uti_core::uti_core

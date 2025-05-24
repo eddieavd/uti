@@ -6,8 +6,6 @@
 add_library( uti_core INTERFACE )
 add_library( uti_core::uti_core ALIAS uti_core )
 
-set_property( TARGET uti_core PROPERTY SOVERSION "${PROJECT_VERSION}" )
-
 if( CMAKE_BUILD_TYPE OR CMAKE_CONFIGURATION_TYPES )
         set( UTI_DEBUG_OPTIONS   -DUTI_DEBUG   )
         set( UTI_RELEASE_OPTIONS -DUTI_RELEASE )

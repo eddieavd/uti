@@ -11,9 +11,6 @@ project( uti
          LANGUAGES    CXX
 )
 
-add_subdirectory( include )
-add_subdirectory(  source )
-
 set( UTI_COMPILE_OPTIONS -Wall -Wextra -pedantic
                          -ftemplate-backtrace-limit=0
                          -fconstexpr-backtrace-limit=0
@@ -27,6 +24,9 @@ if( CMAKE_BUILD_TYPE OR CMAKE_CONFIGURATION_TYPES )
                          "$<$<CONFIG:DEBUG>:${UTI_DEBUG_OPT_LVL}>"
         )
 endif()
+
+add_subdirectory( include )
+add_subdirectory(  source )
 
 if( UTI_TEST )
         add_subdirectory( test/uti )
