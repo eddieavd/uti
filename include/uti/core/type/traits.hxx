@@ -539,15 +539,15 @@ inline constexpr bool is_null_pointer_v = is_null_pointer< T >::value ;
 
 template< typename > struct is_integral_base : false_type {} ;
 
-template<> struct is_integral_base <      bool > : true_type {} ;
-template<> struct is_integral_base <       int > : true_type {} ;
-template<> struct is_integral_base <     short > : true_type {} ;
-template<> struct is_integral_base <      char > : true_type {} ;
-template<> struct is_integral_base <   wchar_t > : true_type {} ;
-template<> struct is_integral_base <  char16_t > : true_type {} ;
-template<> struct is_integral_base <  char32_t > : true_type {} ;
-template<> struct is_integral_base <      long > : true_type {} ;
-template<> struct is_integral_base < long long > : true_type {} ;
+template<> struct is_integral_base <             bool > : true_type {} ;
+template<> struct is_integral_base < signed       int > : true_type {} ;
+template<> struct is_integral_base < signed     short > : true_type {} ;
+template<> struct is_integral_base < signed      char > : true_type {} ;
+template<> struct is_integral_base <          wchar_t > : true_type {} ;
+template<> struct is_integral_base <         char16_t > : true_type {} ;
+template<> struct is_integral_base <         char32_t > : true_type {} ;
+template<> struct is_integral_base < signed      long > : true_type {} ;
+template<> struct is_integral_base < signed long long > : true_type {} ;
 
 template<> struct is_integral_base < unsigned       int > : true_type {} ;
 template<> struct is_integral_base < unsigned     short > : true_type {} ;
