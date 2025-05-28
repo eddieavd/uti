@@ -542,6 +542,7 @@ template< typename > struct is_integral_base : false_type {} ;
 template<> struct is_integral_base <             bool > : true_type {} ;
 template<> struct is_integral_base < signed       int > : true_type {} ;
 template<> struct is_integral_base < signed     short > : true_type {} ;
+template<> struct is_integral_base <             char > : true_type {} ;
 template<> struct is_integral_base < signed      char > : true_type {} ;
 template<> struct is_integral_base <          wchar_t > : true_type {} ;
 template<> struct is_integral_base <         char16_t > : true_type {} ;
