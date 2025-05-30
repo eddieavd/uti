@@ -30,8 +30,9 @@ using iterator_type_for = iterator_base< T, random_access_iterator_tag > ;
 template< typename Resource, typename... Ts >
 class variant_vector
 {
+public:
         using value_types = meta::type_list< Ts... > ;
-
+private:
         static constexpr ssize_t max_elem_align { max_align_of< Ts... >() } ;
         static constexpr ssize_t min_elem_align { min_align_of< Ts... >() } ;
 
