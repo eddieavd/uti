@@ -710,7 +710,69 @@ template< typename Float >
 UTI_NODISCARD constexpr Float
 generic_string_view< CharType >::parse_float () const noexcept
 {
-        return Float{ 0 };
+        Float        result {     } ;
+        Float          sign { 1.0 } ;
+        Float decimal_place { 1.0 } ;
+
+        i32_t exponent       { 0 } ;
+        i32_t exponent_sign  { 1 } ;
+        i32_t exponent_found { 0 } ;
+
+        auto src = trimmed() ;
+
+        if( src.empty() ) return result ;
+
+        if( src.front() == '+' || src.front() == '-' )
+        {
+                char sgn = src.chop_char_left() ;
+
+                if( sgn == '-' ) sign = -1.0 ;
+        }
+        while( !src.empty() && ( ( '0' <= src.front() && src.front() <= '9' ) || src.front() == '.' ) )
+        {
+                char digit = src.chop_char_left() ;
+
+                if( digit == '.' )
+                {
+                        while( !src.empty() && ( '0' <= src.front() && src.front() <= '9' ) )
+                        {
+                                result = result * 10.0 + ( src.front() - '0' ) ;
+                                decimal_place *= 10.0 ;
+                                src.chop_char_left() ;
+                        }
+                        break ;
+                }
+                else
+                {
+                        result = result * 10.0 + ( digit - '0' ) ;
+                }
+        }
+        result /= decimal_place ;
+
+        if( src.empty() ) return result ;
+
+        char exp = src.chop_char_left() ;
+
+        if( exp == 'e' || exp == 'E' )
+        {
+                if( src.front() == '+' || src.front() == '-' )
+                {
+                        char sgn = src.chop_char_left() ;
+
+                        if( sgn == '-' )
+                        {
+                                exponent_sign = -1 ;
+                        }
+                        exponent_found = 1 ;
+                }
+                while( !src.empty() && ( '0' <= src.front() && src.front() <= '9' ) )
+                {
+                        exponent = exponent * 10 + ( src.front() - '0' ) ;
+                        src.chop_char_left() ;
+                }
+                exponent *= exponent_sign ;
+        }
+        return sign * result * ( exponent_found ? pow( 10, exponent ) : 1.0 ) ;
 }
 
 template< typename CharType >
