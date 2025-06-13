@@ -1067,6 +1067,15 @@ inline constexpr bool is_instance_of_v< T< Us... >, T > = true_type {} ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#if __has_builtin( __is_object )
+
+template< typename T >
+using is_object = integral_constant< __is_object( T ) > ;
+
+template< typename T > inline constexpr bool is_object_v = __is_object( T ) ;
+
+#else
+
 template< typename T >
 struct is_object : integral_constant< is_scalar_v< T >
                                    || is_array_v < T >
@@ -1075,6 +1084,8 @@ struct is_object : integral_constant< is_scalar_v< T >
 
 template< typename T >
 inline constexpr bool is_object_v = is_object< T >::value ;
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
