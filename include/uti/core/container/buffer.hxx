@@ -115,7 +115,7 @@ template< typename T, typename Alloc >
 constexpr
 buffer< T, Alloc >::buffer ( ssize_type const _capacity_ ) UTI_NOEXCEPT_UNLESS_BADALLOC
 {
-        if( 0 <= _capacity_ && _capacity_ < max_size() )
+        if( 0 < _capacity_ && _capacity_ < max_size() )
         {
                 block_ = _alloc_traits::allocate( _capacity_ ) ;
         }
