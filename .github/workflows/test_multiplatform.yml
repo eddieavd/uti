@@ -53,7 +53,7 @@ jobs:
 
         if: startsWith( matrix.config.name, 'macos clang' )
         run: |
-          sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           brew install llvm
 #       if: startsWith( matrix.config.name, 'ubuntu clang' )
 #       run: |
