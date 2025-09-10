@@ -207,7 +207,9 @@
 #       define UTI_TRIVIAL_ABI
 #endif
 
-#if defined( __clang__ ) && UTI_HAS_BUILTIN( __is_trivially_relocatable )
+#if defined( __clang__ ) && UTI_HAS_BUILTIN( __builtin_is_cpp_trivially_relocatable )
+#       define UTI_IS_TRIVIALLY_RELOCATABLE( x ) __builtin_is_cpp_trivially_relocatable( x )
+#elif defined( __clang__ ) && UTI_HAS_BUILTIN( __is_trivially_relocatable )
 #       define UTI_IS_TRIVIALLY_RELOCATABLE( x ) __is_trivially_relocatable( x )
 #else
 #       define UTI_IS_TRIVIALLY_RELOCATABLE( x ) false
