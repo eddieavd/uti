@@ -143,7 +143,7 @@ jobs:
         shell: cmake -P {0}
         run: |
           execute_process(
-            COMMAND ./test/uti/uti.test
+            COMMAND ./test/uti/core/uti.core.test --verbosity high
             WORKING_DIRECTORY out
             RESULT_VARIABLE result
           )
