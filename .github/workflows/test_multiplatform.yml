@@ -11,26 +11,26 @@ jobs:
       matrix:
         config:
         - {
-            name: "ubuntu clang-18 release nostl",
+            name: "ubuntu clang-20 release nostl",
             os: ubuntu-latest,
             build_type: "Release",
             is_debug_build: "OFF",
             is_release_build: "ON",
-            cc: "clang-18",
-            cxx: "clang++-18",
-            clang_version: 18,
+            cc: "clang-20",
+            cxx: "clang++-20",
+            clang_version: 20,
             installed_clang_version: 14,
             has_stl: "OFF"
           }
         - {
-            name: "ubuntu clang-18 release",
+            name: "ubuntu clang-20 release",
             os: ubuntu-latest,
             build_type: "Release",
             is_debug_build: "OFF",
             is_release_build: "ON",
-            cc: "clang-18",
-            cxx: "clang++-18",
-            clang_version: 18,
+            cc: "clang-20",
+            cxx: "clang++-20",
+            clang_version: 20,
             installed_clang_version: 14,
             has_stl: "ON"
           }
