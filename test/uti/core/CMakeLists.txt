@@ -5,7 +5,7 @@
 
 set( UTI_CORE_TEST_FILES
         type.test.cxx
-#       meta.test.cxx
+        meta.test.cxx
 #       algo.test.cxx
 #       iterator.test.cxx
 #       allocator.test.cxx
