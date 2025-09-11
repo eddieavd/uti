@@ -49,35 +49,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: install llvm + clang
+      - name: install llvm + clang - macos
 
         if: startsWith( matrix.config.name, 'macos clang' )
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           brew install llvm
-#       if: startsWith( matrix.config.name, 'ubuntu clang' )
-#       run: |
-#         sudo apt-get remove clang-${{ matrix.config.installed_clang_version }} \
-#           lldb-${{ matrix.config.installed_clang_version }} \
-#           lld-${{ matrix.config.installed_clang_version }} \
-#           clangd-${{ matrix.config.installed_clang_version }} \
-#           clang-tidy-${{ matrix.config.installed_clang_version }} \
-#           clang-format-${{ matrix.config.installed_clang_version }} \
-#           clang-tools-${{ matrix.config.installed_clang_version }} \
-#           llvm-${{ matrix.config.installed_clang_version }}-dev \
-#           lld-${{ matrix.config.installed_clang_version }} \
-#           lldb-${{ matrix.config.installed_clang_version }} \
-#           llvm-${{ matrix.config.installed_clang_version }}-tools \
-#           libomp-${{ matrix.config.installed_clang_version }}-dev \
-#           libc++-${{ matrix.config.installed_clang_version }}-dev \
-#           libc++abi-${{ matrix.config.installed_clang_version }}-dev \
-#           libclang-common-${{ matrix.config.installed_clang_version }}-dev \
-#           libclang-${{ matrix.config.installed_clang_version }}-dev \
-#           libclang-cpp${{ matrix.config.installed_clang_version }}-dev \
-#           libunwind-${{ matrix.config.installed_clang_version }}-dev
-#         wget https://apt.llvm.org/llvm.sh
-#         chmod +x llvm.sh
-#         sudo ./llvm.sh ${{ matrix.config.clang_version }} all
+
+      - name: install llvm + clang - ubuntu
+
+        if: startsWith( matrix.config.name, 'ubuntu clang' )
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh ${{ matrix.config.clang_version }} all
 
       - name: download ninja
         id: ninja
@@ -108,7 +93,7 @@ jobs:
           cd benchmark
           mkdir build
           cd build
-          cmake .. -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_ENABLE_GTEST_TESTS=OFF -DBENCHMARK_ENABLE_ASSEMBLY_TESTS=OFF
+          cmake .. -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_ENABLE_TESTING=OFF -DBENCHMARK_ENABLE_GTEST_TESTS=OFF -DBENCHMARK_ENABLE_ASSEMBLY_TESTS=OFF
           sudo cmake --build . --config Release --target install
 
       - name: configure
