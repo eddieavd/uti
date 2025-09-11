@@ -22,25 +22,25 @@ jobs:
             has_stl: "OFF"
           }
         - {
-            name: "ubuntu clang-20 debug",
+            name: "ubuntu clang-21 debug",
             os: ubuntu-latest,
             build_type: "Debug",
             is_debug_build: "ON",
             is_release_build: "OFF",
-            cc: "clang-20",
-            cxx: "clang++-20",
-            clang_version: 20,
+            cc: "clang-21",
+            cxx: "clang++-21",
+            clang_version: 21,
             has_stl: "OFF"
           }
 #       - {
-#           name: "ubuntu clang-20 release",
+#           name: "ubuntu clang-21 release",
 #           os: ubuntu-latest,
 #           build_type: "Release",
 #           is_debug_build: "OFF",
 #           is_release_build: "ON",
-#           cc: "clang-20",
-#           cxx: "clang++-20",
-#           clang_version: 20,
+#           cc: "clang-21",
+#           cxx: "clang++-21",
+#           clang_version: 21,
 #           has_stl: "OFF"
 #         }
     steps:
