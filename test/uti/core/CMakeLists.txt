@@ -17,7 +17,7 @@ set( UTI_CORE_TEST_FILES
         prefix_array.test.cxx
         segment_tree.test.cxx
         variant_vector.test.cxx
-#       variant.test.cxx
+        variant.test.cxx
 )
 
 add_executable( uti.core.test ${UTI_CORE_TEST_FILES} )
