@@ -10,7 +10,7 @@ set( UTI_CORE_TEST_FILES
         iterator.test.cxx
         allocator.test.cxx
 #       string.test.cxx
-#       string_view.test.cxx
+        string_view.test.cxx
 #       string_switch.test.cxx
         tuple.test.cxx
         vector.test.cxx
