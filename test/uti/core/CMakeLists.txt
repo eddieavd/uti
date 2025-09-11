@@ -12,7 +12,7 @@ set( UTI_CORE_TEST_FILES
         string.test.cxx
         string_view.test.cxx
         string_switch.test.cxx
-#       tuple.test.cxx
+        tuple.test.cxx
 #       vector.test.cxx
 #       prefix_array.test.cxx
 #       segment_tree.test.cxx
