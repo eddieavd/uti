@@ -14,26 +14,24 @@ jobs:
             name: "macos clang-21 debug",
             os: macos-latest,
             build_type: "Debug",
-            is_debug_build: "OFF",
+            is_debug_build: "ON",
             is_release_build: "OFF",
-            cc: "clang",
-            cxx: "clang",
+            cc:  "/opt/homebrew/opt/llvm/bin/clang",
+            cxx: "/opt/homebrew/opt/llvm/bin/clang",
             clang_version: 21,
-            installed_clang_version: 14,
             has_stl: "OFF"
           }
-#       - {
-#           name: "ubuntu clang-20 debug",
-#           os: ubuntu-latest,
-#           build_type: "Debug",
-#           is_debug_build: "OFF",
-#           is_release_build: "OFF",
-#           cc: "clang-20",
-#           cxx: "clang++-20",
-#           clang_version: 20,
-#           installed_clang_version: 14,
-#           has_stl: "OFF"
-#         }
+        - {
+            name: "ubuntu clang-20 debug",
+            os: ubuntu-latest,
+            build_type: "Debug",
+            is_debug_build: "ON",
+            is_release_build: "OFF",
+            cc: "clang-20",
+            cxx: "clang++-20",
+            clang_version: 20,
+            has_stl: "OFF"
+          }
 #       - {
 #           name: "ubuntu clang-20 release",
 #           os: ubuntu-latest,
@@ -43,7 +41,6 @@ jobs:
 #           cc: "clang-20",
 #           cxx: "clang++-20",
 #           clang_version: 20,
-#           installed_clang_version: 14,
 #           has_stl: "OFF"
 #         }
     steps:
