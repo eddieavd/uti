@@ -16,7 +16,7 @@ set( UTI_CORE_TEST_FILES
         vector.test.cxx
         prefix_array.test.cxx
         segment_tree.test.cxx
-#       variant_vector.test.cxx
+        variant_vector.test.cxx
 #       variant.test.cxx
 )
 
