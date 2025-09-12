@@ -12,7 +12,11 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/google/benchmark
         GIT_TAG        v1.9.1
 )
-FetchContent_MakeAvailable( benchmark )
+FetchContent_GetProperties( benchmark )
+if( NOT benchmark_POPULATED )
+        set( FETCHCONTENT_QUIET NO )
+        FetchContent_MakeAvailable( benchmark )
+endif()
 
 add_executable(
         uti.bench

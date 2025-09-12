@@ -8,8 +8,6 @@
 
 #include <benchmark/benchmark.h>
 
-#include <cstdio>
-
 
 namespace uti::bench
 {
@@ -18,10 +16,6 @@ namespace uti::bench
 template< typename T >
 static void bm_sum_vector ( benchmark::State & state )
 {
-        static int run_count {} ;
-
-        fprintf( stderr, "bm_sum_vector<>::run %d\n", ++run_count ) ;
-
         srand( time( nullptr ) ) ;
 
         T vector ;
@@ -47,10 +41,6 @@ static void bm_sum_vector ( benchmark::State & state )
 template< typename T >
 static void bm_sum_var_vector ( benchmark::State & state )
 {
-        static int run_count {} ;
-
-        fprintf( stderr, "bm_sum_var_vector<>::run %d\n", ++run_count ) ;
-
         srand( time( nullptr ) ) ;
 
         T vector ;
@@ -77,10 +67,6 @@ static void bm_sum_var_vector ( benchmark::State & state )
 template< typename T >
 static void bm_push_back_trivial ( benchmark::State & state )
 {
-        static int run_count {} ;
-
-        fprintf( stderr, "bm_push_back_trivial<>::run %d\n", ++run_count ) ;
-
         for( auto _ : state )
         {
                 T container;
@@ -97,10 +83,6 @@ static void bm_push_back_trivial ( benchmark::State & state )
 template< typename T, typename U = T >
 static void bm_dual_push_back_trivial ( benchmark::State & state )
 {
-        static int run_count {} ;
-
-        fprintf( stderr, "bm_dual_push_back_trivial<>::run %d\n", ++run_count ) ;
-
         for( auto _ : state )
         {
                 T container_1 ;
@@ -120,10 +102,6 @@ static void bm_dual_push_back_trivial ( benchmark::State & state )
 template< typename T >
 static void bm_push_back_nontrivial ( benchmark::State & state )
 {
-        static int run_count {} ;
-
-        fprintf( stderr, "bm_push_back_nontrivial<>::run %d\n", ++run_count ) ;
-
         for( auto _ : state )
         {
                 T container;
@@ -140,10 +118,6 @@ static void bm_push_back_nontrivial ( benchmark::State & state )
 template< typename T >
 static void bm_push_back_reserved_trivial ( benchmark::State & state )
 {
-        static int run_count {} ;
-
-        fprintf( stderr, "bm_push_back_reserved_trivial<>::run %d\n", ++run_count ) ;
-
         for( auto _ : state )
         {
                 T container;
@@ -161,10 +135,6 @@ static void bm_push_back_reserved_trivial ( benchmark::State & state )
 template< typename T >
 static void bm_push_back_var_reserved_trivial ( benchmark::State & state )
 {
-        static int run_count {} ;
-
-        fprintf( stderr, "bm_push_back_var_reserved_trivial<>::run %d\n", ++run_count ) ;
-
         for( auto _ : state )
         {
                 T container;
@@ -182,10 +152,6 @@ static void bm_push_back_var_reserved_trivial ( benchmark::State & state )
 template< typename T >
 static void bm_push_back_reserved_nontrivial ( benchmark::State & state )
 {
-        static int run_count {} ;
-
-        fprintf( stderr, "bm_push_back_reserved_nontrivial<>::run %d\n", ++run_count ) ;
-
         for( auto _ : state )
         {
                 T container;
@@ -203,10 +169,6 @@ static void bm_push_back_reserved_nontrivial ( benchmark::State & state )
 template< typename T >
 static void bm_copy_container_trivial ( benchmark::State & state )
 {
-        static int run_count {} ;
-
-        fprintf( stderr, "bm_copy_container_trivial<>::run %d\n", ++run_count ) ;
-
         T container;
         for( ssize_t i = 0; i < state.range( 0 ); ++i )
         {
@@ -224,10 +186,6 @@ static void bm_copy_container_trivial ( benchmark::State & state )
 template< typename T >
 static void bm_copy_container_nontrivial ( benchmark::State & state )
 {
-        static int run_count {} ;
-
-        fprintf( stderr, "bm_copy_container_nontrivial<>::run %d\n", ++run_count ) ;
-
         T container;
         for( ssize_t i = 0; i < state.range( 0 ); ++i )
         {
