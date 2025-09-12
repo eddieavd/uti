@@ -81,18 +81,6 @@ jobs:
             COMMAND chmod +x ninja
           )
 
-#     - name: install benchmark library
-
-#       run: |
-#         mkdir bench/lib
-#         cd bench/lib
-#         git clone https://github.com/google/benchmark.git
-#         cd benchmark
-#         mkdir build
-#         cd build
-#         cmake .. -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_ENABLE_TESTING=OFF -DBENCHMARK_ENABLE_GTEST_TESTS=OFF -DBENCHMARK_ENABLE_ASSEMBLY_TESTS=OFF
-#         sudo cmake --build . --config Release --target install
-
       - name: configure
         shell: cmake -P {0}
         run: |
