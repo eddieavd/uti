@@ -21,6 +21,17 @@ jobs:
 #           clang_version: 21,
 #           has_stl: "OFF"
 #         }
+#       - {
+#           name: "macos clang-21 release",
+#           os: macos-latest,
+#           build_type: "Release",
+#           is_debug_build: "OFF",
+#           is_release_build: "ON",
+#           cc:  "/opt/homebrew/opt/llvm/bin/clang",
+#           cxx: "/opt/homebrew/opt/llvm/bin/clang",
+#           clang_version: 21,
+#           has_stl: "OFF"
+#         }
         - {
             name: "ubuntu clang-21 debug",
             os: ubuntu-latest,
@@ -80,18 +91,6 @@ jobs:
           execute_process(
             COMMAND chmod +x ninja
           )
-
-#     - name: install benchmark library
-
-#       run: |
-#         mkdir bench/lib
-#         cd bench/lib
-#         git clone https://github.com/google/benchmark.git
-#         cd benchmark
-#         mkdir build
-#         cd build
-#         cmake .. -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_ENABLE_TESTING=OFF -DBENCHMARK_ENABLE_GTEST_TESTS=OFF -DBENCHMARK_ENABLE_ASSEMBLY_TESTS=OFF
-#         sudo cmake --build . --config Release --target install
 
       - name: configure
         shell: cmake -P {0}
