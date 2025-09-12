@@ -20,10 +20,9 @@ jobs:
             build_type: "Release",
             is_debug_build: "OFF",
             is_release_build: "ON",
-            cc: "clang-18",
-            cxx: "clang++-18",
-            clang_version: 18,
-            installed_clang_version: 14,
+            cc: "clang-21",
+            cxx: "clang++-21",
+            clang_version: 21,
             has_stl: "OFF"
           }
     steps:
@@ -32,24 +31,6 @@ jobs:
       - name: install llvm + clang
 
         run: |
-          sudo apt-get remove clang-${{ matrix.config.installed_clang_version }} \
-            lldb-${{ matrix.config.installed_clang_version }} \
-            lld-${{ matrix.config.installed_clang_version }} \
-            clangd-${{ matrix.config.installed_clang_version }} \
-            clang-tidy-${{ matrix.config.installed_clang_version }} \
-            clang-format-${{ matrix.config.installed_clang_version }} \
-            clang-tools-${{ matrix.config.installed_clang_version }} \
-            llvm-${{ matrix.config.installed_clang_version }}-dev \
-            lld-${{ matrix.config.installed_clang_version }} \
-            lldb-${{ matrix.config.installed_clang_version }} \
-            llvm-${{ matrix.config.installed_clang_version }}-tools \
-            libomp-${{ matrix.config.installed_clang_version }}-dev \
-            libc++-${{ matrix.config.installed_clang_version }}-dev \
-            libc++abi-${{ matrix.config.installed_clang_version }}-dev \
-            libclang-common-${{ matrix.config.installed_clang_version }}-dev \
-            libclang-${{ matrix.config.installed_clang_version }}-dev \
-            libclang-cpp${{ matrix.config.installed_clang_version }}-dev \
-            libunwind-${{ matrix.config.installed_clang_version }}-dev
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
           sudo ./llvm.sh ${{ matrix.config.clang_version }} all
@@ -84,7 +65,7 @@ jobs:
           cd benchmark
           mkdir build
           cd build
-          cmake .. -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=Release
+          cmake .. -DBENCHMARK_DOWNLOAD_DEPENDENCIES=ON -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_ENABLE_TESTING=OFF
           sudo cmake --build . --config Release --target install
 
       - name: configure

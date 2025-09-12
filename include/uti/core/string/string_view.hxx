@@ -12,6 +12,8 @@
 #include <uti/core/algo/mem.hxx>
 #include <uti/core/algo/distance.hxx>
 
+#include <cmath>
+
 #define SV_FMT "%.*s"
 #define SV_ARG(sv) (int) (sv).size(), (sv).data()
 
