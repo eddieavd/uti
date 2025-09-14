@@ -144,6 +144,7 @@ struct bidirectional_iterator_tag : public       forward_iterator_tag {} ;
 struct random_access_iterator_tag : public bidirectional_iterator_tag {} ;
 struct    contiguous_iterator_tag : public random_access_iterator_tag {} ;
 struct  prefix_array_iterator_tag : public random_access_iterator_tag {} ;
+struct      circular_iterator_tag : public random_access_iterator_tag {} ;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -309,6 +310,11 @@ template< typename Iter >
 concept prefix_array_iterator =
         random_access_iterator< Iter > &&
         same_as< typename iterator_traits< Iter >::iterator_category, prefix_array_iterator_tag > ;
+
+template< typename Iter >
+concept circular_iterator =
+        random_access_iterator< Iter > &&
+        same_as< typename iterator_traits< Iter >::iterator_category, circular_iterator_tag > ;
 
 
 } // namespace meta
