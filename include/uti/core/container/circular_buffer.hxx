@@ -23,7 +23,7 @@ namespace uti
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template< meta::arithmetic T, ssize_t Capacity >
+template< meta::trivial T, ssize_t Capacity >
 class circular_buffer
 {
         static constexpr ssize_t capacity_ { Capacity } ;
@@ -91,7 +91,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-template< meta::arithmetic T, ssize_t Capacity >
+template< meta::trivial T, ssize_t Capacity >
 constexpr
 circular_buffer< T, Capacity >::circular_buffer ( ssize_type _count_, value_type const & _value_ ) noexcept
 {
@@ -105,7 +105,7 @@ circular_buffer< T, Capacity >::circular_buffer ( ssize_type _count_, value_type
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template< meta::arithmetic T, ssize_t Capacity >
+template< meta::trivial T, ssize_t Capacity >
 constexpr void
 circular_buffer< T, Capacity >::push_back ( value_type const & _value_ ) noexcept
 {
