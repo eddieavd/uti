@@ -71,7 +71,7 @@ public:
         UTI_NODISCARD UTI_DEEP_INLINE constexpr
         auto & at ( this Self && self, ssize_type const _index_ ) noexcept
         {
-                UTI_ASSERT( 0 <= _index_ && _index_ < UTI_FWD( self ).size(), "uti::view::at: index out of range" );
+                UTI_CEXPR_ASSERT( 0 <= _index_ && _index_ < UTI_FWD( self ).size(), "uti::view::at: index out of range" );
 
                 return UTI_FWD( self ).begin_[ _index_ ];
         }
@@ -107,7 +107,7 @@ public:
         UTI_NODISCARD constexpr
         auto & front ( this Self && self ) noexcept
         {
-                UTI_ASSERT( !UTI_FWD( self ).empty(), "uti::view::front: called on empty view" );
+                UTI_CEXPR_ASSERT( !UTI_FWD( self ).empty(), "uti::view::front: called on empty view" );
 
                 return *( UTI_FWD( self ).begin_ );
         }
@@ -117,7 +117,7 @@ public:
         UTI_NODISCARD constexpr
         auto & back ( this Self && self ) noexcept
         {
-                UTI_ASSERT( !UTI_FWD( self ).empty(), "uti::view::back: called on empty view" );
+                UTI_CEXPR_ASSERT( !UTI_FWD( self ).empty(), "uti::view::back: called on empty view" );
 
                 return *( UTI_FWD( self ).end() - 1 );
         }

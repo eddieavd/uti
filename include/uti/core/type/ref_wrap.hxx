@@ -17,7 +17,10 @@ namespace uti
 
 
 template< typename T >
-T * addressof ( T const & t ) noexcept ;
+constexpr T * addressof ( T const & t ) noexcept
+{
+        return const_cast< T * >( &t ) ;
+}
 
 
 template< typename T >
@@ -25,8 +28,10 @@ class reference_wrapper
 {
 public:
         using type = T ;
+
+        constexpr reference_wrapper () noexcept = default ;
 private:
-        type * f_ ;
+        type * f_ { nullptr } ;
 
         static void _fn ( T &  ) noexcept ;
         static void _fn ( T && ) = delete ;
